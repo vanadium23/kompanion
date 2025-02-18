@@ -68,6 +68,8 @@ Go to following plugins:
 
 ## Development
 
+Project was started with [go-clean-template](https://github.com/evrone/go-clean-template), but then heavily modified.
+
 Local development:
 ```sh
 # Postgres
