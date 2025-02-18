@@ -1,0 +1,15 @@
+services:
+  postgres:
+    environment:
+      - PGDATA=/pgtmpfs
+    tmpfs:
+      - /pgtmpfs
+
+  integration:
+    build:
+      context: .
+      dockerfile: integration-test/Dockerfile
+    container_name: integration
+    image: integration
+    depends_on:
+      - app

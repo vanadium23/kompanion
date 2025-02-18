@@ -1,0 +1,32 @@
+services:
+
+  postgres:
+    image: postgres
+    volumes:
+      - pg-data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_USER: 'user'
+      POSTGRES_PASSWORD: 'pass'
+      POSTGRES_DB: 'postgres'
+    ports:
+      - 5432:5432
+
+  app:
+    build: .
+    image: app
+    user: "${UID}:${GID}"
+    volumes:
+      - ./data:/data
+    environment:
+      KOMPANION_PG_URL: 'postgres://user:pass@postgres:5432/postgres'
+      KOMPANION_STATS_PATH: '/data/stats/'
+      KOMPANION_BSTORAGE_PATH: '/data/books/'
+      KOMPANION_AUTH_USERNAME: 'user'
+      KOMPANION_AUTH_PASSWORD: 'password'
+    ports:
+      - 8080:8080
+    depends_on:
+      - postgres
+
+volumes:
+  pg-data:

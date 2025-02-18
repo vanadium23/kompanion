@@ -1,0 +1,68 @@
+
+
+.edit-book-article {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px;
+}
+
+.cover {
+    max-width: 200px;
+    flex-shrink: 0;
+}
+
+.cover img {
+    width: 100%;
+    height: auto;
+}
+
+
+
+/* books */
+.book-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 20px;
+}
+
+.book-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+}
+
+.book-item .cover {
+    width: 100%;
+    height: 300px;
+    /* Фиксированная высота для всех обложек */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #f0f0f0;
+    /* Цвет фона для обложек, если изображение отсутствует */
+}
+
+.book-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    /* Обеспечиваем, чтобы изображение полностью занимало контейнер */
+}
+
+.book-info {
+    margin-top: 10px;
+}
+
+.book-title {
+    font-weight: bold;
+}
+
+.book-author {
+    font-style: italic;
+    color: #555;
+}

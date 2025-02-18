@@ -1,0 +1,52 @@
+{{ define "title" }}Reading Statistics - KOmpanion{{ end }}
+
+{{ define "content" }}
+<article>
+    <header>
+        <h1>Reading Statistics</h1>
+    </header>
+
+    <section>
+        <form method="GET" action="/stats" class="grid">
+            <input type="date" id="from" name="from" value="{{ .from }}">
+            <input type="date" id="to" name="to" value="{{ .to }}">
+            <button type="submit" style="flex-grow: 1;">Update</button>
+        </form>
+    </section>
+
+    <section>
+        <table>
+            <thead>
+                <tr>
+                    <th>Book Title</th>
+                    <th>Pages Read</th>
+                    <th>Time Spent</th>
+                    <th>Days Read</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{ range .stats.BookStats }}
+                <tr>
+                    <td>{{ .Title }}</td>
+                    <td>{{ .TotalReadPages }}</td>
+                    <td>{{ formatDuration .TotalReadTime }}</td>
+                    <td>{{ .TotalReadDays }}</td>
+                </tr>
+                {{ end }}
+                <tr class="total-row">
+                    <td><strong>Total / Average</strong></td>
+                    <td><strong>{{ .stats.TotalReadPages }}</strong></td>
+                    <td><strong>{{ formatDuration .stats.TotalReadTime }}</strong></td>
+                    <td><strong>{{ .stats.AveragePagePerDay }} pages/day</strong></td>
+                </tr>
+            </tbody>
+        </table>
+    </section>
+
+    <section>
+        <h2>Daily Reading Progress</h2>
+        <img src="/stats/chart?from={{ .from }}&to={{ .to }}" alt="Daily Reading Progress"
+            style="width: 100%; max-width: 800px;">
+    </section>
+</article>
+{{ end }}

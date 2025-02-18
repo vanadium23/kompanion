@@ -1,0 +1,53 @@
+{{define "content"}}
+<main>
+    <header>
+        <h1>Device Management</h1>
+    </header>
+
+    {{if .error}}
+    <blockquote class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4" role="alert">
+        <p>{{.error}}</p>
+    </blockquote>
+    {{end}}
+
+    <section>
+        <h2>Add New Device</h2>
+        <form action="/devices/add" method="POST" class="grid">
+            <input type="text" name="device_name" required placeholder="Enter device name">
+            <input type="text" name="password" required placeholder="Enter device password">
+            <button type="submit">Add Device</button>
+        </form>
+    </section>
+
+    <section>
+        <h2>Registered Devices</h2>
+        {{if .devices}}
+        <table>
+            <thead>
+                <tr>
+                    <th>Device Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .devices}}
+                <tr>
+                    <td>{{.Name}}</td>
+                    <td>
+                        <form action="/devices/deactivate/{{.Name}}" method="POST">
+                            <button type="submit"
+                                onclick="return confirm('Are you sure you want to deactivate this device?')">
+                                Deactivate
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p><em>No devices have been added yet.</em></p>
+        {{end}}
+    </section>
+</main>
+{{end}}

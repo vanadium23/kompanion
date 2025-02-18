@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="light dark">
+    <title>{{ block "title" . }}KOmpanion{{ end }}</title>
+    <link rel="stylesheet" href="/static/monospace.css">
+    <link rel="stylesheet" href="/static/static.css">
+</head>
+
+<body>
+
+    <!-- Main site header -->
+    <header class="header">
+        <table>
+            <tr>
+                <td>KOmpanion</td>
+                {{ if .isAuthenticated }}
+                <td><a href="/books/">> Books</a></td>
+                <td><a href="/stats/">> Statistics</a></td>
+                <td><a href="/devices/">> Devices</a></td>
+                <td><a href="/auth/logout/">Log Out</a></td>
+                {{ else }}
+                <td>Login Page</td>
+                {{ end}}
+            </tr>
+        </table>
+    </header>
+
+
+    <main>
+        {{ block "content" . }}Default Content{{ end }}
+    </main>
+
+    <footer>
+        <!-- Simple Footer -->
+        <hr> <!-- Adds a nice divider line -->
+        <p style="text-align: center; color: var(--text-color-alt);">
+            Powered by KOmpanion, Version: TDB, Page: <strong>{{ LoadTimes .startTime }}</strong>
+        </p>
+    </footer>
+
+
+</body>
+
+</html>

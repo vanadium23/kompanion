@@ -1,0 +1,80 @@
+{{ define "title" }}{{ .book.Author }} - {{ .book.Title }} - Books - KOmpanion{{ end }}
+
+{{ define "content" }}
+{{ with .book }}
+<article class="edit-book-article">
+    <!-- Обложка книги -->
+    <div class="cover">
+        <img src="/books/{{.ID}}/cover" alt="{{.Title}} - {{.Author}}">
+    </div>
+
+
+    <!-- Форма для редактирования метаданных -->
+    <div>
+        <form aria-labelledby="Редактирование книги" method="post">
+            <div class="grid">
+                <label>
+                    Title
+                    <input type="text" name="title" placeholder="Enter title" required value="{{ .Title }}">
+                </label>
+                <label>
+                    Author
+                    <input type="text" name="author" placeholder="Enter author" required value="{{ .Author }}">
+                </label>
+            </div>
+            <div class="grid">
+                <label>
+                    ISBN
+                    <input type="text" name="isbn" placeholder="Enter ISBN" value="{{ .ISBN }}">
+                </label>
+            </div>
+            <div class="grid">
+                <label>
+                    Year
+                    <input type="number" name="year" placeholder="YYYY" min="1000" max="9999" value="{{ .Year }}">
+                </label>
+                <label>
+                    Publisher
+                    <input type="text" name="publisher" placeholder="Enter publisher" value="{{ .Publisher }}">
+                </label>
+            </div>
+            <div class="grid">
+                <button type="submit" class="button success">Save</button>
+                <button type="button" class="button"><a href="/books/{{.ID}}/download"
+                        target="_blank">Download</a></button>
+            </div>
+        </form>
+    </div>
+</article>
+{{ end }}
+<!-- Статистика чтения -->
+{{ with $.stats }}
+<section class="reading-stats">
+    <hgroup>
+        <h3>Reading Stats</h3>
+    </hgroup>
+    <table>
+        <tr>
+            <td style="width: 50%;">
+                <strong>Pages Read</strong>
+                <p>{{ .TotalReadPages }}</p>
+            </td>
+            <td>
+                <strong>Total Reading Time</strong>
+                <p>{{ formatDuration .TotalReadTime }}</p>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <strong>Average Time per Page</strong>
+                <p>{{ formatDuration .AverageTimePerPage }}</p>
+            </td>
+            <td>
+                <strong>Reading Days</strong>
+                <p>{{ .TotalReadDays }}</p>
+            </td>
+        </tr>
+    </table>
+</section>
+{{ end }}
+{{ end }}

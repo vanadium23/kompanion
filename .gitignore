@@ -21,3 +21,9 @@
 # Go workspace file
 go.work
 
+# Config file
+.env
+
+# Data for local development
+data/
+bin/
