@@ -39,8 +39,14 @@ jobs:
       - name: Upload coverage report
         run: bash <(curl -s https://codecov.io/bash)
 
+  integration-tests:
+    name: runner / tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: docker/setup-buildx-action@v3
       - name: Integration tests
-        run: "docker-compose up \
+        run: "docker compose up \
           -f docker-compose-integration.yml \
           --build \
           --abort-on-container-exit \
