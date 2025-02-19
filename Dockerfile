@@ -15,6 +15,7 @@ RUN GOOS=linux GOARCH=amd64 \
 
 # Step 3: Final
 FROM golang:1.22.5-alpine
+ENV GIN_MODE=release
 WORKDIR /
 COPY --from=builder /app/config /config
 COPY --from=builder /app/migrations /migrations
