@@ -6,7 +6,7 @@ import (
 	"gitea.chrnv.ru/vanadium23/kompanion/internal/entity"
 )
 
-//go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=progress_test
+//go:generate mockgen -source=interfaces.go -destination=./mocks_test.go -package=sync_test
 
 type ProgressRepo interface {
 	Store(ctx context.Context, t entity.Progress) error

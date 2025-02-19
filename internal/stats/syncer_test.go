@@ -38,7 +38,7 @@ func TestSyncer(t *testing.T) {
 	deviceName := "test_device"
 
 	// Expect books upsert
-	pgmock.ExpectExec(`INSERT INTO koreader_books`).
+	pgmock.ExpectExec(`INSERT INTO stats_book`).
 		WithArgs(
 			pgxmock.AnyArg(), // md5
 			pgxmock.AnyArg(), // title
@@ -57,7 +57,7 @@ func TestSyncer(t *testing.T) {
 
 	// Expect page stats upsert
 	for i := 0; i < 4; i++ {
-		pgmock.ExpectExec(`INSERT INTO koreader_page_stat_data`).
+		pgmock.ExpectExec(`INSERT INTO stats_page_stat_data`).
 			WithArgs(
 				pgxmock.AnyArg(), // md5
 				pgxmock.AnyArg(), // page

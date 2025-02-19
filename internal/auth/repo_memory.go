@@ -11,18 +11,20 @@ type MemoryRepo struct {
 	user     User
 	sessions map[string]bool
 	devices  map[string]Device
-	mu       *sync.RWMutex
+	mu       sync.RWMutex
 }
 
 func NewMemoryUserRepo() *MemoryRepo {
 	return &MemoryRepo{
 		sessions: make(map[string]bool),
 		devices:  make(map[string]Device),
-		mu:       &sync.RWMutex{},
 	}
 }
 
 func (mr *MemoryRepo) CreateUser(ctx context.Context, user User) error {
+	mr.mu.Lock()
+	defer mr.mu.Unlock()
+
 	if mr.user.Username != "" {
 		return UserAlreadyCreated
 	}
@@ -31,86 +33,78 @@ func (mr *MemoryRepo) CreateUser(ctx context.Context, user User) error {
 }
 
 func (mr *MemoryRepo) GetUserByUsername(ctx context.Context, username string) (User, error) {
+	mr.mu.RLock()
+	defer mr.mu.RUnlock()
+
 	if mr.user.Username != username {
-		return User{}, errors.New("not found")
+		return User{}, UserNotFound
 	}
 	return mr.user, nil
 }
 
 func (mr *MemoryRepo) GetUserBySession(ctx context.Context, sessionKey string) (User, error) {
 	mr.mu.RLock()
-	_, ok := mr.sessions[sessionKey]
-	mr.mu.RUnlock()
+	defer mr.mu.RUnlock()
 
-	if !ok {
-		return User{}, errors.New("not found")
+	if !mr.sessions[sessionKey] {
+		return User{}, SessionNotFound
 	}
-
 	return mr.user, nil
 }
 
-func (mr *MemoryRepo) StoreSession(
-	ctx context.Context,
-	username string,
-	sessionKey string,
-	userAgent string,
-	clientIP net.IP,
-) error {
-	mr.mu.RLock()
+func (mr *MemoryRepo) StoreSession(ctx context.Context, username, sessionKey, userAgent string, clientIP net.IP) error {
+	mr.mu.Lock()
+	defer mr.mu.Unlock()
+
 	if mr.user.Username != username {
-		mr.mu.RUnlock()
 		return UserNotFound
 	}
-	mr.mu.RUnlock()
 
-	mr.mu.Lock()
 	mr.sessions[sessionKey] = true
-	mr.mu.Unlock()
-
 	return nil
 }
 
 func (mr *MemoryRepo) DeleteSession(ctx context.Context, sessionKey string) error {
 	mr.mu.Lock()
-	delete(mr.sessions, sessionKey)
-	mr.mu.Unlock()
+	defer mr.mu.Unlock()
 
+	if !mr.sessions[sessionKey] {
+		return SessionNotFound
+	}
+	delete(mr.sessions, sessionKey)
 	return nil
 }
 
 func (mr *MemoryRepo) CreateDevice(ctx context.Context, device Device) error {
-	mr.mu.RLock()
-	_, ok := mr.devices[device.Name]
-	mr.mu.RUnlock()
+	mr.mu.Lock()
+	defer mr.mu.Unlock()
 
-	if ok {
+	if _, ok := mr.devices[device.Name]; ok {
 		return DeviceAlreadyCreated
 	}
-
-	mr.mu.Lock()
 	mr.devices[device.Name] = device
-	mr.mu.Unlock()
-
 	return nil
 }
 
-func (mr *MemoryRepo) GetDeviceByName(ctx context.Context, device_name string) (Device, error) {
+func (mr *MemoryRepo) GetDeviceByName(ctx context.Context, deviceName string) (Device, error) {
 	mr.mu.RLock()
-	device, ok := mr.devices[device_name]
-	mr.mu.RUnlock()
+	defer mr.mu.RUnlock()
 
+	device, ok := mr.devices[deviceName]
 	if !ok {
 		return Device{}, errors.New("not found")
 	}
-
 	return device, nil
 }
 
-func (mr *MemoryRepo) DeleteDevice(ctx context.Context, device_name string) error {
+func (mr *MemoryRepo) DeleteDevice(ctx context.Context, deviceName string) error {
 	mr.mu.Lock()
-	delete(mr.devices, device_name)
-	mr.mu.Unlock()
+	defer mr.mu.Unlock()
 
+	if _, ok := mr.devices[deviceName]; !ok {
+		return errors.New("not found")
+	}
+	delete(mr.devices, deviceName)
 	return nil
 }
 

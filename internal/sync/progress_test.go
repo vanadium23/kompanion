@@ -82,7 +82,8 @@ func TestProgressSync(t *testing.T) {
 	progressSync, repo := mockedProgress(t)
 
 	progressDoc := entity.Progress{
-		Document: "bookID",
+		Document:  "bookID",
+		Timestamp: 1,
 	}
 	errInternalServErr := errors.New("internal server error")
 
