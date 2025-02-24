@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"os"
 	"time"
 
 	"github.com/foolin/goview"
@@ -65,6 +66,9 @@ func NewRouter(
 		// https://github.com/go-gitea/gitea/blob/f35850f48ed0bd40ec288e2547ac687a7bf1746c/modules/templates/helper.go#L76
 		"LoadTimes": func(startTime time.Time) string {
 			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
+		},
+		"Version": func() string {
+			return os.Getenv("KOMPANION_VERSION")
 		},
 	}
 	handler.HTMLRender = ginview.New(config)

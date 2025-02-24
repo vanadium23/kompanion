@@ -59,6 +59,16 @@ func healthCheck(attempts int) error {
 	return err
 }
 
+func TestWebFooterVersion(t *testing.T) {
+	Test(t,
+		Description("Footer Version"),
+		Get(basePath+"/"),
+		Expect().Status().Equal(http.StatusOK),
+		Expect().Body().String().Contains("github.com/vanadium23/kompanion"),
+		Expect().Body().String().Contains("integration"),
+	)
+}
+
 // New tests based on controller/web
 // login/page
 func TestWebAuthUser(t *testing.T) {
