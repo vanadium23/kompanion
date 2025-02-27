@@ -61,12 +61,7 @@ type (
 )
 
 // NewConfig - reads from env, validates and returns the config.
-func NewConfig() (*Config, error) {
-	app, err := readAppConfig()
-	if err != nil {
-		return nil, err
-	}
-
+func NewConfig(version string) (*Config, error) {
 	auth, err := readAuthConfig()
 	if err != nil {
 		return nil, err
@@ -98,20 +93,16 @@ func NewConfig() (*Config, error) {
 	}
 
 	return &Config{
-		App:          app,
+		App: App{
+			Name:    "kompanion",
+			Version: version,
+		},
 		Auth:         auth,
 		HTTP:         http,
 		Log:          log,
 		PG:           postgres,
 		BookStorage:  bookStorage,
 		StatsStorage: statsStorage,
-	}, nil
-}
-
-func readAppConfig() (App, error) {
-	return App{
-		Name:    "kompanion",
-		Version: "0.0.1",
 	}, nil
 }
 

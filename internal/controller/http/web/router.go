@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
-	"os"
 	"time"
 
 	"github.com/foolin/goview"
@@ -38,6 +37,7 @@ func NewRouter(
 	p sync.Progress,
 	shelf library.Shelf,
 	stats stats.ReadingStats,
+	version string,
 ) {
 	// Options
 	handler.Use(gin.Logger())
@@ -68,7 +68,7 @@ func NewRouter(
 			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
 		},
 		"Version": func() string {
-			return os.Getenv("KOMPANION_VERSION")
+			return template.HTMLEscapeString(version)
 		},
 	}
 	handler.HTMLRender = ginview.New(config)
