@@ -37,6 +37,7 @@ func NewRouter(
 	p sync.Progress,
 	shelf library.Shelf,
 	stats stats.ReadingStats,
+	version string,
 ) {
 	// Options
 	handler.Use(gin.Logger())
@@ -65,6 +66,9 @@ func NewRouter(
 		// https://github.com/go-gitea/gitea/blob/f35850f48ed0bd40ec288e2547ac687a7bf1746c/modules/templates/helper.go#L76
 		"LoadTimes": func(startTime time.Time) string {
 			return fmt.Sprint(time.Since(startTime).Nanoseconds()/1e6) + "ms"
+		},
+		"Version": func() string {
+			return template.HTMLEscapeString(version)
 		},
 	}
 	handler.HTMLRender = ginview.New(config)

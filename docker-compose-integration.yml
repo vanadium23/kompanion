@@ -5,6 +5,13 @@ services:
     tmpfs:
       - /pgtmpfs
 
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        - KOMPANION_VERSION=integration
+
   integration:
     build:
       context: .

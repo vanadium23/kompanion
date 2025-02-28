@@ -10,15 +10,16 @@ RUN apk add --update gcc musl-dev
 COPY --from=modules /go/pkg /go/pkg
 COPY . /app
 WORKDIR /app
+
+ARG KOMPANION_VERSION=local
+ENV KOMPANION_VERSION=$KOMPANION_VERSION
+
 RUN GOOS=linux GOARCH=amd64 \
-    go build -tags migrate -o /bin/app ./cmd/app
+    go build -ldflags "-X main.Version=$KOMPANION_VERSION" -tags migrate -o /bin/app ./cmd/app
 
 # Step 3: Final
 FROM golang:1.22.5-alpine
 ENV GIN_MODE=release
-
-ARG KOMPANION_VERSION=local
-ENV KOMPANION_VERSION=$KOMPANION_VERSION
 
 WORKDIR /
 COPY --from=builder /app/config /config
