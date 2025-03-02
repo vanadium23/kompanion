@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/golang-migrate/migrate/v4"
+	"github.com/vanadium23/kompanion"
+
 	// migrate tools
 	_ "github.com/golang-migrate/migrate/v4/database/postgres"
-	_ "github.com/golang-migrate/migrate/v4/source/file"
+	"github.com/golang-migrate/migrate/v4/source/iofs"
 )
 
 const (
@@ -33,8 +35,13 @@ func init() {
 		m        *migrate.Migrate
 	)
 
+	d, err := iofs.New(kompanion.Migrations, "migrations")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	for attempts > 0 {
-		m, err = migrate.New("file://migrations", databaseURL)
+		m, err = migrate.NewWithSourceInstance("iofs", d, databaseURL)
 		if err == nil {
 			break
 		}
