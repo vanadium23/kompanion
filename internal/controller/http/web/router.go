@@ -4,31 +4,21 @@ import (
 	"encoding/json"
 	"fmt"
 	"html/template"
+	"io/fs"
+	"net/http"
+	"path/filepath"
 	"time"
 
 	"github.com/foolin/goview"
 	"github.com/foolin/goview/supports/ginview"
 	"github.com/gin-gonic/gin"
+	"github.com/vanadium23/kompanion"
 	"github.com/vanadium23/kompanion/internal/auth"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/stats"
 	"github.com/vanadium23/kompanion/internal/sync"
 	"github.com/vanadium23/kompanion/pkg/logger"
 )
-
-func formatDuration(seconds int) string {
-	duration := time.Duration(seconds) * time.Second
-	hours := int(duration.Hours())
-	minutes := int(duration.Minutes()) % 60
-	secs := int(duration.Seconds()) % 60
-
-	if hours > 0 {
-		return fmt.Sprintf("%dh %dm %ds", hours, minutes, secs)
-	} else if minutes > 0 {
-		return fmt.Sprintf("%dm %ds", minutes, secs)
-	}
-	return fmt.Sprintf("%ds", secs)
-}
 
 func NewRouter(
 	handler *gin.Engine,
@@ -46,7 +36,11 @@ func NewRouter(
 		c.Set("startTime", time.Now())
 	})
 	// static files
-	handler.Static("/static", "web/static")
+	staticFs, err := fs.Sub(kompanion.WebAssets, "web/static")
+	if err != nil {
+		l.Error("Failed to get static files: %v", err)
+	}
+	handler.StaticFS("/static", http.FS(staticFs))
 
 	config := goview.DefaultConfig
 	config.Root = "web/templates"
@@ -71,7 +65,9 @@ func NewRouter(
 			return template.HTMLEscapeString(version)
 		},
 	}
-	handler.HTMLRender = ginview.New(config)
+	gv := ginview.New(config)
+	gv.SetFileHandler(embeddedFH)
+	handler.HTMLRender = gv
 
 	// Home
 	handler.GET("/", func(c *gin.Context) {
@@ -102,4 +98,24 @@ func passStandartContext(c *gin.Context, data gin.H) gin.H {
 	data["isAuthenticated"] = c.GetBool("isAuthenticated")
 	data["startTime"] = c.GetTime("startTime")
 	return data
+}
+
+func formatDuration(seconds int) string {
+	duration := time.Duration(seconds) * time.Second
+	hours := int(duration.Hours())
+	minutes := int(duration.Minutes()) % 60
+	secs := int(duration.Seconds()) % 60
+
+	if hours > 0 {
+		return fmt.Sprintf("%dh %dm %ds", hours, minutes, secs)
+	} else if minutes > 0 {
+		return fmt.Sprintf("%dm %ds", minutes, secs)
+	}
+	return fmt.Sprintf("%ds", secs)
+}
+
+func embeddedFH(config goview.Config, tmpl string) (string, error) {
+	path := filepath.Join(config.Root, tmpl)
+	bytes, err := kompanion.WebAssets.ReadFile(path + config.Extension)
+	return string(bytes), err
 }
