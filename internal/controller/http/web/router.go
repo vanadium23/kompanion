@@ -114,6 +114,7 @@ func formatDuration(seconds int) string {
 	return fmt.Sprintf("%ds", secs)
 }
 
+// https://github.com/foolin/goview/issues/25#issuecomment-876889943
 func embeddedFH(config goview.Config, tmpl string) (string, error) {
 	path := filepath.Join(config.Root, tmpl)
 	bytes, err := kompanion.WebAssets.ReadFile(path + config.Extension)

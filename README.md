@@ -25,12 +25,17 @@ Features, that can buy you in:
 1. you need a postgresql instance
 2. run `docker run -e KOMPANION_PG_URL=postgres://... -e KOMPANION_AUTH_PASSWORD=password -e KOMPANION_AUTH_USERNAME=username kompanion` , where you pass pg url and admin username and password to init
 
+### Pre-compiled binary
+
+1. download archive with latest binary from [Releases page](https://github.com/vanadium23/kompanion/releases)
+2. run `KOMPANION_PG_URL=postgres://... -e KOMPANION_AUTH_PASSWORD=password -e KOMPANION_AUTH_USERNAME=username ./kompanion`, it will start server with provided postgresql and admin credentials
+
 ### Configuration
 
 - `KOMPANION_AUTH_USERNAME` - required for setup
 - `KOMPANION_AUTH_PASSWORD` - required for setup
 - `KOMPANION_AUTH_STORAGE` - postgres or memory (default: postgres)
-- `KOMPANION_HTTP_PORT` - port for service (default: postgres)
+- `KOMPANION_HTTP_PORT` - port for service (default: 8080)
 - `KOMPANION_LOG_LEVEL` - debug, info, error (default: info)
 - `KOMPANION_PG_POOL_MAX` - integer number for pooling connections (default: 2)
 - `KOMPANION_PG_URL` - postgresql link
