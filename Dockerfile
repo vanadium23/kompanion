@@ -22,8 +22,6 @@ FROM golang:1.22.5-alpine
 ENV GIN_MODE=release
 
 WORKDIR /
-COPY --from=builder /app/config /config
-COPY --from=builder /app/migrations /migrations
 COPY --from=builder /app/web /web
 COPY --from=builder /bin/app /app
 COPY --from=builder /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/
