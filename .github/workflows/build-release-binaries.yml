@@ -1,0 +1,43 @@
+# src https://github.com/akrabat/rodeo/blob/main/.github/workflows/build-release-binaries.yml
+name: Build Release Binaries
+
+on:
+  release:
+    types:
+      - created
+
+jobs:
+  build:
+    name: Build Release Assets
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Go
+        uses: actions/setup-go@v1
+        with:
+          go-version: 1.22
+
+      - name: Display the version of go that we have installed
+        run: go version
+
+      - name: Display the release tag
+        run: echo ${{ github.event.release.tag_name }}
+
+      - name: "DEBUG: What's our directory & what's in it?"
+        run: pwd && ls
+
+      - name: Build the Kompanion executables
+        run: ./build-executables.sh ${{ github.event.release.tag_name }}
+
+      - name: List the Kompanion executables
+        run: ls -l ./release
+
+      - name: Upload the Kompanion binaries
+        uses: actions/svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: ./release/kompanion-*
+          file_glob: true

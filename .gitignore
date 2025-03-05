@@ -27,3 +27,4 @@ go.work
 # Data for local development
 data/
 bin/
+release/
