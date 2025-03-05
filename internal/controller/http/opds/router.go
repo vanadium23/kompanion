@@ -29,7 +29,7 @@ func NewRouter(
 	h.Use(basicAuth(a))
 	{
 		h.GET("/", sh.listShelves)
-		h.GET("/newest/", sh.listNewest)
+		h.GET("/:filter/", sh.listBooks)
 		h.GET("/book/:bookID/download", sh.downloadBook)
 		// TODO: search
 	}
@@ -54,19 +54,32 @@ func (r *OPDSRouter) listShelves(c *gin.Context) {
 	c.XML(http.StatusOK, feed)
 }
 
-func (r *OPDSRouter) listNewest(c *gin.Context) {
+func (r *OPDSRouter) listBooks(c *gin.Context) {
 	pageStr := c.Query("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
 		page = 1
 	}
-	books, err := r.books.ListBooks(c.Request.Context(), "created_at", "desc", page, 10)
+	var opdsFilter OPDSListing
+	filter := c.Param("filter")
+	for _, f := range OPDSListings {
+		if f.URI == filter {
+			opdsFilter = f
+			break
+		}
+	}
+	if opdsFilter.URI == "" {
+		c.JSON(http.StatusNotFound, gin.H{"message": "Not found", "code": 1002})
+		return
+	}
+
+	books, err := r.books.ListBooks(c.Request.Context(), opdsFilter.Field, opdsFilter.Sort, page, 10)
 	if err != nil {
 		r.logger.Error("failed to list newest books", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
 		return
 	}
-	baseUrl := "/opds/newest/"
+	baseUrl := "/opds/" + filter + "/"
 	entries := translateBooksToEntries(books.Books)
 	navLinks := formNavLinks(baseUrl, books)
 	feed := BuildFeed("urn:kompanion:newest", "KOmpanion library", baseUrl, entries, navLinks)
@@ -107,4 +120,19 @@ func basicAuth(auth auth.AuthInterface) gin.HandlerFunc {
 		}
 		c.Next()
 	}
+}
+
+type OPDSListing struct {
+	Name  string
+	URI   string
+	Field string
+	Sort  string
+}
+
+var OPDSListings = []OPDSListing{
+	{"By Newest", "newest", "created_at", "desc"},
+	{"By Oldest", "oldest", "created_at", "asc"},
+	{"By Title", "title", "title", "asc"},
+	{"By Author", "author", "author", "asc"},
+	{"By Year", "year", "year", "asc"},
 }
