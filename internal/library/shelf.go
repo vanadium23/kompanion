@@ -47,7 +47,6 @@ func (uc *BookShelf) StoreBook(ctx context.Context, tempFile *os.File, uploadedF
 	if m.Format == "" {
 		return entity.Book{}, errors.New("BookShelf - StoreBook - unknown file format")
 	}
-	uc.logger.Info("BookShelf - StoreBook - metadata: %+v", m)
 
 	bookID := uuidv7.Generate()
 	createDate := time.Now()
