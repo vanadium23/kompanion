@@ -20,7 +20,11 @@ Features, that can buy you in:
 
 ## Installation
 
-### Docker (preferred)
+### Railway (preferred)
+
+[![Deploy on Railway](https://railway.com/button.svg)](https://railway.com/template/n9t_1r?referralCode=Wkt51Y)
+
+### Docker
 
 1. you need a postgresql instance
 2. run `docker run -e KOMPANION_PG_URL=postgres://... -e KOMPANION_AUTH_PASSWORD=password -e KOMPANION_AUTH_USERNAME=username kompanion` , where you pass pg url and admin username and password to init
