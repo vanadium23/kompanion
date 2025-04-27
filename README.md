@@ -72,6 +72,10 @@ Go to following plugins:
 3. Open book - tools - Progress sync
     1. Custom sync server: `https://your-kompanion.org/`
     1. Login: username - device name, password - password
+4. To setup OPDS catalog:
+    1. Toolbar -> Search -> OPDS Catalog
+    2. Hit plus
+    3. Catalog URL: `https://your-kompanion.org/opds/`, username - device name, password - password
 
 ## Development
 
