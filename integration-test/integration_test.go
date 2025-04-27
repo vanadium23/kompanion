@@ -387,6 +387,16 @@ func TestWebStats(t *testing.T) {
 		Expect().Status().Equal(http.StatusOK),
 		Expect().Body().String().Contains("Crime and Punishment"),
 	)
+
+	// regress for uploading same file
+	// https://github.com/vanadium23/kompanion/issues/22
+	Test(t,
+		Description("Kompanion Upload Stats via WebDAV"),
+		Put(basePath+"/webdav/statistics.sqlite3"),
+		Send().Headers("Authorization").Add(basicAuth),
+		Send().Body().Bytes(statsContent),
+		Expect().Status().Equal(http.StatusCreated),
+	)
 }
 
 // HTTP test kompanion shelf feature

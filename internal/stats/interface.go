@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"io"
-	"os"
 	"time"
 )
 
@@ -28,5 +27,4 @@ type ReadingStats interface {
 	GetGeneralStats(ctx context.Context, from, to time.Time) (*GeneralStats, error)
 	GetDailyStats(ctx context.Context, from, to time.Time) ([]DailyStats, error)
 	Write(ctx context.Context, r io.ReadCloser, deviceName string) error
-	Read(ctx context.Context) (*os.File, error)
 }

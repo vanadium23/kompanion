@@ -14,7 +14,6 @@ func NewRouter(
 	a auth.AuthInterface,
 	l logger.Interface,
 	rs stats.ReadingStats,
-	dirPath string,
 ) {
 	// Options
 	handler.Use(gin.Logger())

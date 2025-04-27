@@ -16,7 +16,6 @@ type (
 		Log
 		PG
 		BookStorage
-		StatsStorage
 	}
 
 	// App -.
@@ -52,12 +51,6 @@ type (
 		Type string
 		Path string
 	}
-
-	// StatsStorage -.
-	StatsStorage struct {
-		Type string
-		Path string
-	}
 )
 
 // NewConfig - reads from env, validates and returns the config.
@@ -87,22 +80,16 @@ func NewConfig(version string) (*Config, error) {
 		return nil, err
 	}
 
-	statsStorage, err := readStatsStorageConfig()
-	if err != nil {
-		return nil, err
-	}
-
 	return &Config{
 		App: App{
 			Name:    "kompanion",
 			Version: version,
 		},
-		Auth:         auth,
-		HTTP:         http,
-		Log:          log,
-		PG:           postgres,
-		BookStorage:  bookStorage,
-		StatsStorage: statsStorage,
+		Auth:        auth,
+		HTTP:        http,
+		Log:         log,
+		PG:          postgres,
+		BookStorage: bookStorage,
 	}, nil
 }
 
@@ -181,18 +168,6 @@ func readBookStorageConfig() (BookStorage, error) {
 	return BookStorage{
 		Type: bstorage_type,
 		Path: bstorage_path,
-	}, nil
-}
-
-func readStatsStorageConfig() (StatsStorage, error) {
-	stats_type := readPrefixedEnv("STATS_TYPE")
-	if stats_type == "" {
-		stats_type = "postgres"
-	}
-	stats_path := readPrefixedEnv("STATS_PATH")
-	return StatsStorage{
-		Type: stats_type,
-		Path: stats_path,
 	}, nil
 }
 
