@@ -81,7 +81,7 @@ func NewRouter(
 	// Product pages
 	bookGroup := handler.Group("/books")
 	bookGroup.Use(authMiddleware(a))
-	newBooksRoutes(bookGroup, shelf, stats, l)
+	newBooksRoutes(bookGroup, shelf, stats, p, l)
 
 	// Stats pages
 	statsGroup := handler.Group("/stats")

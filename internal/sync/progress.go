@@ -42,6 +42,10 @@ func (uc *ProgressSyncUseCase) Fetch(ctx context.Context, bookID string) (entity
 		return entity.Progress{}, nil
 	}
 
+	if len(doc) == 0 {
+		return entity.Progress{}, nil
+	}
+
 	last := doc[0]
 	// rewrite koreader device with our authed device
 	last.Device = last.AuthDeviceName

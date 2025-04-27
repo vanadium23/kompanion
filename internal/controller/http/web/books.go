@@ -9,17 +9,19 @@ import (
 	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/stats"
+	syncpkg "github.com/vanadium23/kompanion/internal/sync"
 	"github.com/vanadium23/kompanion/pkg/logger"
 )
 
 type booksRoutes struct {
-	shelf  library.Shelf
-	stats  stats.ReadingStats
-	logger logger.Interface
+	shelf    library.Shelf
+	stats    stats.ReadingStats
+	progress syncpkg.Progress
+	logger   logger.Interface
 }
 
-func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.ReadingStats, l logger.Interface) {
-	r := &booksRoutes{shelf: shelf, stats: stats, logger: l}
+func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.ReadingStats, progress syncpkg.Progress, l logger.Interface) {
+	r := &booksRoutes{shelf: shelf, stats: stats, progress: progress, logger: l}
 
 	handler.GET("/", r.listBooks)
 	handler.POST("/upload", r.uploadBook)
@@ -44,8 +46,26 @@ func (r *booksRoutes) listBooks(c *gin.Context) {
 		return
 	}
 
+	// Fetch progress for each book
+	type BookWithProgress struct {
+		entity.Book
+		Progress float64
+	}
+	booksWithProgress := make([]BookWithProgress, len(books.Books))
+	for i, book := range books.Books {
+		progress, err := r.progress.Fetch(c.Request.Context(), book.DocumentID)
+		if err != nil {
+			r.logger.Error(err, "failed to fetch progress for book %s", book.ID)
+			progress = entity.Progress{}
+		}
+		booksWithProgress[i] = BookWithProgress{
+			Book:     book,
+			Progress: progress.Percentage * 100,
+		}
+	}
+
 	c.HTML(200, "books", passStandartContext(c, gin.H{
-		"books": books.Books,
+		"books": booksWithProgress,
 		"pagination": gin.H{
 			"currentPage": page,
 			"perPage":     perPage,
