@@ -45,8 +45,6 @@ Features, that can buy you in:
 - `KOMPANION_PG_URL` - postgresql link
 - `KOMPANION_BSTORAGE_TYPE` - type of storage for books: postgres, memory, filesystem (default: postgres)
 - `KOMPANION_BSTORAGE_PATH` - path in case of filesystem
-- `KOMPANION_STATS_TYPE` - type of temporary storage for uploaded sqlite3 stats files: postgres, memory, filesystem (default: memory)
-- `KOMPANION_STATS_PATH` - path in case of filesystem
 
 ## Usage
 

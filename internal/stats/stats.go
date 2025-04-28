@@ -2,44 +2,26 @@ package stats
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"io"
 	"os"
-	"sync"
 	"time"
 
-	"github.com/vanadium23/kompanion/internal/storage"
 	"github.com/vanadium23/kompanion/pkg/postgres"
 )
 
 const KOReaderFile = "statistics.sqlite3"
 
-// KOReaderStats implements ReadingStats interface
-type KOReaderStats struct {
-	rw sync.RWMutex
-	st storage.Storage
+// KOReaderPGStats implements ReadingStats interface
+type KOReaderPGStats struct {
 	pg *postgres.Postgres
 }
 
-func NewKOReaderStats(st storage.Storage, pg *postgres.Postgres) *KOReaderStats {
-	return &KOReaderStats{st: st, rw: sync.RWMutex{}, pg: pg}
+func NewKOReaderPGStats(pg *postgres.Postgres) *KOReaderPGStats {
+	return &KOReaderPGStats{pg: pg}
 }
 
-func (s *KOReaderStats) Read(ctx context.Context) (*os.File, error) {
-	s.rw.RLock()
-	stats, err := s.st.Read(ctx, KOReaderFile)
-	s.rw.RUnlock()
-	if errors.Is(err, storage.ErrNotFound) {
-		return nil, ErrEmptyStats
-	}
-	if err != nil {
-		return nil, err
-	}
-	return stats, nil
-}
-
-func (s *KOReaderStats) Write(ctx context.Context, r io.ReadCloser, deviceName string) error {
+func (s *KOReaderPGStats) Write(ctx context.Context, r io.ReadCloser, deviceName string) error {
 	// make by temp files
 	tempFile, err := os.CreateTemp("", fmt.Sprintf("%s-", deviceName))
 	if err != nil {
@@ -53,12 +35,6 @@ func (s *KOReaderStats) Write(ctx context.Context, r io.ReadCloser, deviceName s
 		return err
 	}
 
-	s.rw.Lock()
-	err = s.st.Write(ctx, tempFile.Name(), KOReaderFile)
-	s.rw.Unlock()
-	if err != nil {
-		return err
-	}
 	go SyncDatabases(filepath, s.pg, deviceName)
 	return nil
 }
@@ -70,7 +46,7 @@ type BookStats struct {
 	TotalReadDays      int
 }
 
-func (s *KOReaderStats) GetBookStats(ctx context.Context, fileHash string) (*BookStats, error) {
+func (s *KOReaderPGStats) GetBookStats(ctx context.Context, fileHash string) (*BookStats, error) {
 	query := `
 		WITH daily_reads AS (
 			SELECT DISTINCT DATE(start_time) as read_date
@@ -102,7 +78,7 @@ func (s *KOReaderStats) GetBookStats(ctx context.Context, fileHash string) (*Boo
 	return &stats, nil
 }
 
-func (s *KOReaderStats) GetGeneralStats(ctx context.Context, from, to time.Time) (*GeneralStats, error) {
+func (s *KOReaderPGStats) GetGeneralStats(ctx context.Context, from, to time.Time) (*GeneralStats, error) {
 	var stats GeneralStats
 
 	// Get per book statistics
@@ -163,7 +139,7 @@ type DailyStats struct {
 	AvgDurationPerPage float64
 }
 
-func (s *KOReaderStats) GetDailyStats(ctx context.Context, from, to time.Time) ([]DailyStats, error) {
+func (s *KOReaderPGStats) GetDailyStats(ctx context.Context, from, to time.Time) ([]DailyStats, error) {
 	query := `
 		WITH RECURSIVE dates AS (
 			SELECT date_trunc('day', $1::timestamp)::date as date

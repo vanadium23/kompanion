@@ -39,10 +39,6 @@ func Run(cfg *config.Config) {
 	if err != nil {
 		l.Fatal(fmt.Errorf("app - Run - storage.NewStorage: %w", err))
 	}
-	statsStorage, err := storage.NewStorage(cfg.StatsStorage.Type, cfg.StatsStorage.Path, pg)
-	if err != nil {
-		l.Fatal(fmt.Errorf("app - Run - storage.NewStorage: %w", err))
-	}
 
 	// Use case
 	var repo auth.UserRepo
@@ -61,14 +57,14 @@ func Run(cfg *config.Config) {
 	)
 	progress := sync.NewProgressSync(sync.NewProgressDatabaseRepo(pg))
 	shelf := library.NewBookShelf(bookStorage, library.NewBookDatabaseRepo(pg), l)
-	rs := stats.NewKOReaderStats(statsStorage, pg)
+	rs := stats.NewKOReaderPGStats(pg)
 
 	// HTTP Server
 	handler := gin.New()
 	web.NewRouter(handler, l, authService, progress, shelf, rs, cfg.Version)
 	v1.NewRouter(handler, l, authService, progress, shelf)
 	opds.NewRouter(handler, l, authService, progress, shelf)
-	webdav.NewRouter(handler, authService, l, rs, cfg.StatsStorage.Path)
+	webdav.NewRouter(handler, authService, l, rs)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal

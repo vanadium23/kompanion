@@ -19,7 +19,6 @@ services:
       - ./data:/data
     environment:
       KOMPANION_PG_URL: 'postgres://user:pass@postgres:5432/postgres'
-      KOMPANION_STATS_PATH: '/data/stats/'
       KOMPANION_BSTORAGE_PATH: '/data/books/'
       KOMPANION_AUTH_USERNAME: 'user'
       KOMPANION_AUTH_PASSWORD: 'password'
