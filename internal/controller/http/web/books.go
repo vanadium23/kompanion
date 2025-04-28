@@ -49,7 +49,7 @@ func (r *booksRoutes) listBooks(c *gin.Context) {
 	// Fetch progress for each book
 	type BookWithProgress struct {
 		entity.Book
-		Progress float64
+		Progress int
 	}
 	booksWithProgress := make([]BookWithProgress, len(books.Books))
 	for i, book := range books.Books {
@@ -60,7 +60,7 @@ func (r *booksRoutes) listBooks(c *gin.Context) {
 		}
 		booksWithProgress[i] = BookWithProgress{
 			Book:     book,
-			Progress: progress.Percentage * 100,
+			Progress: int(progress.Percentage * 100),
 		}
 	}
 

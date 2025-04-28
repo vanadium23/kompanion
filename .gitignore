@@ -28,3 +28,5 @@ go.work
 data/
 bin/
 release/
+
+docker-compose-local.yml

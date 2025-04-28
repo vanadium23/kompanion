@@ -1,5 +1,3 @@
-
-
 .edit-book-article {
     display: flex;
     flex-direction: row;
@@ -19,50 +17,30 @@
     height: auto;
 }
 
-
-
 /* books */
-.book-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 20px;
-}
-
-.book-item {
+.book-card {
     display: flex;
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
+    align-items: flex-start;
+    gap: 1rem;
+    border: var(--border-thickness) solid var(--text-color);
+    padding: 1rem;
+    margin-bottom: 1.5rem;
 }
 
-.book-item .cover {
-    width: 100%;
-    height: 300px;
-    /* Фиксированная высота для всех обложек */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    background-color: #f0f0f0;
-    /* Цвет фона для обложек, если изображение отсутствует */
+/* Container for the book cover image */
+.book-cover {
+    flex-shrink: 0;
+    width: 10rem;
 }
 
-.book-item img {
+/* Style the actual image */
+.book-cover img {
+    display: block;
     width: 100%;
-    height: 100%;
-    object-fit: cover;
-    /* Обеспечиваем, чтобы изображение полностью занимало контейнер */
+    height: auto;
 }
 
 .book-info {
-    margin-top: 10px;
-}
-
-.book-title {
-    font-weight: bold;
-}
-
-.book-author {
-    font-style: italic;
-    color: #555;
+    flex-grow: 1;
+    margin-top: 0;
 }

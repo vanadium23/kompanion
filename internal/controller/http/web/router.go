@@ -5,8 +5,10 @@ import (
 	"fmt"
 	"html/template"
 	"io/fs"
+	"math"
 	"net/http"
 	"path/filepath"
+	"strings"
 	"time"
 
 	"github.com/foolin/goview"
@@ -64,6 +66,7 @@ func NewRouter(
 		"Version": func() string {
 			return template.HTMLEscapeString(version)
 		},
+		"generateProgressBar": generateProgressBar,
 	}
 	gv := ginview.New(config)
 	gv.SetFileHandler(embeddedFH)
@@ -112,6 +115,30 @@ func formatDuration(seconds int) string {
 		return fmt.Sprintf("%dm %ds", minutes, secs)
 	}
 	return fmt.Sprintf("%ds", secs)
+}
+
+func generateProgressBar(percentage int, totalLength int) string {
+	if percentage < 0 {
+		percentage = 0
+	}
+	numEquals := int(math.Round(float64(percentage) * float64(totalLength) / 100.0))
+	if numEquals > totalLength {
+		numEquals = totalLength
+	}
+	if numEquals < 0 {
+		numEquals = 0
+	}
+
+	numDots := totalLength - numEquals
+
+	var sb strings.Builder
+	sb.Grow(totalLength + 2)
+	sb.WriteString("[")
+	sb.WriteString(strings.Repeat("▓", numEquals))
+	sb.WriteString(strings.Repeat("░", numDots))
+	sb.WriteString("]")
+
+	return sb.String()
 }
 
 // https://github.com/foolin/goview/issues/25#issuecomment-876889943
