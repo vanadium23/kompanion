@@ -1,5 +1,10 @@
-include .env.example
-export
+ifneq (,$(wildcard ./.env))
+    include .env
+    export
+else
+	include .env.example
+	export
+endif
 
 LOCAL_BIN:=$(CURDIR)/bin
 PATH:=$(LOCAL_BIN):$(PATH)
