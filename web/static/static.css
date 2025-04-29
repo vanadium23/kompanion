@@ -44,3 +44,14 @@
     flex-grow: 1;
     margin-top: 0;
 }
+
+.book-progress {
+    font-size: 0.8rem;
+    font-weight: var(--font-weight-bold);
+}
+
+@media (min-width: 48em) {
+    .book-progress {
+        font-size: 1rem;
+    }
+}

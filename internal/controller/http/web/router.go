@@ -129,13 +129,22 @@ func generateProgressBar(percentage int, totalLength int) string {
 		numEquals = 0
 	}
 
-	numDots := totalLength - numEquals
+	percentageString := fmt.Sprintf("%d%%", percentage)
 
 	var sb strings.Builder
 	sb.Grow(totalLength + 2)
 	sb.WriteString("[")
-	sb.WriteString(strings.Repeat("▓", numEquals))
-	sb.WriteString(strings.Repeat("░", numDots))
+	for i := range totalLength {
+		if i == totalLength/2 {
+			sb.WriteString(percentageString)
+			i += len(percentageString) - 1
+		} else if i < numEquals {
+			sb.WriteString("▓")
+		} else {
+			sb.WriteString("░")
+		}
+	}
+
 	sb.WriteString("]")
 
 	return sb.String()
