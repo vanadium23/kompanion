@@ -45,5 +45,5 @@ jobs:
         push: true
         platforms: linux/amd64,linux/arm64
         tags: |
-          submartingaie/kompanion:latest
-          submartingaie/kompanion:${{ steps.get_tag.outputs.TAG }}
+          vanadium23/kompanion:latest
+          vanadium23/kompanion:${{ steps.get_tag.outputs.TAG }}
