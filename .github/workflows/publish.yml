@@ -19,6 +19,8 @@ jobs:
 
     - name: Set up Docker Buildx
       uses: docker/setup-buildx-action@v2
+      with:
+        platforms: linux/amd64,linux/arm64
 
     - name: Integration tests
       run: "docker compose \
@@ -41,6 +43,7 @@ jobs:
         build-args: |
           KOMPANION_VERSION=${{ steps.get_tag.outputs.TAG }}
         push: true
+        platforms: linux/amd64,linux/arm64
         tags: |
           vanadium23/kompanion:latest
           vanadium23/kompanion:${{ steps.get_tag.outputs.TAG }}
