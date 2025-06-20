@@ -25,7 +25,7 @@ func newUserRoutes(handler *gin.RouterGroup, a auth.AuthInterface, l logger.Inte
 
 func (r *userRoutes) authenicate(c *gin.Context) {
 	// authenication done by authDeviceMiddleware
-	c.JSON(http.StatusOK, gin.H{"message": "OK", "code": 200})
+	c.AsciiJSON(http.StatusOK, gin.H{"message": "OK", "code": 200})
 }
 
 func authDeviceMiddleware(auth auth.AuthInterface, l logger.Interface) gin.HandlerFunc {
@@ -33,12 +33,12 @@ func authDeviceMiddleware(auth auth.AuthInterface, l logger.Interface) gin.Handl
 		username := c.GetHeader("x-auth-user")
 		hashed_password := c.GetHeader("x-auth-key")
 		if username == "" || hashed_password == "" {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "code": 2001})
+			c.AsciiJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "code": 2001})
 			c.Abort()
 			return
 		}
 		if !auth.CheckDevicePassword(c.Request.Context(), username, hashed_password, false) {
-			c.JSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "code": 2001})
+			c.AsciiJSON(http.StatusUnauthorized, gin.H{"message": "Unauthorized", "code": 2001})
 			c.Abort()
 			return
 		}

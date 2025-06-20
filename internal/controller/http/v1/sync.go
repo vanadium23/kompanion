@@ -28,7 +28,7 @@ func (r *syncRoutes) updateProgress(c *gin.Context) {
 	var doc entity.Progress
 	if err := c.ShouldBindJSON(&doc); err != nil {
 		r.l.Error(err)
-		c.JSON(http.StatusBadRequest, gin.H{"message": "Bad request", "code": 4000})
+		c.AsciiJSON(http.StatusBadRequest, gin.H{"message": "Bad request", "code": 4000})
 		return
 	}
 
@@ -36,20 +36,20 @@ func (r *syncRoutes) updateProgress(c *gin.Context) {
 	savedDoc, err := r.progress.Sync(c, doc)
 	if err != nil {
 		r.l.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 5000})
+		c.AsciiJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 5000})
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H{"timestamp": savedDoc.Timestamp, "document": savedDoc})
+	c.AsciiJSON(http.StatusOK, gin.H{"timestamp": savedDoc.Timestamp, "document": savedDoc})
 }
 
 func (r *syncRoutes) fetchProgress(c *gin.Context) {
 	doc, err := r.progress.Fetch(c, c.Param("document"))
 	if err != nil {
 		r.l.Error(err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 5000})
+		c.AsciiJSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 5000})
 		return
 	}
 
-	c.JSON(http.StatusOK, doc)
+	c.AsciiJSON(http.StatusOK, doc)
 }
