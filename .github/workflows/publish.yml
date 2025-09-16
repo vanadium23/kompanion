@@ -38,6 +38,7 @@ jobs:
       uses: docker/build-push-action@v4
       with:
         context: .
+        platforms: linux/amd64,linux/arm64
         build-args: |
           KOMPANION_VERSION=${{ steps.get_tag.outputs.TAG }}
         push: true
