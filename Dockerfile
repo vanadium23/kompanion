@@ -1,11 +1,11 @@
 # Step 1: Modules caching
-FROM golang:1.22.5-alpine as modules
+FROM --platform=${BUILDPLATFORM} golang:1.22.5-alpine as modules
 COPY go.mod go.sum /modules/
 WORKDIR /modules
 RUN go mod download
 
 # Step 2: Builder
-FROM golang:1.22.5-alpine as builder
+FROM --platform=${BUILDPLATFORM} golang:1.22.5-alpine as builder
 RUN apk add --update gcc musl-dev
 COPY --from=modules /go/pkg /go/pkg
 COPY . /app
@@ -16,11 +16,11 @@ ENV KOMPANION_VERSION=$KOMPANION_VERSION
 
 ARG TARGETARCH
 RUN GOOS=linux GOARCH=${TARGETARCH:-amd64} \
-    go build -ldflags "-X main.Version=$KOMPANION_VERSION" -tags migrate -o /bin/app ./cmd/app
+  go build -ldflags "-X main.Version=$KOMPANION_VERSION" -tags migrate -o /bin/app ./cmd/app
 
 
 # Step 3: Final
-FROM golang:1.22.5-alpine
+FROM --platform=${TARGETPLATFORM} golang:1.22.5-alpine
 ENV GIN_MODE=release
 
 WORKDIR /
