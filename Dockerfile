@@ -14,8 +14,10 @@ WORKDIR /app
 ARG KOMPANION_VERSION=local
 ENV KOMPANION_VERSION=$KOMPANION_VERSION
 
-RUN GOOS=linux GOARCH=amd64 \
+ARG TARGETARCH
+RUN GOOS=linux GOARCH=${TARGETARCH:-amd64} \
     go build -ldflags "-X main.Version=$KOMPANION_VERSION" -tags migrate -o /bin/app ./cmd/app
+
 
 # Step 3: Final
 FROM golang:1.22.5-alpine

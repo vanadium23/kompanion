@@ -23,7 +23,8 @@ import (
 )
 
 func NewRouter(
-	handler *gin.Engine,
+	handler *gin.RouterGroup,
+	router *gin.Engine,
 	l logger.Interface,
 	a auth.AuthInterface,
 	p sync.Progress,
@@ -37,6 +38,9 @@ func NewRouter(
 	handler.Use(func(c *gin.Context) {
 		c.Set("startTime", time.Now())
 	})
+
+	// hold origin prefix as urlPrefix
+	urlPrefix := strings.TrimSuffix(handler.BasePath(), "/")
 	// static files
 	staticFs, err := fs.Sub(kompanion.WebAssets, "web/static")
 	if err != nil {
@@ -70,31 +74,31 @@ func NewRouter(
 	}
 	gv := ginview.New(config)
 	gv.SetFileHandler(embeddedFH)
-	handler.HTMLRender = gv
+	router.HTMLRender = gv
 
 	// Home
 	handler.GET("/", func(c *gin.Context) {
-		c.Redirect(302, "/books")
+		c.Redirect(302, urlPrefix+"/books")
 	})
 
 	// Login
 	authGroup := handler.Group("/auth")
-	newAuthRoutes(authGroup, a, l)
+	newAuthRoutes(authGroup, urlPrefix, a, l)
 
 	// Product pages
 	bookGroup := handler.Group("/books")
-	bookGroup.Use(authMiddleware(a))
-	newBooksRoutes(bookGroup, shelf, stats, p, l)
+	bookGroup.Use(authMiddleware(a, urlPrefix))
+	newBooksRoutes(bookGroup, urlPrefix, shelf, stats, p, l)
 
 	// Stats pages
 	statsGroup := handler.Group("/stats")
-	statsGroup.Use(authMiddleware(a))
-	newStatsRoutes(statsGroup, stats, l)
+	statsGroup.Use(authMiddleware(a, urlPrefix))
+	newStatsRoutes(statsGroup, urlPrefix, stats, l)
 
 	// Device management
 	deviceGroup := handler.Group("/devices")
-	deviceGroup.Use(authMiddleware(a))
-	newDeviceRoutes(deviceGroup, a, l)
+	deviceGroup.Use(authMiddleware(a, urlPrefix))
+	newDeviceRoutes(deviceGroup, urlPrefix, a, l)
 }
 
 func passStandartContext(c *gin.Context, data gin.H) gin.H {

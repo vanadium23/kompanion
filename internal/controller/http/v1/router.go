@@ -14,7 +14,7 @@ import (
 )
 
 // NewRouter -.
-func NewRouter(handler *gin.Engine, l logger.Interface, a auth.AuthInterface, p sync.Progress, shelf library.Shelf) {
+func NewRouter(handler *gin.RouterGroup, l logger.Interface, a auth.AuthInterface, p sync.Progress, shelf library.Shelf) {
 	// Options
 	handler.Use(gin.Logger())
 	handler.Use(gin.Recovery())

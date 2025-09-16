@@ -54,10 +54,10 @@ type Summary struct {
 	Text string `xml:",chardata"`
 }
 
-func BuildFeed(id, title, href string, entries []Entry, additionalLinks []Link) *Feed {
+func BuildFeed(id, title, href string, entries []Entry, additionalLinks []Link, urlPrefix string) *Feed {
 	finalLinks := []Link{
 		{
-			Href: "/opds/",
+			Href: urlPrefix + "/opds/",
 			Type: DirMime,
 			Rel:  "start",
 		},
@@ -67,7 +67,7 @@ func BuildFeed(id, title, href string, entries []Entry, additionalLinks []Link) 
 			Rel:  "self",
 		},
 		{
-			Href: "/opds/search/{searchTerms}/",
+			Href: urlPrefix + "/opds/search/{searchTerms}/",
 			Type: "application/atom+xml",
 			Rel:  "search",
 		},
@@ -83,7 +83,7 @@ func BuildFeed(id, title, href string, entries []Entry, additionalLinks []Link) 
 	}
 }
 
-func translateBooksToEntries(books []entity.Book) []Entry {
+func translateBooksToEntries(books []entity.Book, urlPrefix string) []Entry {
 	entries := make([]Entry, 0, len(books))
 	for _, book := range books {
 		entries = append(entries, Entry{
@@ -95,7 +95,7 @@ func translateBooksToEntries(books []entity.Book) []Entry {
 			},
 			Link: []Link{
 				{
-					Href: fmt.Sprintf("/opds/book/%s/download", book.ID),
+					Href: fmt.Sprintf(urlPrefix+"/opds/book/%s/download", book.ID),
 					Type: book.MimeType(),
 					Rel:  FileRel,
 					// Mtime: book.UpdatedAt.Format(AtomTime),

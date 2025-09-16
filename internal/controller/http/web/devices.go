@@ -7,12 +7,13 @@ import (
 )
 
 type deviceRoutes struct {
-	auth auth.AuthInterface
-	l    logger.Interface
+	auth      auth.AuthInterface
+	urlPrefix string
+	l         logger.Interface
 }
 
-func newDeviceRoutes(handler *gin.RouterGroup, a auth.AuthInterface, l logger.Interface) {
-	r := &deviceRoutes{a, l}
+func newDeviceRoutes(handler *gin.RouterGroup, urlPrefix string, a auth.AuthInterface, l logger.Interface) {
+	r := &deviceRoutes{a, urlPrefix, l}
 
 	handler.GET("/", r.listDevices)
 	handler.POST("/add", r.addDeviceAction)
@@ -23,13 +24,15 @@ func (r *deviceRoutes) listDevices(c *gin.Context) {
 	devices, err := r.auth.ListDevices(c.Request.Context())
 	if err != nil {
 		c.HTML(500, "devices", passStandartContext(c, gin.H{
-			"error": "Failed to load devices",
+			"urlPrefix": r.urlPrefix,
+			"error":     "Failed to load devices",
 		}))
 		return
 	}
 
 	c.HTML(200, "devices", passStandartContext(c, gin.H{
-		"devices": devices,
+		"urlPrefix": r.urlPrefix,
+		"devices":   devices,
 	}))
 }
 
@@ -39,7 +42,8 @@ func (r *deviceRoutes) addDeviceAction(c *gin.Context) {
 
 	if deviceName == "" || password == "" {
 		c.HTML(400, "devices", passStandartContext(c, gin.H{
-			"error": "Device name and password are required",
+			"error":     "Device name and password are required",
+			"urlPrefix": r.urlPrefix,
 		}))
 		return
 	}
@@ -47,12 +51,13 @@ func (r *deviceRoutes) addDeviceAction(c *gin.Context) {
 	err := r.auth.AddUserDevice(c.Request.Context(), deviceName, password)
 	if err != nil {
 		c.HTML(400, "devices", passStandartContext(c, gin.H{
-			"error": err.Error(),
+			"error":     err.Error(),
+			"urlPrefix": r.urlPrefix,
 		}))
 		return
 	}
 
-	c.Redirect(302, "/devices")
+	c.Redirect(302, r.urlPrefix+"/devices")
 }
 
 func (r *deviceRoutes) deactivateDeviceAction(c *gin.Context) {
@@ -60,10 +65,11 @@ func (r *deviceRoutes) deactivateDeviceAction(c *gin.Context) {
 	err := r.auth.DeactivateUserDevice(c.Request.Context(), deviceName)
 	if err != nil {
 		c.HTML(400, "devices", passStandartContext(c, gin.H{
-			"error": err.Error(),
+			"urlPrefix": r.urlPrefix,
+			"error":     err.Error(),
 		}))
 		return
 	}
 
-	c.Redirect(302, "/devices")
+	c.Redirect(302, r.urlPrefix+"/devices")
 }

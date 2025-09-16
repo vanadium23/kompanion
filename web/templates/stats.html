@@ -7,7 +7,7 @@
     </header>
 
     <section>
-        <form method="GET" action="/stats" class="grid">
+        <form method="GET" action="{{.urlPrefix}}/stats" class="grid">
             <input type="date" id="from" name="from" value="{{ .from }}">
             <input type="date" id="to" name="to" value="{{ .to }}">
             <button type="submit" style="flex-grow: 1;">Update</button>
@@ -45,7 +45,7 @@
 
     <section>
         <h2>Daily Reading Progress</h2>
-        <img src="/stats/chart?from={{ .from }}&to={{ .to }}" alt="Daily Reading Progress"
+        <img src="{{.urlPrefix}}/stats/chart?from={{ .from }}&to={{ .to }}" alt="Daily Reading Progress"
             style="width: 100%; max-width: 800px;">
     </section>
 </article>

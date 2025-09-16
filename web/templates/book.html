@@ -5,7 +5,7 @@
 <article class="edit-book-article">
     <!-- Обложка книги -->
     <div class="cover">
-        <img src="/books/{{.ID}}/cover" alt="{{.Title}} - {{.Author}}">
+        <img src="{{$.urlPrefix}}/books/{{.ID}}/cover" alt="{{.Title}} - {{.Author}}">
     </div>
 
 
@@ -40,7 +40,7 @@
             </div>
             <div class="grid">
                 <button type="submit" class="button success">Save</button>
-                <button type="button" class="button"><a href="/books/{{.ID}}/download"
+                <button type="button" class="button"><a href="{{$.urlPrefix}}/books/{{.ID}}/download"
                         target="_blank">Download</a></button>
             </div>
         </form>

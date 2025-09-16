@@ -6,8 +6,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="color-scheme" content="light dark">
     <title>{{ block "title" . }}KOmpanion{{ end }}</title>
-    <link rel="stylesheet" href="/static/monospace.css">
-    <link rel="stylesheet" href="/static/static.css">
+    <link rel="stylesheet" href="{{.urlPrefix}}/static/monospace.css">
+    <link rel="stylesheet" href="{{.urlPrefix}}/static/static.css">
 </head>
 
 <body>
@@ -18,10 +18,10 @@
             <tr>
                 <td style="flex-grow: 1;">KOmpanion</td>
                 {{ if .isAuthenticated }}
-                <td><a href="/books/">> Books</a></td>
-                <td><a href="/stats/">> Statistics</a></td>
-                <td><a href="/devices/">> Devices</a></td>
-                <td><a href="/auth/logout/">Log Out</a></td>
+                <td><a href="{{.urlPrefix}}/books/">> Books</a></td>
+                <td><a href="{{.urlPrefix}}/stats/">> Statistics</a></td>
+                <td><a href="{{.urlPrefix}}/devices/">> Devices</a></td>
+                <td><a href="{{.urlPrefix}}/auth/logout/">Log Out</a></td>
                 {{ else }}
                 <td>Login Page</td>
                 {{ end}}

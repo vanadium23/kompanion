@@ -7,12 +7,13 @@ import (
 )
 
 type authRoutes struct {
-	auth auth.AuthInterface
-	l    logger.Interface
+	auth      auth.AuthInterface
+	urlPrefix string
+	l         logger.Interface
 }
 
-func newAuthRoutes(handler *gin.RouterGroup, a auth.AuthInterface, l logger.Interface) {
-	r := &authRoutes{a, l}
+func newAuthRoutes(handler *gin.RouterGroup, urlPrefix string, a auth.AuthInterface, l logger.Interface) {
+	r := &authRoutes{a, urlPrefix, l}
 
 	handler.GET("/login", r.loginForm)
 	handler.POST("/login", r.loginAction)
@@ -20,18 +21,18 @@ func newAuthRoutes(handler *gin.RouterGroup, a auth.AuthInterface, l logger.Inte
 }
 
 func (r *authRoutes) loginForm(c *gin.Context) {
-	c.HTML(200, "login", passStandartContext(c, gin.H{}))
+	c.HTML(200, "login", passStandartContext(c, gin.H{"urlPrefix": r.urlPrefix}))
 }
 
 func (r *authRoutes) logoutAction(c *gin.Context) {
 	sessionKey, err := c.Cookie("session")
 	if err != nil {
-		c.Redirect(302, "/auth/login")
+		c.Redirect(302, r.urlPrefix+"/auth/login")
 		return
 	}
 	r.auth.Logout(c.Request.Context(), sessionKey)
 	c.SetCookie("session", "", 0, "/", "", false, true)
-	c.Redirect(302, "/auth/login")
+	c.Redirect(302, r.urlPrefix+"/auth/login")
 }
 
 func (r *authRoutes) loginAction(c *gin.Context) {
@@ -49,20 +50,20 @@ func (r *authRoutes) loginAction(c *gin.Context) {
 		return
 	}
 	c.SetCookie("session", sessionKey, 0, "/", "", false, true)
-	c.Redirect(302, "/books")
+	c.Redirect(302, r.urlPrefix+"/books")
 }
 
-func authMiddleware(a auth.AuthInterface) gin.HandlerFunc {
+func authMiddleware(a auth.AuthInterface, urlPrefix string) gin.HandlerFunc {
 	return func(c *gin.Context) {
 		sessionKey, err := c.Cookie("session")
 		if err != nil {
-			c.Redirect(302, "/auth/login")
+			c.Redirect(302, urlPrefix+"/auth/login")
 			c.Abort()
 			return
 		}
 
 		if !a.IsAuthenticated(c.Request.Context(), sessionKey) {
-			c.Redirect(302, "/auth/login")
+			c.Redirect(302, urlPrefix+"/auth/login")
 			c.Abort()
 			return
 		}

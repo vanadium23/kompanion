@@ -2,9 +2,9 @@
 
 {{ define "content" }}
 <div>
-    <form method="post" action="/books/upload" enctype="multipart/form-data" class="grid">
+    <form method="post" action="{{.urlPrefix}}/books/upload" enctype="multipart/form-data" class="grid">
         <div>
-            <input type="file" name="book" accept=".epub,.pdf,.fb2">
+            <input type="file" name="book" accept=".epub,.pdf,.fb2" required>
         </div>
         <button style="flex-grow: 1;">Upload</button>
     </form>
@@ -14,13 +14,13 @@
     <!-- Another example -->
     <div class="book-card">
         <div class="book-cover">
-            <a href="/books/{{.ID}}">
-                <img src="/books/{{.ID}}/cover" alt="{{.Title}} - {{.Author}}">
+            <a href="{{$.urlPrefix}}/books/{{.ID}}">
+                <img src="{{$.urlPrefix}}/books/{{.ID}}/cover" alt="{{.Title}} - {{.Author}}">
             </a>
         </div>
         <div class="book-info">
             <h3 class="book-title">
-                <a href="/books/{{.ID}}">
+                <a href="{{$.urlPrefix}}/books/{{.ID}}">
                     {{.Title}}
                 </a>
             </h3>

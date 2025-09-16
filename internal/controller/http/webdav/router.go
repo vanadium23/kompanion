@@ -10,7 +10,7 @@ import (
 )
 
 func NewRouter(
-	handler *gin.Engine,
+	handler *gin.RouterGroup,
 	a auth.AuthInterface,
 	l logger.Interface,
 	rs stats.ReadingStats,
