@@ -42,10 +42,26 @@
                 <button type="submit" class="button success">Save</button>
                 <button type="button" class="button"><a href="/books/{{.ID}}/download"
                         target="_blank">Download</a></button>
+                <button type="button" class="button danger" onclick="deleteBook('{{.ID}}')">
+                    Delete
+                </button>
             </div>
         </form>
     </div>
 </article>
+<script>
+    async function deleteBook(id) {
+        if (!confirm('Confirm to delete?')) return;
+
+        const res = await fetch(`/books/${id}/delete`, { method: 'POST' });
+        if (res.ok) {
+            alert('Delete successful!')
+            window.location.href = '/books';
+        } else {
+            alert('Delete failed');
+        }
+    }
+</script>
 {{ end }}
 <!-- Статистика чтения -->
 {{ with $.stats }}

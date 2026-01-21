@@ -145,6 +145,30 @@ func (uc *BookShelf) UpdateBookMetadata(ctx context.Context, bookID string, meta
 	return updatedBook, nil
 }
 
+func (uc *BookShelf) DeleteBook(ctx context.Context, bookID string) error {
+	book, err := uc.repo.GetById(ctx, bookID)
+	if err != nil {
+		return fmt.Errorf("BookShelf - DeleteBook - s.repo.Get: %w", err)
+	}
+	
+	err = uc.deleteCover(ctx, bookID)
+	if err != nil {
+		return fmt.Errorf("BookShelf - deleteCover - s.repo.Delete: %w", err)
+	}
+
+	err = uc.repo.Delete(ctx, book)
+	if err != nil {
+		return fmt.Errorf("BookShelf - DeleteBook - s.repo.Delete: %w", err)
+	}
+
+	err = uc.storage.Delete(ctx, book.FilePath)
+	if err != nil {
+		return fmt.Errorf("BookShelf - DeleteBook - s.storage.Delete: %w", err)
+	}
+
+	return nil
+}
+
 func (uc *BookShelf) DownloadBook(ctx context.Context, bookID string) (entity.Book, *os.File, error) {
 	book, err := uc.repo.GetById(ctx, bookID)
 	if err != nil {
@@ -197,4 +221,19 @@ func writeCover(
 		return "", fmt.Errorf("BookShelf - writeCover - s.storage.Write: %w", err)
 	}
 	return coverpath, nil
+}
+
+func (uc *BookShelf) deleteCover(ctx context.Context, bookID string) error {
+	book, err := uc.repo.GetById(ctx, bookID)
+	if err != nil {
+		return fmt.Errorf("BookShelf - deleteCover - s.repo.Get: %w", err)
+	}
+	if book.CoverPath == "" {
+		return nil
+	}
+	err = uc.storage.Delete(ctx, book.CoverPath)
+	if err != nil {
+		return fmt.Errorf("BookShelf - deleteCover - s.Storage.Delete: %w", err)
+	}
+	return nil
 }

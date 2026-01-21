@@ -69,6 +69,27 @@ func (bdr *BookDatabaseRepo) Update(ctx context.Context, book entity.Book) error
 	return nil
 }
 
+// Delete -. only delete from database
+func (bdr *BookDatabaseRepo) Delete(ctx context.Context, book entity.Book) error {
+	sql :=  `
+		DELETE FROM library_book
+		WHERE id = $1
+	`
+
+	args := []interface{}{
+		book.ID,
+	}
+
+	rows, err := bdr.Pool.Exec(ctx, sql, args...)
+	if err != nil {
+		return fmt.Errorf("BookDatabaseRepo - Delete - r.Pool.Exec: %w", err)
+	}
+	if rows.RowsAffected() == 0 {
+		return fmt.Errorf("BookDatabaseRepo - Delete - no rows affected")
+	}
+	return nil
+}
+
 // List -. only select from database
 func (bdr *BookDatabaseRepo) List(ctx context.Context,
 	sortBy, sortOrder string,

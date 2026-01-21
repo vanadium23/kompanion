@@ -53,3 +53,10 @@ func (s *MemoryStorage) Write(ctx context.Context, source string, filepath strin
 	s.mu.Unlock()
 	return nil
 }
+
+func (s *MemoryStorage) Delete(ctx context.Context, filepath string) error {
+	s.mu.Lock()
+	s.data[filepath] = nil
+	s.mu.Unlock()
+	return nil
+}

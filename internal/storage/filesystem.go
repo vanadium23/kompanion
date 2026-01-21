@@ -75,6 +75,15 @@ func (s *FilesystemStorage) Write(ctx context.Context, src, dest string) error {
 	return nil
 }
 
+func (s *FilesystemStorage) Delete(ctx context.Context, p string) error {
+	filepath := path.Join(s.root, p)
+	err := os.Remove(filepath)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
 func checkSystemWrites(root string) error {
 	// Create a temporary file in the root directory
 	tempFile, err := os.CreateTemp(root, "write_test")

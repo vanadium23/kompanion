@@ -42,6 +42,7 @@ func TestFilesystemStorage(t *testing.T) {
 	if err != nil {
 		t.Errorf("Error reading file: %v", err)
 	}
+
 	defer readFile.Close()
 	readBody, err := os.ReadFile(readFile.Name())
 	if err != nil {
@@ -49,5 +50,16 @@ func TestFilesystemStorage(t *testing.T) {
 	}
 	if string(readBody) != string(body) {
 		t.Errorf("Expected body %s, got %s", string(body), string(readBody))
+	}
+
+	err = st.Delete(ctx, "test")
+	if err != nil {
+		t.Errorf("Error deleting file: %v", err)
+	}
+
+	defer readFile.Close()
+	_, err =os.ReadFile(readFile.Name())
+	if err == nil {
+		t.Errorf("Error deleting file failed")
 	}
 }

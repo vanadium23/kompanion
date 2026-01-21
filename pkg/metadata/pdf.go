@@ -1,9 +1,14 @@
 package metadata
 
 import (
-	"bufio"
 	"os"
+	"bytes"
+	"unicode/utf8"
+	"golang.org/x/text/encoding/unicode"
+	"golang.org/x/text/transform"
+	"regexp"
 	"strings"
+	"io"
 )
 
 // PDFMetadata holds the extracted PDFmetadata information
@@ -16,23 +21,35 @@ type PDFMetadata struct {
 
 // extractPDFMetadataFromHeader scans the first part of the PDF file for PDFmetadata information
 func extractPdfMetadata(tmpFile *os.File) (Metadata, error) {
-	scanner := bufio.NewScanner(tmpFile)
 	var PDFmetadata Metadata
-	for scanner.Scan() {
-		line := scanner.Text()
 
-		if strings.Contains(line, "/Title") {
-			PDFmetadata.Title = extractValue(line, "/Title")
+	const chunksize = 64 * 1024
+	const tailsize = 1024
+
+	buf := make([]byte, chunksize)
+	tail := make([]byte, tailsize)
+
+	for {
+		n, err := tmpFile.Read(buf)
+
+		block := append(tail, buf[:n]...)
+
+		if bytes.Contains(block, []byte("/Title")) {
+			PDFmetadata.Title = clean(extractValue(block, "/Title"))
+
 		}
-		if strings.Contains(line, "/Author") {
-			PDFmetadata.Author = extractValue(line, "/Author")
+
+		if bytes.Contains(block, []byte("/Author")) {
+			PDFmetadata.Author = clean(extractValue(block, "/Author"))
 		}
-		// if strings.Contains(line, "/Subject") {
-		// 	PDFmetadata.Subject = extractValue(line, "/Subject")
-		// }
-		// if strings.Contains(line, "/Keywords") {
-		// 	PDFmetadata.Keywords = extractValue(line, "/Keywords")
-		// }
+
+		if err == io.EOF {
+			break
+		}
+
+		if err != nil {
+			return Metadata{}, err
+		}
 
 		// Break early if we've found all fields
 		if PDFmetadata.Title != "" && PDFmetadata.Author != "" {
@@ -40,23 +57,92 @@ func extractPdfMetadata(tmpFile *os.File) (Metadata, error) {
 		}
 	}
 
-	if err := scanner.Err(); err != nil {
-		return Metadata{}, err
+	// use file name if no title found
+	if PDFmetadata.Title == "" {
+		parts := strings.Split(tmpFile.Name(), "/")
+		parts = strings.Split(parts[len(parts) - 1], ".")
+		PDFmetadata.Title = parts[0]
 	}
 
 	return PDFmetadata, nil
 }
 
 // extractValue extracts the value for a specific metadata field
-func extractValue(line string, field string) string {
-	start := strings.Index(line, field+"(")
-	if start == -1 {
-		return ""
+func extractValue(block []byte, field string) string {
+	fieldIndex := bytes.Index(block, []byte(field))
+	start := bytes.Index(block[fieldIndex:], []byte("(")) + fieldIndex + 1
+	end := findLiteralEnd(block[start:]) + start
+	value := block[start:end]
+
+	if utf8.Valid(value) {
+		return string(value)
 	}
-	start += len(field) + 1 // Skip past the field and the opening parenthesis
-	end := strings.Index(line[start:], ")")
-	if end == -1 {
-		return ""
+
+	// remove escape symbol
+	regex := regexp.MustCompile(`\\(.)`)
+	value = regex.ReplaceAll(value, []byte("$1"))
+
+	// UTF16BE
+	if len(value) >= 2 && value[0] == 0xFE && value[1] == 0xFF {
+		return decodeUTF16("be", value)
 	}
-	return line[start : start+end]
+	// UTF16LE
+	if len(value) >= 2 && value[0] == 0xFF && value[1] == 0xFE {
+		return decodeUTF16("le", value)
+	}
+
+	return ""
+}
+
+// find the literal end, excluding parentheis in the field
+func findLiteralEnd(b []byte) int {
+	depth := 1
+	escaped := false
+	for i := 0; i < len(b); i++ {
+		c := b[i]
+		if escaped {
+			escaped = false
+			continue
+		}
+		if c == '\\' {
+			escaped = true
+			continue
+		}
+		if c == '(' {
+			depth++
+			continue
+		}
+		if c == ')' {
+			depth--
+			if depth == 0 {
+				return i
+			}
+		}
+	}
+	return -1
+}
+
+// decode UTF-16 content
+func decodeUTF16(t string, data []byte) string {
+	var dec transform.Transformer
+	if t == "be" {
+		dec = unicode.UTF16(unicode.BigEndian, unicode.ExpectBOM).NewDecoder()
+	} else if t == "le" {
+		dec = unicode.UTF16(unicode.LittleEndian, unicode.ExpectBOM).NewDecoder()
+	}
+	
+	r := transform.NewReader(bytes.NewReader(data), dec)
+	b, _ := io.ReadAll(r)
+	return string(b)
+}
+
+// remove non-utf8 bytes
+func clean(s string) string {
+	r := strings.NewReplacer(
+		"\x00", "",
+		"\xFF", "",
+		"\xFE", "",
+	)
+
+	return r.Replace(s)
 }

@@ -19,6 +19,7 @@ type (
 		DownloadBook(ctx context.Context, bookID string) (entity.Book, *os.File, error)
 		UpdateBookMetadata(ctx context.Context, bookID string, metadata entity.Book) (entity.Book, error)
 		ViewCover(ctx context.Context, bookID string) (*os.File, error)
+		DeleteBook(ctx context.Context, bookID string) error
 	}
 
 	// BookRepo -.
@@ -32,5 +33,6 @@ type (
 		GetById(context.Context, string) (entity.Book, error)
 		GetByFileHash(context.Context, string) (entity.Book, error)
 		Update(context.Context, entity.Book) error
+		Delete(context.Context, entity.Book) error
 	}
 )
