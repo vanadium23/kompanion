@@ -138,6 +138,10 @@ func (uc *BookShelf) UpdateBookMetadata(ctx context.Context, bookID string, meta
 		Publisher: utils.If(metadata.Publisher == "", book.Publisher, metadata.Publisher),
 		Year:      utils.If(metadata.Year == 0, book.Year, metadata.Year),
 		ISBN:      utils.If(metadata.ISBN == "", book.ISBN, metadata.ISBN),
+		Series:    utils.If(metadata.Series == "", book.Series, metadata.Series),
+		Language:  utils.If(metadata.Language == "", book.Language, metadata.Language),
+		Pages:     utils.If(metadata.Pages == 0, book.Pages, metadata.Pages),
+		Summary:   utils.If(metadata.Summary == "", book.Summary, metadata.Summary),
 		UpdatedAt: time.Now(),
 	}
 

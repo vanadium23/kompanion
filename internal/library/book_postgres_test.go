@@ -70,7 +70,7 @@ func TestBookDatabaseRepoGetById(t *testing.T) {
 	mock, bdr := setupTestBookDatabaseRepo()
 	defer mock.Close()
 
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "language", "pages", "summary"}).
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "storage_file_path", "koreader_partial_md5", "storage_cover_path", "series", "language", "pages", "summary"}).
 		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.Language, book.Pages, book.Summary)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
@@ -112,7 +112,7 @@ func TestBookDatabaseRepoGetByFileHash(t *testing.T) {
 	mock, bdr := setupTestBookDatabaseRepo()
 	defer mock.Close()
 
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "language", "pages", "summary"}).
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "storage_file_path", "koreader_partial_md5", "storage_cover_path", "series", "language", "pages", "summary"}).
 		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.Language, book.Pages, book.Summary)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
@@ -154,7 +154,7 @@ func TestBookDatabaseRepoList(t *testing.T) {
 	mock, bdr := setupTestBookDatabaseRepo()
 	defer mock.Close()
 
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "language", "pages", "summary"}).
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "storage_file_path", "koreader_partial_md5", "storage_cover_path", "series", "language", "pages", "summary"}).
 		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.Language, book.Pages, book.Summary)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
