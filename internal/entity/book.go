@@ -8,6 +8,8 @@ import (
 
 var ErrBookAlreadyExists = errors.New("Book already exists")
 
+var ErrNotFound = errors.New("Book not found")
+
 // Book represents a book entity in the database.
 type Book struct {
 	ID         string    // unique identifier for the book
@@ -22,6 +24,10 @@ type Book struct {
 	FilePath   string    // path to the book file
 	Format     string    // format of the book file
 	CoverPath  string    // path to the cover image
+	Series     string    // series the book belongs to
+	Language   string    // language of the book
+	Pages      int       // number of pages
+	Summary    string    // book summary/description
 }
 
 func (b Book) extension() string {

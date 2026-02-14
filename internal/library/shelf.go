@@ -76,6 +76,10 @@ func (uc *BookShelf) StoreBook(ctx context.Context, tempFile *os.File, uploadedF
 		FilePath:   storagepath,
 		Format:     m.Format,
 		CoverPath:  coverPath,
+		Series:     "",
+		Language:   m.Language,
+		Pages:      0,
+		Summary:    m.Description,
 	}
 
 	// place in database

@@ -25,6 +25,10 @@ func TestBookDatabaseRepoCreate(t *testing.T) {
 		FilePath:   "file_path",
 		DocumentID: "document_id",
 		CoverPath:  "cover_path",
+		Series:     "series",
+		Language:   "en",
+		Pages:      100,
+		Summary:    "summary",
 	}
 
 	// создать mock
@@ -32,7 +36,7 @@ func TestBookDatabaseRepoCreate(t *testing.T) {
 	defer mock.Close()
 
 	mock.ExpectExec("INSERT INTO library_book").
-		WithArgs(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath).
+		WithArgs(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.Language, book.Pages, book.Summary).
 		WillReturnResult(pgxmock.NewResult("INSERT", 1))
 
 	// вызвать Create
@@ -56,14 +60,18 @@ func TestBookDatabaseRepoGetById(t *testing.T) {
 		FilePath:   "file_path",
 		DocumentID: "document_id",
 		CoverPath:  "cover_path",
+		Series:     "series",
+		Language:   "en",
+		Pages:      100,
+		Summary:    "summary",
 	}
 
 	// создать mock
 	mock, bdr := setupTestBookDatabaseRepo()
 	defer mock.Close()
 
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path"}).
-		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath)
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "language", "pages", "summary"}).
+		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.Language, book.Pages, book.Summary)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
 		WithArgs(book.ID).
@@ -94,14 +102,18 @@ func TestBookDatabaseRepoGetByFileHash(t *testing.T) {
 		FilePath:   "file_path",
 		DocumentID: "document_id",
 		CoverPath:  "cover_path",
+		Series:     "series",
+		Language:   "en",
+		Pages:      100,
+		Summary:    "summary",
 	}
 
 	// создать mock
 	mock, bdr := setupTestBookDatabaseRepo()
 	defer mock.Close()
 
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path"}).
-		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath)
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "language", "pages", "summary"}).
+		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.Language, book.Pages, book.Summary)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
 		WithArgs(book.DocumentID).
@@ -132,14 +144,18 @@ func TestBookDatabaseRepoList(t *testing.T) {
 		FilePath:   "file_path",
 		DocumentID: "document_id",
 		CoverPath:  "cover_path",
+		Series:     "series",
+		Language:   "en",
+		Pages:      100,
+		Summary:    "summary",
 	}
 
 	// создать mock
 	mock, bdr := setupTestBookDatabaseRepo()
 	defer mock.Close()
 
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path"}).
-		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath)
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "language", "pages", "summary"}).
+		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.Language, book.Pages, book.Summary)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
 		WillReturnRows(rows)

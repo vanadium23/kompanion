@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "quint-code": {
+      "command": "/home/deploy/.local/bin/quint-code",
+      "args": [
+        "serve"
+      ],
+      "cwd": "/home/deploy/kompanion",
+      "env": {
+        "QUINT_PROJECT_ROOT": "/home/deploy/kompanion"
+      }
+    }
+  }
+}

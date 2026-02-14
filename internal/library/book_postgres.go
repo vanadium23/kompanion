@@ -2,9 +2,11 @@ package library
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"strings"
 
+	"github.com/jackc/pgx/v5"
 	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/pkg/postgres"
 )
@@ -22,13 +24,14 @@ func NewBookDatabaseRepo(pg *postgres.Postgres) *BookDatabaseRepo {
 // Store -. only insert in database
 func (bdr *BookDatabaseRepo) Store(ctx context.Context, book entity.Book) error {
 	sql := `
-		INSERT INTO library_book (id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+		INSERT INTO library_book (id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)
 	`
 	args := []interface{}{
 		book.ID, book.Title, book.Author, book.Publisher, book.Year,
 		book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath,
-		book.DocumentID, book.CoverPath,
+		book.DocumentID, book.CoverPath, book.Series, book.Language,
+		book.Pages, book.Summary,
 	}
 
 	_, err := bdr.Pool.Exec(ctx, sql, args...)
@@ -51,12 +54,17 @@ func (bdr *BookDatabaseRepo) Update(ctx context.Context, book entity.Book) error
 			publisher = $3,
 			year = $4,
 			updated_at = $5,
-			isbn = $6
-		WHERE id = $7
+			isbn = $6,
+			series = $7,
+			language = $8,
+			pages = $9,
+			summary = $10
+		WHERE id = $11
 	`
 	args := []interface{}{
 		book.Title, book.Author, book.Publisher, book.Year,
-		book.UpdatedAt, book.ISBN, book.ID,
+		book.UpdatedAt, book.ISBN, book.Series, book.Language,
+		book.Pages, book.Summary, book.ID,
 	}
 
 	rows, err := bdr.Pool.Exec(ctx, sql, args...)
@@ -96,8 +104,8 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 	// Use limit and offset for pagination, because we don't have a lot of books
 	// (yes, it's not the best way to do pagination)
 	sql := fmt.Sprintf(`
-		SELECT 
-			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path
+		SELECT
+			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
 		FROM library_book
 		ORDER BY %s %s
 		LIMIT %d OFFSET %d
@@ -112,7 +120,7 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 	books := make([]entity.Book, 0)
 	for rows.Next() {
 		var book entity.Book
-		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath)
+		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &book.Language, &book.Pages, &book.Summary)
 		if err != nil {
 			return nil, fmt.Errorf("BookDatabaseRepo - List - rows.Scan: %w", err)
 		}
@@ -125,7 +133,7 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 // Get -. only select from database
 func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Book, error) {
 	sql := `
-		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path
+		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
 		FROM library_book
 		WHERE id = $1
 	`
@@ -133,8 +141,11 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 
 	row := bdr.Pool.QueryRow(ctx, sql, args...)
 	var book entity.Book
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath)
+	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &book.Language, &book.Pages, &book.Summary)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return entity.Book{}, entity.ErrNotFound
+		}
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - Get - r.Pool.QueryRow: %w", err)
 	}
 
@@ -144,7 +155,7 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 // GetByFileHash -. only select from database
 func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string) (entity.Book, error) {
 	sql := `
-		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path
+		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
 		FROM library_book
 		WHERE koreader_partial_md5 = $1
 	`
@@ -152,8 +163,11 @@ func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string)
 
 	row := bdr.Pool.QueryRow(ctx, sql, args...)
 	var book entity.Book
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath)
+	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &book.Language, &book.Pages, &book.Summary)
 	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return entity.Book{}, entity.ErrNotFound
+		}
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - GetByFileHash - r.Pool.QueryRow: %w", err)
 	}
 
