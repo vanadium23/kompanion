@@ -2,7 +2,9 @@ package opds
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -98,6 +100,12 @@ func (r *OPDSRouter) openSearchDescription(c *gin.Context) {
 func (r *OPDSRouter) searchBooks(c *gin.Context) {
 	searchTerms := c.Param("searchTerms")
 
+	// Validate that search terms are not empty
+	if strings.TrimSpace(searchTerms) == "" {
+		c.XML(http.StatusBadRequest, gin.H{"message": "Search terms cannot be empty", "code": 1002})
+		return
+	}
+
 	pageStr := c.Query("page")
 	page, err := strconv.Atoi(pageStr)
 	if err != nil {
@@ -111,7 +119,9 @@ func (r *OPDSRouter) searchBooks(c *gin.Context) {
 		return
 	}
 
-	baseUrl := "/opds/search/" + searchTerms + "/"
+	// URL encode search terms for proper pagination links
+	encodedSearchTerms := url.PathEscape(searchTerms)
+	baseUrl := "/opds/search/" + encodedSearchTerms + "/"
 	entries := translateBooksToEntries(books.Books)
 	navLinks := formNavLinks(baseUrl, books)
 	feed := BuildFeed("urn:kompanion:search", "KOmpanion library - Search: "+searchTerms, baseUrl, entries, navLinks)

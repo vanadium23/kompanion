@@ -11,6 +11,15 @@ import (
 	"github.com/vanadium23/kompanion/pkg/postgres"
 )
 
+// escapeLikeWildcards escapes SQL LIKE wildcard characters (% and _) in a query string
+func escapeLikeWildcards(query string) string {
+	// Escape backslash first, then % and _
+	query = strings.ReplaceAll(query, "\\", "\\\\")
+	query = strings.ReplaceAll(query, "%", "\\%")
+	query = strings.ReplaceAll(query, "_", "\\_")
+	return query
+}
+
 // BookDatabaseRepo -.
 type BookDatabaseRepo struct {
 	*postgres.Postgres
@@ -198,13 +207,15 @@ func (bdr *BookDatabaseRepo) Search(ctx context.Context, query string, page, per
 	}
 
 	// Use parameterized query with ILIKE for case-insensitive search
+	// Escape SQL wildcards to prevent wildcard injection attacks
 	// Search in title, author, series, and summary fields
-	searchPattern := "%" + query + "%"
+	escapedQuery := escapeLikeWildcards(query)
+	searchPattern := "%" + escapedQuery + "%"
 	sql := `
 		SELECT
 			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
 		FROM library_book
-		WHERE title ILIKE $1 OR author ILIKE $1 OR series ILIKE $1 OR summary ILIKE $1
+		WHERE title ILIKE $1 ESCAPE '\' OR author ILIKE $1 ESCAPE '\' OR series ILIKE $1 ESCAPE '\' OR summary ILIKE $1 ESCAPE '\'
 		ORDER BY created_at DESC
 		LIMIT $2 OFFSET $3
 	`
@@ -231,8 +242,10 @@ func (bdr *BookDatabaseRepo) Search(ctx context.Context, query string, page, per
 
 // CountSearch -. count search results for query
 func (bdr *BookDatabaseRepo) CountSearch(ctx context.Context, query string) (int, error) {
-	searchPattern := "%" + query + "%"
-	sql := `SELECT count(*) FROM library_book WHERE title ILIKE $1 OR author ILIKE $1 OR series ILIKE $1 OR summary ILIKE $1`
+	// Escape SQL wildcards to prevent wildcard injection attacks
+	escapedQuery := escapeLikeWildcards(query)
+	searchPattern := "%" + escapedQuery + "%"
+	sql := `SELECT count(*) FROM library_book WHERE title ILIKE $1 ESCAPE '\' OR author ILIKE $1 ESCAPE '\' OR series ILIKE $1 ESCAPE '\' OR summary ILIKE $1 ESCAPE '\'`
 
 	row := bdr.Pool.QueryRow(ctx, sql, searchPattern)
 	var count int
