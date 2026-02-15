@@ -106,7 +106,7 @@ func (r *OPDSRouter) getCover(c *gin.Context) {
 	stat, err := file.Stat()
 	if err != nil {
 		r.logger.Error("http - opds - getCover - file stat", err)
-		c.Data(http.StatusNotFound, "text/xml; charset=utf-8", []byte(`<?xml version="1.0" encoding="UTF-8"?><error><message>Cover not found</message></error>`))
+		c.Data(http.StatusNotFound, "text/xml; charset=utf-8", []byte(`<?xml version="1.0" encoding="UTF-8"?><error><message>Error reading cover</message></error>`))
 		return
 	}
 
