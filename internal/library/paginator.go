@@ -55,3 +55,57 @@ func (p PaginatedBookList) Prev() int {
 	}
 	return p.currentPage
 }
+
+type PaginatedSeriesList struct {
+	Series []string
+	// for pagination
+	totalCount  int
+	perPage     int
+	currentPage int
+}
+
+func NewPaginatedSeriesList(series []string, perPage, currentPage, totalCount int) PaginatedSeriesList {
+	return PaginatedSeriesList{
+		Series:      series,
+		perPage:     perPage,
+		currentPage: currentPage,
+		totalCount:  totalCount,
+	}
+}
+
+func (p PaginatedSeriesList) TotalPages() int {
+	if p.totalCount == 0 {
+		return 0
+	}
+	return (p.totalCount + p.perPage - 1) / p.perPage // Ceiling division
+}
+
+func (p PaginatedSeriesList) HasNext() bool {
+	return p.currentPage < p.TotalPages()
+}
+
+func (p PaginatedSeriesList) HasPrev() bool {
+	return p.currentPage > 1
+}
+
+func (p PaginatedSeriesList) First() int {
+	return 1
+}
+
+func (p PaginatedSeriesList) Last() int {
+	return p.TotalPages()
+}
+
+func (p PaginatedSeriesList) Next() int {
+	if p.HasNext() {
+		return p.currentPage + 1
+	}
+	return p.currentPage
+}
+
+func (p PaginatedSeriesList) Prev() int {
+	if p.HasPrev() {
+		return p.currentPage - 1
+	}
+	return p.currentPage
+}

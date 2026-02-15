@@ -3,6 +3,7 @@ package opds
 import (
 	"encoding/xml"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/vanadium23/kompanion/internal/entity"
@@ -181,6 +182,56 @@ func formNavLinks(baseURL string, books library.PaginatedBookList) []Link {
 	if books.HasPrev() {
 		links = append(links, Link{
 			Href: fmt.Sprintf("%s?page=%d", baseURL, books.Prev()),
+			Type: DirMime,
+			Rel:  "prev",
+		})
+	}
+	return links
+}
+
+func translateSeriesToEntries(series []string) []Entry {
+	entries := make([]Entry, 0, len(series))
+	for _, s := range series {
+		encodedName := url.PathEscape(s)
+		entry := Entry{
+			ID:      "urn:kompanion:series:" + s,
+			Updated: time.Now().UTC().Format(AtomTime),
+			Title:   s,
+			Link: []Link{
+				{
+					Href: "/opds/series/" + encodedName + "/",
+					Type: "application/atom+xml;type=feed;profile=opds-catalog",
+				},
+			},
+		}
+		entries = append(entries, entry)
+	}
+	return entries
+}
+
+func formSeriesNavLinks(baseURL string, series library.PaginatedSeriesList) []Link {
+	links := []Link{
+		{
+			Href: baseURL,
+			Type: DirMime,
+			Rel:  "start",
+		},
+		{
+			Href: fmt.Sprintf("%s?page=%d", baseURL, series.Last()),
+			Type: DirMime,
+			Rel:  "last",
+		},
+	}
+	if series.HasNext() {
+		links = append(links, Link{
+			Href: fmt.Sprintf("%s?page=%d", baseURL, series.Next()),
+			Type: DirMime,
+			Rel:  "next",
+		})
+	}
+	if series.HasPrev() {
+		links = append(links, Link{
+			Href: fmt.Sprintf("%s?page=%d", baseURL, series.Prev()),
 			Type: DirMime,
 			Rel:  "prev",
 		})

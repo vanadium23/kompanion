@@ -35,6 +35,8 @@ func NewRouter(
 		h.GET("/book/:bookID/cover", sh.getCover)
 		h.GET("/search.xml", sh.openSearchDescription)
 		h.GET("/search/:searchTerms/", sh.searchBooks)
+		h.GET("/series/", sh.listSeries)
+		h.GET("/series/:seriesName/", sh.listBooksBySeries)
 	}
 }
 
@@ -47,6 +49,17 @@ func (r *OPDSRouter) listShelves(c *gin.Context) {
 			Link: []Link{
 				{
 					Href: "/opds/newest/",
+					Type: "application/atom+xml;type=feed;profile=opds-catalog",
+				},
+			},
+		},
+		{
+			ID:      "urn:kompanion:series",
+			Updated: time.Now().UTC().Format(AtomTime),
+			Title:   "By Series",
+			Link: []Link{
+				{
+					Href: "/opds/series/",
 					Type: "application/atom+xml;type=feed;profile=opds-catalog",
 				},
 			},
@@ -140,6 +153,52 @@ func (r *OPDSRouter) searchBooks(c *gin.Context) {
 	entries := translateBooksToEntries(books.Books)
 	navLinks := formNavLinks(baseUrl, books)
 	feed := BuildFeed("urn:kompanion:search", "KOmpanion library - Search: "+searchTerms, baseUrl, entries, navLinks)
+	c.XML(http.StatusOK, feed)
+}
+
+func (r *OPDSRouter) listSeries(c *gin.Context) {
+	pageStr := c.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	series, err := r.books.ListSeries(c.Request.Context(), page, 10)
+	if err != nil {
+		r.logger.Error("failed to list series", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		return
+	}
+
+	baseUrl := "/opds/series/"
+	entries := translateSeriesToEntries(series.Series)
+	navLinks := formSeriesNavLinks(baseUrl, series)
+	feed := BuildFeed("urn:kompanion:series", "KOmpanion library - Series", baseUrl, entries, navLinks)
+	c.XML(http.StatusOK, feed)
+}
+
+func (r *OPDSRouter) listBooksBySeries(c *gin.Context) {
+	seriesName := c.Param("seriesName")
+
+	pageStr := c.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	books, err := r.books.ListBooksBySeries(c.Request.Context(), seriesName, page, 10)
+	if err != nil {
+		r.logger.Error("failed to list books by series", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		return
+	}
+
+	// URL encode series name for proper pagination links
+	encodedSeriesName := url.PathEscape(seriesName)
+	baseUrl := "/opds/series/" + encodedSeriesName + "/"
+	entries := translateBooksToEntries(books.Books)
+	navLinks := formNavLinks(baseUrl, books)
+	feed := BuildFeed("urn:kompanion:series:"+seriesName, "KOmpanion library - Series: "+seriesName, baseUrl, entries, navLinks)
 	c.XML(http.StatusOK, feed)
 }
 

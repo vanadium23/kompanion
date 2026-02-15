@@ -20,6 +20,8 @@ type (
 		DownloadBook(ctx context.Context, bookID string) (entity.Book, *os.File, error)
 		UpdateBookMetadata(ctx context.Context, bookID string, metadata entity.Book) (entity.Book, error)
 		ViewCover(ctx context.Context, bookID string) (*os.File, error)
+		ListSeries(ctx context.Context, page, perPage int) (PaginatedSeriesList, error)
+		ListBooksBySeries(ctx context.Context, series string, page, perPage int) (PaginatedBookList, error)
 	}
 
 	// BookRepo -.
@@ -35,5 +37,9 @@ type (
 		GetById(context.Context, string) (entity.Book, error)
 		GetByFileHash(context.Context, string) (entity.Book, error)
 		Update(context.Context, entity.Book) error
+		ListSeries(ctx context.Context, page, perPage int) ([]string, error)
+		CountSeries(ctx context.Context) (int, error)
+		ListBooksBySeries(ctx context.Context, series string, page, perPage int) ([]entity.Book, error)
+		CountBooksBySeries(ctx context.Context, series string) (int, error)
 	}
 )

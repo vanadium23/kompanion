@@ -256,3 +256,106 @@ func (bdr *BookDatabaseRepo) CountSearch(ctx context.Context, query string) (int
 
 	return count, nil
 }
+
+// ListSeries -. list all distinct non-empty series from database
+func (bdr *BookDatabaseRepo) ListSeries(ctx context.Context, page, perPage int) ([]string, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if perPage <= 0 || perPage > 100 {
+		perPage = 25
+	}
+
+	sql := `
+		SELECT DISTINCT series
+		FROM library_book
+		WHERE series IS NOT NULL AND series != ''
+		ORDER BY series ASC
+		LIMIT $1 OFFSET $2
+	`
+	args := []interface{}{perPage, (page - 1) * perPage}
+
+	rows, err := bdr.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("BookDatabaseRepo - ListSeries - r.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	series := make([]string, 0)
+	for rows.Next() {
+		var s string
+		err = rows.Scan(&s)
+		if err != nil {
+			return nil, fmt.Errorf("BookDatabaseRepo - ListSeries - rows.Scan: %w", err)
+		}
+		series = append(series, s)
+	}
+
+	return series, nil
+}
+
+// CountSeries -. count total number of distinct non-empty series
+func (bdr *BookDatabaseRepo) CountSeries(ctx context.Context) (int, error) {
+	sql := `SELECT count(DISTINCT series) FROM library_book WHERE series IS NOT NULL AND series != ''`
+
+	row := bdr.Pool.QueryRow(ctx, sql)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("BookDatabaseRepo - CountSeries - r.Pool.QueryRow: %w", err)
+	}
+
+	return count, nil
+}
+
+// ListBooksBySeries -. list books belonging to a specific series
+func (bdr *BookDatabaseRepo) ListBooksBySeries(ctx context.Context, series string, page, perPage int) ([]entity.Book, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if perPage <= 0 || perPage > 100 {
+		perPage = 25
+	}
+
+	sql := `
+		SELECT
+			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
+		FROM library_book
+		WHERE series = $1
+		ORDER BY title ASC
+		LIMIT $2 OFFSET $3
+	`
+	args := []interface{}{series, perPage, (page - 1) * perPage}
+
+	rows, err := bdr.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("BookDatabaseRepo - ListBooksBySeries - r.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	books := make([]entity.Book, 0)
+	for rows.Next() {
+		var book entity.Book
+		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &book.Language, &book.Pages, &book.Summary)
+		if err != nil {
+			return nil, fmt.Errorf("BookDatabaseRepo - ListBooksBySeries - rows.Scan: %w", err)
+		}
+		books = append(books, book)
+	}
+
+	return books, nil
+}
+
+// CountBooksBySeries -. count books in a specific series
+func (bdr *BookDatabaseRepo) CountBooksBySeries(ctx context.Context, series string) (int, error) {
+	sql := `SELECT count(*) FROM library_book WHERE series = $1`
+
+	row := bdr.Pool.QueryRow(ctx, sql, series)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("BookDatabaseRepo - CountBooksBySeries - r.Pool.QueryRow: %w", err)
+	}
+
+	return count, nil
+}

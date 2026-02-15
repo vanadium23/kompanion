@@ -201,6 +201,48 @@ func (uc *BookShelf) ViewCover(ctx context.Context, bookID string) (*os.File, er
 	return file, nil
 }
 
+func (uc *BookShelf) ListSeries(ctx context.Context, page, perPage int) (PaginatedSeriesList, error) {
+	series, err := uc.repo.ListSeries(ctx, page, perPage)
+	if err != nil {
+		return PaginatedSeriesList{}, fmt.Errorf("BookShelf - ListSeries - s.repo.ListSeries: %w", err)
+	}
+
+	totalCount, err := uc.repo.CountSeries(ctx)
+	if err != nil {
+		return PaginatedSeriesList{}, fmt.Errorf("BookShelf - ListSeries - s.repo.CountSeries: %w", err)
+	}
+
+	psl := NewPaginatedSeriesList(
+		series,
+		perPage,
+		page,
+		totalCount,
+	)
+
+	return psl, nil
+}
+
+func (uc *BookShelf) ListBooksBySeries(ctx context.Context, series string, page, perPage int) (PaginatedBookList, error) {
+	books, err := uc.repo.ListBooksBySeries(ctx, series, page, perPage)
+	if err != nil {
+		return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooksBySeries - s.repo.ListBooksBySeries: %w", err)
+	}
+
+	totalCount, err := uc.repo.CountBooksBySeries(ctx, series)
+	if err != nil {
+		return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooksBySeries - s.repo.CountBooksBySeries: %w", err)
+	}
+
+	pbl := NewPaginatedBookList(
+		books,
+		perPage,
+		page,
+		totalCount,
+	)
+
+	return pbl, nil
+}
+
 func writeCover(
 	ctx context.Context,
 	storage storage.Storage,
