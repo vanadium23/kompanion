@@ -10,11 +10,12 @@ import (
 )
 
 const (
-	AtomTime = "2006-01-02T15:04:05Z"
-	DirMime  = "application/atom+xml;profile=opds-catalog;kind=navigation"
-	DirRel   = "subsection"
-	FileRel  = "http://opds-spec.org/acquisition"
-	CoverRel = "http://opds-spec.org/cover"
+	AtomTime    = "2006-01-02T15:04:05Z"
+	DirMime     = "application/atom+xml;profile=opds-catalog;kind=navigation"
+	DirRel      = "subsection"
+	FileRel     = "http://opds-spec.org/acquisition"
+	CoverRel    = "http://opds-spec.org/cover"
+	ThumbnailRel = "http://opds-spec.org/thumbnail"
 )
 
 // OpenSearchDescription is the OpenSearch description document structure
@@ -113,6 +114,29 @@ func BuildOpenSearchDescription() *OpenSearchDescription {
 func translateBooksToEntries(books []entity.Book) []Entry {
 	entries := make([]Entry, 0, len(books))
 	for _, book := range books {
+		links := []Link{
+			{
+				Href: fmt.Sprintf("/opds/book/%s/download", book.ID),
+				Type: book.MimeType(),
+				Rel:  FileRel,
+				// Mtime: book.UpdatedAt.Format(AtomTime),
+			},
+		}
+		// Add cover and thumbnail links if book has a cover
+		if book.CoverPath != "" {
+			links = append(links,
+				Link{
+					Href: fmt.Sprintf("/opds/book/%s/cover", book.ID),
+					Type: "image/jpeg",
+					Rel:  ThumbnailRel,
+				},
+				Link{
+					Href: fmt.Sprintf("/opds/book/%s/cover", book.ID),
+					Type: "image/jpeg",
+					Rel:  CoverRel,
+				},
+			)
+		}
 		entry := Entry{
 			ID:      book.ID,
 			Updated: book.UpdatedAt.Format(AtomTime),
@@ -120,14 +144,7 @@ func translateBooksToEntries(books []entity.Book) []Entry {
 			Author: Author{
 				Name: book.Author,
 			},
-			Link: []Link{
-				{
-					Href: fmt.Sprintf("/opds/book/%s/download", book.ID),
-					Type: book.MimeType(),
-					Rel:  FileRel,
-					// Mtime: book.UpdatedAt.Format(AtomTime),
-				},
-			},
+			Link: links,
 		}
 		// Only include summary if it's not empty
 		if book.Summary != "" {

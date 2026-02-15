@@ -32,6 +32,7 @@ func NewRouter(
 		h.GET("/", sh.listShelves)
 		h.GET("/newest/", sh.listNewest)
 		h.GET("/book/:bookID/download", sh.downloadBook)
+		h.GET("/book/:bookID/cover", sh.getCover)
 		h.GET("/search.xml", sh.openSearchDescription)
 		h.GET("/search/:searchTerms/", sh.searchBooks)
 	}
@@ -88,6 +89,21 @@ func (r *OPDSRouter) downloadBook(c *gin.Context) {
 
 	c.Header("Content-Disposition", "attachment; filename="+book.Filename())
 	c.Header("Content-Type", "application/octet-stream")
+	c.File(file.Name())
+}
+
+func (r *OPDSRouter) getCover(c *gin.Context) {
+	bookID := c.Param("bookID")
+
+	file, err := r.books.ViewCover(c.Request.Context(), bookID)
+	if err != nil {
+		r.logger.Error(err, "http - opds - getCover")
+		c.Status(http.StatusNotFound)
+		return
+	}
+	defer file.Close()
+
+	c.Header("Content-Type", "image/jpeg")
 	c.File(file.Name())
 }
 
