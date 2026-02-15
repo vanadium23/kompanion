@@ -238,3 +238,53 @@ func formSeriesNavLinks(baseURL string, series library.PaginatedSeriesList) []Li
 	}
 	return links
 }
+
+func translateAuthorsToEntries(authors []string) []Entry {
+	entries := make([]Entry, 0, len(authors))
+	for _, a := range authors {
+		encodedName := url.PathEscape(a)
+		entry := Entry{
+			ID:      "urn:kompanion:author:" + a,
+			Updated: time.Now().UTC().Format(AtomTime),
+			Title:   a,
+			Link: []Link{
+				{
+					Href: "/opds/authors/" + encodedName + "/",
+					Type: "application/atom+xml;type=feed;profile=opds-catalog",
+				},
+			},
+		}
+		entries = append(entries, entry)
+	}
+	return entries
+}
+
+func formAuthorsNavLinks(baseURL string, authors library.PaginatedAuthorList) []Link {
+	links := []Link{
+		{
+			Href: baseURL,
+			Type: DirMime,
+			Rel:  "start",
+		},
+		{
+			Href: fmt.Sprintf("%s?page=%d", baseURL, authors.Last()),
+			Type: DirMime,
+			Rel:  "last",
+		},
+	}
+	if authors.HasNext() {
+		links = append(links, Link{
+			Href: fmt.Sprintf("%s?page=%d", baseURL, authors.Next()),
+			Type: DirMime,
+			Rel:  "next",
+		})
+	}
+	if authors.HasPrev() {
+		links = append(links, Link{
+			Href: fmt.Sprintf("%s?page=%d", baseURL, authors.Prev()),
+			Type: DirMime,
+			Rel:  "prev",
+		})
+	}
+	return links
+}

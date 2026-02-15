@@ -359,3 +359,106 @@ func (bdr *BookDatabaseRepo) CountBooksBySeries(ctx context.Context, series stri
 
 	return count, nil
 }
+
+// ListAuthors -. list all distinct non-empty authors from database
+func (bdr *BookDatabaseRepo) ListAuthors(ctx context.Context, page, perPage int) ([]string, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if perPage <= 0 || perPage > 100 {
+		perPage = 25
+	}
+
+	sql := `
+		SELECT DISTINCT author
+		FROM library_book
+		WHERE author IS NOT NULL AND author != ''
+		ORDER BY author ASC
+		LIMIT $1 OFFSET $2
+	`
+	args := []interface{}{perPage, (page - 1) * perPage}
+
+	rows, err := bdr.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("BookDatabaseRepo - ListAuthors - r.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	authors := make([]string, 0)
+	for rows.Next() {
+		var a string
+		err = rows.Scan(&a)
+		if err != nil {
+			return nil, fmt.Errorf("BookDatabaseRepo - ListAuthors - rows.Scan: %w", err)
+		}
+		authors = append(authors, a)
+	}
+
+	return authors, nil
+}
+
+// CountAuthors -. count total number of distinct non-empty authors
+func (bdr *BookDatabaseRepo) CountAuthors(ctx context.Context) (int, error) {
+	sql := `SELECT count(DISTINCT author) FROM library_book WHERE author IS NOT NULL AND author != ''`
+
+	row := bdr.Pool.QueryRow(ctx, sql)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("BookDatabaseRepo - CountAuthors - r.Pool.QueryRow: %w", err)
+	}
+
+	return count, nil
+}
+
+// ListBooksByAuthor -. list books by a specific author
+func (bdr *BookDatabaseRepo) ListBooksByAuthor(ctx context.Context, author string, page, perPage int) ([]entity.Book, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if perPage <= 0 || perPage > 100 {
+		perPage = 25
+	}
+
+	sql := `
+		SELECT
+			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
+		FROM library_book
+		WHERE author = $1
+		ORDER BY title ASC
+		LIMIT $2 OFFSET $3
+	`
+	args := []interface{}{author, perPage, (page - 1) * perPage}
+
+	rows, err := bdr.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("BookDatabaseRepo - ListBooksByAuthor - r.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	books := make([]entity.Book, 0)
+	for rows.Next() {
+		var book entity.Book
+		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &book.Language, &book.Pages, &book.Summary)
+		if err != nil {
+			return nil, fmt.Errorf("BookDatabaseRepo - ListBooksByAuthor - rows.Scan: %w", err)
+		}
+		books = append(books, book)
+	}
+
+	return books, nil
+}
+
+// CountBooksByAuthor -. count books by a specific author
+func (bdr *BookDatabaseRepo) CountBooksByAuthor(ctx context.Context, author string) (int, error) {
+	sql := `SELECT count(*) FROM library_book WHERE author = $1`
+
+	row := bdr.Pool.QueryRow(ctx, sql, author)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("BookDatabaseRepo - CountBooksByAuthor - r.Pool.QueryRow: %w", err)
+	}
+
+	return count, nil
+}

@@ -22,6 +22,8 @@ type (
 		ViewCover(ctx context.Context, bookID string) (*os.File, error)
 		ListSeries(ctx context.Context, page, perPage int) (PaginatedSeriesList, error)
 		ListBooksBySeries(ctx context.Context, series string, page, perPage int) (PaginatedBookList, error)
+		ListAuthors(ctx context.Context, page, perPage int) (PaginatedAuthorList, error)
+		ListBooksByAuthor(ctx context.Context, author string, page, perPage int) (PaginatedBookList, error)
 	}
 
 	// BookRepo -.
@@ -41,5 +43,9 @@ type (
 		CountSeries(ctx context.Context) (int, error)
 		ListBooksBySeries(ctx context.Context, series string, page, perPage int) ([]entity.Book, error)
 		CountBooksBySeries(ctx context.Context, series string) (int, error)
+		ListAuthors(ctx context.Context, page, perPage int) ([]string, error)
+		CountAuthors(ctx context.Context) (int, error)
+		ListBooksByAuthor(ctx context.Context, author string, page, perPage int) ([]entity.Book, error)
+		CountBooksByAuthor(ctx context.Context, author string) (int, error)
 	}
 )

@@ -441,6 +441,7 @@ func TestHTTPKompanionOPDS(t *testing.T) {
 		Send().Headers("Authorization").Add(basicAuth),
 		Expect().Status().Equal(http.StatusOK),
 		Expect().Body().String().Contains("/opds/newest"),
+		Expect().Body().String().Contains("/opds/authors/"),
 	)
 	// list newest books
 	Test(t,
@@ -449,6 +450,21 @@ func TestHTTPKompanionOPDS(t *testing.T) {
 		Send().Headers("Authorization").Add(basicAuth),
 		Expect().Status().Equal(http.StatusOK),
 		Expect().Body().String().Contains("/opds/newest"),
+	)
+	// list authors via OPDS
+	Test(t,
+		Description("Kompanion List Authors via OPDS"),
+		Get(basePath+"/opds/authors/"),
+		Send().Headers("Authorization").Add(basicAuth),
+		Expect().Status().Equal(http.StatusOK),
+		Expect().Body().String().Contains("/opds/authors/"),
+	)
+	// list books by author
+	Test(t,
+		Description("Kompanion List Books by Author via OPDS"),
+		Get(basePath+"/opds/authors/Andy%20Weir/"),
+		Send().Headers("Authorization").Add(basicAuth),
+		Expect().Status().Equal(http.StatusOK),
 	)
 	// download book
 	Test(t,

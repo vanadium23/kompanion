@@ -109,3 +109,57 @@ func (p PaginatedSeriesList) Prev() int {
 	}
 	return p.currentPage
 }
+
+type PaginatedAuthorList struct {
+	Authors []string
+	// for pagination
+	totalCount  int
+	perPage     int
+	currentPage int
+}
+
+func NewPaginatedAuthorList(authors []string, perPage, currentPage, totalCount int) PaginatedAuthorList {
+	return PaginatedAuthorList{
+		Authors:     authors,
+		perPage:     perPage,
+		currentPage: currentPage,
+		totalCount:  totalCount,
+	}
+}
+
+func (p PaginatedAuthorList) TotalPages() int {
+	if p.totalCount == 0 {
+		return 0
+	}
+	return (p.totalCount + p.perPage - 1) / p.perPage // Ceiling division
+}
+
+func (p PaginatedAuthorList) HasNext() bool {
+	return p.currentPage < p.TotalPages()
+}
+
+func (p PaginatedAuthorList) HasPrev() bool {
+	return p.currentPage > 1
+}
+
+func (p PaginatedAuthorList) First() int {
+	return 1
+}
+
+func (p PaginatedAuthorList) Last() int {
+	return p.TotalPages()
+}
+
+func (p PaginatedAuthorList) Next() int {
+	if p.HasNext() {
+		return p.currentPage + 1
+	}
+	return p.currentPage
+}
+
+func (p PaginatedAuthorList) Prev() int {
+	if p.HasPrev() {
+		return p.currentPage - 1
+	}
+	return p.currentPage
+}

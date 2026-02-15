@@ -37,6 +37,8 @@ func NewRouter(
 		h.GET("/search/:searchTerms/", sh.searchBooks)
 		h.GET("/series/", sh.listSeries)
 		h.GET("/series/:seriesName/", sh.listBooksBySeries)
+		h.GET("/authors/", sh.listAuthors)
+		h.GET("/authors/:authorName/", sh.listBooksByAuthor)
 	}
 }
 
@@ -60,6 +62,17 @@ func (r *OPDSRouter) listShelves(c *gin.Context) {
 			Link: []Link{
 				{
 					Href: "/opds/series/",
+					Type: "application/atom+xml;type=feed;profile=opds-catalog",
+				},
+			},
+		},
+		{
+			ID:      "urn:kompanion:authors",
+			Updated: time.Now().UTC().Format(AtomTime),
+			Title:   "By Author",
+			Link: []Link{
+				{
+					Href: "/opds/authors/",
 					Type: "application/atom+xml;type=feed;profile=opds-catalog",
 				},
 			},
@@ -199,6 +212,52 @@ func (r *OPDSRouter) listBooksBySeries(c *gin.Context) {
 	entries := translateBooksToEntries(books.Books)
 	navLinks := formNavLinks(baseUrl, books)
 	feed := BuildFeed("urn:kompanion:series:"+seriesName, "KOmpanion library - Series: "+seriesName, baseUrl, entries, navLinks)
+	c.XML(http.StatusOK, feed)
+}
+
+func (r *OPDSRouter) listAuthors(c *gin.Context) {
+	pageStr := c.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	authors, err := r.books.ListAuthors(c.Request.Context(), page, 10)
+	if err != nil {
+		r.logger.Error("failed to list authors", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		return
+	}
+
+	baseUrl := "/opds/authors/"
+	entries := translateAuthorsToEntries(authors.Authors)
+	navLinks := formAuthorsNavLinks(baseUrl, authors)
+	feed := BuildFeed("urn:kompanion:authors", "KOmpanion library - Authors", baseUrl, entries, navLinks)
+	c.XML(http.StatusOK, feed)
+}
+
+func (r *OPDSRouter) listBooksByAuthor(c *gin.Context) {
+	authorName := c.Param("authorName")
+
+	pageStr := c.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	books, err := r.books.ListBooksByAuthor(c.Request.Context(), authorName, page, 10)
+	if err != nil {
+		r.logger.Error("failed to list books by author", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		return
+	}
+
+	// URL encode author name for proper pagination links
+	encodedAuthorName := url.PathEscape(authorName)
+	baseUrl := "/opds/authors/" + encodedAuthorName + "/"
+	entries := translateBooksToEntries(books.Books)
+	navLinks := formNavLinks(baseUrl, books)
+	feed := BuildFeed("urn:kompanion:author:"+authorName, "KOmpanion library - Author: "+authorName, baseUrl, entries, navLinks)
 	c.XML(http.StatusOK, feed)
 }
 

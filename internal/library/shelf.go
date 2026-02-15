@@ -243,6 +243,48 @@ func (uc *BookShelf) ListBooksBySeries(ctx context.Context, series string, page,
 	return pbl, nil
 }
 
+func (uc *BookShelf) ListAuthors(ctx context.Context, page, perPage int) (PaginatedAuthorList, error) {
+	authors, err := uc.repo.ListAuthors(ctx, page, perPage)
+	if err != nil {
+		return PaginatedAuthorList{}, fmt.Errorf("BookShelf - ListAuthors - s.repo.ListAuthors: %w", err)
+	}
+
+	totalCount, err := uc.repo.CountAuthors(ctx)
+	if err != nil {
+		return PaginatedAuthorList{}, fmt.Errorf("BookShelf - ListAuthors - s.repo.CountAuthors: %w", err)
+	}
+
+	pal := NewPaginatedAuthorList(
+		authors,
+		perPage,
+		page,
+		totalCount,
+	)
+
+	return pal, nil
+}
+
+func (uc *BookShelf) ListBooksByAuthor(ctx context.Context, author string, page, perPage int) (PaginatedBookList, error) {
+	books, err := uc.repo.ListBooksByAuthor(ctx, author, page, perPage)
+	if err != nil {
+		return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooksByAuthor - s.repo.ListBooksByAuthor: %w", err)
+	}
+
+	totalCount, err := uc.repo.CountBooksByAuthor(ctx, author)
+	if err != nil {
+		return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooksByAuthor - s.repo.CountBooksByAuthor: %w", err)
+	}
+
+	pbl := NewPaginatedBookList(
+		books,
+		perPage,
+		page,
+		totalCount,
+	)
+
+	return pbl, nil
+}
+
 func writeCover(
 	ctx context.Context,
 	storage storage.Storage,
