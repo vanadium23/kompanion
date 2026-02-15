@@ -47,7 +47,7 @@ type Feed struct {
 type Link struct {
 	Href string `xml:"href,attr"`
 	Type string `xml:"type,attr"`
-	Rel  string `xml:"rel,attr,ommitempty"`
+	Rel  string `xml:"rel,attr,omitempty"`
 }
 
 // Entry is a struct of OPDS entry properties.
@@ -55,8 +55,8 @@ type Entry struct {
 	ID      string  `xml:"id"`
 	Updated string  `xml:"updated"`
 	Title   string  `xml:"title"`
-	Author  Author  `xml:"author,ommitempty"`
-	Summary Summary `xml:"summary,ommitempty"`
+	Author  Author  `xml:"author,omitempty"`
+	Summary Summary `xml:"summary,omitempty"`
 	Link    []Link  `xml:"link"`
 }
 
@@ -113,7 +113,7 @@ func BuildOpenSearchDescription() *OpenSearchDescription {
 func translateBooksToEntries(books []entity.Book) []Entry {
 	entries := make([]Entry, 0, len(books))
 	for _, book := range books {
-		entries = append(entries, Entry{
+		entry := Entry{
 			ID:      book.ID,
 			Updated: book.UpdatedAt.Format(AtomTime),
 			Title:   book.Title,
@@ -128,7 +128,15 @@ func translateBooksToEntries(books []entity.Book) []Entry {
 					// Mtime: book.UpdatedAt.Format(AtomTime),
 				},
 			},
-		})
+		}
+		// Only include summary if it's not empty
+		if book.Summary != "" {
+			entry.Summary = Summary{
+				Type: "text",
+				Text: book.Summary,
+			}
+		}
+		entries = append(entries, entry)
 	}
 	return entries
 }

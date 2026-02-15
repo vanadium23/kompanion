@@ -215,7 +215,7 @@ func (bdr *BookDatabaseRepo) Search(ctx context.Context, query string, page, per
 		SELECT
 			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
 		FROM library_book
-		WHERE title ILIKE $1 ESCAPE '\' OR author ILIKE $1 ESCAPE '\' OR series ILIKE $1 ESCAPE '\' OR summary ILIKE $1 ESCAPE '\'
+		WHERE title ILIKE $1 OR author ILIKE $1 OR series ILIKE $1 OR summary ILIKE $1
 		ORDER BY created_at DESC
 		LIMIT $2 OFFSET $3
 	`
@@ -245,7 +245,7 @@ func (bdr *BookDatabaseRepo) CountSearch(ctx context.Context, query string) (int
 	// Escape SQL wildcards to prevent wildcard injection attacks
 	escapedQuery := escapeLikeWildcards(query)
 	searchPattern := "%" + escapedQuery + "%"
-	sql := `SELECT count(*) FROM library_book WHERE title ILIKE $1 ESCAPE '\' OR author ILIKE $1 ESCAPE '\' OR series ILIKE $1 ESCAPE '\' OR summary ILIKE $1 ESCAPE '\'`
+	sql := `SELECT count(*) FROM library_book WHERE title ILIKE $1 OR author ILIKE $1 OR series ILIKE $1 OR summary ILIKE $1`
 
 	row := bdr.Pool.QueryRow(ctx, sql, searchPattern)
 	var count int
