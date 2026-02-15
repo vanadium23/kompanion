@@ -4,7 +4,6 @@ import (
 	"net/http"
 	"net/url"
 	"strconv"
-	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -99,12 +98,6 @@ func (r *OPDSRouter) openSearchDescription(c *gin.Context) {
 
 func (r *OPDSRouter) searchBooks(c *gin.Context) {
 	searchTerms := c.Param("searchTerms")
-
-	// Validate that search terms are not empty
-	if strings.TrimSpace(searchTerms) == "" {
-		c.XML(http.StatusBadRequest, gin.H{"message": "Search terms cannot be empty", "code": 1002})
-		return
-	}
 
 	pageStr := c.Query("page")
 	page, err := strconv.Atoi(pageStr)
