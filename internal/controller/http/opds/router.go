@@ -101,7 +101,7 @@ func (r *OPDSRouter) getCover(c *gin.Context) {
 		c.Data(http.StatusNotFound, "text/xml; charset=utf-8", []byte(`<?xml version="1.0" encoding="UTF-8"?><error><message>Cover not found</message></error>`))
 		return
 	}
-	defer file.Close()
+	defer file.Close() // Ensure file is closed on all return paths
 
 	stat, err := file.Stat()
 	if err != nil {
