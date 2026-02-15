@@ -36,13 +36,14 @@ type OpenSearchURL struct {
 
 // Feed is a main frame of OPDS.
 type Feed struct {
-	XMLName xml.Name `xml:"feed"`
-	ID      string   `xml:"id"`
-	Title   string   `xml:"title"`
-	Xmlns   string   `xml:"xmlns,attr"`
-	Updated string   `xml:"updated"`
-	Link    []Link   `xml:"link"`
-	Entry   []Entry  `xml:"entry"`
+	XMLName  xml.Name `xml:"feed"`
+	ID       string   `xml:"id"`
+	Title    string   `xml:"title"`
+	Xmlns    string   `xml:"xmlns,attr"`
+	XMLnsDc  string   `xml:"xmlns:dcterms,attr"`
+	Updated  string   `xml:"updated"`
+	Link     []Link   `xml:"link"`
+	Entry    []Entry  `xml:"entry"`
 }
 
 // Link is link properties.
@@ -54,12 +55,15 @@ type Link struct {
 
 // Entry is a struct of OPDS entry properties.
 type Entry struct {
-	ID      string  `xml:"id"`
-	Updated string  `xml:"updated"`
-	Title   string  `xml:"title"`
-	Author  Author  `xml:"author,omitempty"`
-	Summary Summary `xml:"summary,omitempty"`
-	Link    []Link  `xml:"link"`
+	ID           string  `xml:"id"`
+	Updated      string  `xml:"updated"`
+	Title        string  `xml:"title"`
+	Author       Author  `xml:"author,omitempty"`
+	Summary      Summary `xml:"summary,omitempty"`
+	Publisher    string  `xml:"dcterms:publisher,omitempty"`
+	Issued       string  `xml:"dcterms:issued,omitempty"`
+	Language     string  `xml:"dcterms:language,omitempty"`
+	Link         []Link  `xml:"link"`
 }
 
 type Author struct {
@@ -94,6 +98,7 @@ func BuildFeed(id, title, href string, entries []Entry, additionalLinks []Link) 
 		ID:      id,
 		Title:   title,
 		Xmlns:   "http://www.w3.org/2005/Atom",
+		XMLnsDc: "http://purl.org/dc/terms/",
 		Updated: time.Now().UTC().Format(AtomTime),
 		Link:    finalLinks,
 		Entry:   entries,
@@ -153,6 +158,16 @@ func translateBooksToEntries(books []entity.Book) []Entry {
 				Type: "text",
 				Text: book.Summary,
 			}
+		}
+		// Add dcterms metadata
+		if book.Publisher != "" {
+			entry.Publisher = book.Publisher
+		}
+		if book.Year > 0 {
+			entry.Issued = fmt.Sprintf("%d", book.Year)
+		}
+		if book.Language != "" {
+			entry.Language = book.Language
 		}
 		entries = append(entries, entry)
 	}

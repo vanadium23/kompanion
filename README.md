@@ -75,6 +75,31 @@ Go to following plugins:
     2. Hit plus
     3. Catalog URL: `https://your-kompanion.org/opds/`, username - device name, password - password
 
+### OPDS Endpoints
+
+KOmpanion provides a complete OPDS 1.2 catalog for browsing and downloading books:
+
+| Endpoint | Description |
+|----------|-------------|
+| `/opds/` | Root navigation feed |
+| `/opds/newest/` | Books sorted by newest first (paginated) |
+| `/opds/authors/` | Browse by author |
+| `/opds/authors/{author}/` | Books by specific author |
+| `/opds/series/` | Browse by series |
+| `/opds/series/{series}/` | Books in specific series |
+| `/opds/search/{query}/` | Search books by title/author |
+| `/opds/search.xml` | OpenSearch description document |
+| `/opds/book/{id}/download` | Download book file |
+| `/opds/book/{id}/cover` | Get book cover thumbnail |
+
+All OPDS endpoints require HTTP Basic Authentication (device name and password).
+
+Book entries include Dublin Core metadata:
+- `dcterms:publisher` - Publisher name
+- `dcterms:issued` - Publication year
+- `dcterms:language` - Book language
+- `atom:summary` - Book description/summary
+
 ## Development
 
 Project was started with [go-clean-template](https://github.com/evrone/go-clean-template), but then heavily modified.

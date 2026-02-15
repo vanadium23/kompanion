@@ -1,13 +1,17 @@
 package opds
 
 import (
+	"encoding/xml"
+	"errors"
 	"net/http"
 	"net/url"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/jackc/pgx/v5"
 	"github.com/vanadium23/kompanion/internal/auth"
+	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/sync"
 	"github.com/vanadium23/kompanion/pkg/logger"
@@ -16,6 +20,15 @@ import (
 type OPDSRouter struct {
 	books  library.Shelf
 	logger logger.Interface
+}
+
+// opdsError sends an XML error response for OPDS clients
+func opdsError(c *gin.Context, status int, code int, message string) {
+	c.XML(status, gin.H{
+		"XMLName": xml.Name{Local: "error"},
+		"Code":    code,
+		"Message": message,
+	})
 }
 
 func NewRouter(
@@ -92,7 +105,7 @@ func (r *OPDSRouter) listNewest(c *gin.Context) {
 	books, err := r.books.ListBooks(c.Request.Context(), "created_at", "desc", page, 10)
 	if err != nil {
 		r.logger.Error("failed to list newest books", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 	baseUrl := "/opds/newest/"
@@ -107,8 +120,13 @@ func (r *OPDSRouter) downloadBook(c *gin.Context) {
 
 	book, file, err := r.books.DownloadBook(c.Request.Context(), bookID)
 	if err != nil {
-		r.logger.Error(err, "http - v1 - shelf - downloadBook")
-		c.JSON(500, gin.H{"message": "internal server error"})
+		if errors.Is(err, entity.ErrNotFound) || errors.Is(err, pgx.ErrNoRows) {
+			r.logger.Error(err, "http - opds - downloadBook - not found")
+			opdsError(c, http.StatusNotFound, 404, "Book not found")
+			return
+		}
+		r.logger.Error(err, "http - opds - downloadBook")
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 	defer file.Close()
@@ -123,8 +141,13 @@ func (r *OPDSRouter) getCover(c *gin.Context) {
 
 	file, err := r.books.ViewCover(c.Request.Context(), bookID)
 	if err != nil {
+		if errors.Is(err, entity.ErrNotFound) || errors.Is(err, pgx.ErrNoRows) {
+			r.logger.Error("http - opds - getCover - not found", err)
+			opdsError(c, http.StatusNotFound, 404, "Cover not found")
+			return
+		}
 		r.logger.Error("http - opds - getCover", err)
-		c.Data(http.StatusNotFound, "text/xml; charset=utf-8", []byte(`<?xml version="1.0" encoding="UTF-8"?><error><message>Cover not found</message></error>`))
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 	defer file.Close() // Ensure file is closed on all return paths
@@ -132,7 +155,7 @@ func (r *OPDSRouter) getCover(c *gin.Context) {
 	stat, err := file.Stat()
 	if err != nil {
 		r.logger.Error("http - opds - getCover - file stat", err)
-		c.Data(http.StatusNotFound, "text/xml; charset=utf-8", []byte(`<?xml version="1.0" encoding="UTF-8"?><error><message>Error reading cover</message></error>`))
+		opdsError(c, http.StatusServiceUnavailable, 503, "Error reading cover file")
 		return
 	}
 
@@ -156,7 +179,7 @@ func (r *OPDSRouter) searchBooks(c *gin.Context) {
 	books, err := r.books.SearchBooks(c.Request.Context(), searchTerms, page, 10)
 	if err != nil {
 		r.logger.Error("failed to search books", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 
@@ -179,7 +202,7 @@ func (r *OPDSRouter) listSeries(c *gin.Context) {
 	series, err := r.books.ListSeries(c.Request.Context(), page, 10)
 	if err != nil {
 		r.logger.Error("failed to list series", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 
@@ -202,7 +225,7 @@ func (r *OPDSRouter) listBooksBySeries(c *gin.Context) {
 	books, err := r.books.ListBooksBySeries(c.Request.Context(), seriesName, page, 10)
 	if err != nil {
 		r.logger.Error("failed to list books by series", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 
@@ -225,7 +248,7 @@ func (r *OPDSRouter) listAuthors(c *gin.Context) {
 	authors, err := r.books.ListAuthors(c.Request.Context(), page, 10)
 	if err != nil {
 		r.logger.Error("failed to list authors", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 
@@ -248,7 +271,7 @@ func (r *OPDSRouter) listBooksByAuthor(c *gin.Context) {
 	books, err := r.books.ListBooksByAuthor(c.Request.Context(), authorName, page, 10)
 	if err != nil {
 		r.logger.Error("failed to list books by author", err)
-		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		opdsError(c, http.StatusServiceUnavailable, 503, "Service unavailable")
 		return
 	}
 
