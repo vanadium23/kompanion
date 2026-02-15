@@ -156,11 +156,11 @@ func (uc *BookShelf) UpdateBookMetadata(ctx context.Context, bookID string, meta
 func (uc *BookShelf) DownloadBook(ctx context.Context, bookID string) (entity.Book, *os.File, error) {
 	book, err := uc.repo.GetById(ctx, bookID)
 	if err != nil {
-		return book, nil, fmt.Errorf("BookShelf - DownloadBook - s.repo.Get: %s", err)
+		return book, nil, fmt.Errorf("BookShelf - DownloadBook - s.repo.Get: %w", err)
 	}
 	file, err := uc.storage.Read(ctx, book.FilePath)
 	if err != nil {
-		return book, nil, fmt.Errorf("BookShelf - DownloadBook - s.storage.Read: %s", err)
+		return book, nil, fmt.Errorf("BookShelf - DownloadBook - s.storage.Read: %w", err)
 	}
 	return book, file, nil
 }
@@ -168,14 +168,14 @@ func (uc *BookShelf) DownloadBook(ctx context.Context, bookID string) (entity.Bo
 func (uc *BookShelf) ViewCover(ctx context.Context, bookID string) (*os.File, error) {
 	book, err := uc.repo.GetById(ctx, bookID)
 	if err != nil {
-		return nil, fmt.Errorf("BookShelf - ViewCover - s.repo.Get: %s", err)
+		return nil, fmt.Errorf("BookShelf - ViewCover - s.repo.Get: %w", err)
 	}
 	if book.CoverPath == "" {
 		return nil, fmt.Errorf("BookShelf - ViewCover - no cover")
 	}
 	file, err := uc.storage.Read(ctx, book.CoverPath)
 	if err != nil {
-		return nil, fmt.Errorf("BookShelf - ViewCover - s.storage.Read: %s", err)
+		return nil, fmt.Errorf("BookShelf - ViewCover - s.storage.Read: %w", err)
 	}
 	return file, nil
 }

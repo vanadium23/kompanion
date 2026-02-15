@@ -72,7 +72,7 @@ func (bdr *BookDatabaseRepo) Update(ctx context.Context, book entity.Book) error
 		return fmt.Errorf("BookDatabaseRepo - Update - r.Pool.Exec: %w", err)
 	}
 	if rows.RowsAffected() == 0 {
-		return fmt.Errorf("BookDatabaseRepo - Update - no rows affected")
+		return entity.ErrNotFound
 	}
 	return nil
 }
