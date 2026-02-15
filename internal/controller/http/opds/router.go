@@ -98,7 +98,7 @@ func (r *OPDSRouter) getCover(c *gin.Context) {
 	file, err := r.books.ViewCover(c.Request.Context(), bookID)
 	if err != nil {
 		r.logger.Error(err, "http - opds - getCover")
-		c.Status(http.StatusNotFound)
+		c.XML(http.StatusNotFound, gin.H{"message": "Cover not found"})
 		return
 	}
 	defer file.Close()
