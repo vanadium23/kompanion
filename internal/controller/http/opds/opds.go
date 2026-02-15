@@ -17,6 +17,21 @@ const (
 	CoverRel = "http://opds-spec.org/cover"
 )
 
+// OpenSearchDescription is the OpenSearch description document structure
+type OpenSearchDescription struct {
+	XMLName     xml.Name `xml:"OpenSearchDescription"`
+	Xmlns       string   `xml:"xmlns,attr"`
+	ShortName   string   `xml:"ShortName"`
+	Description string   `xml:"Description"`
+	URL         OpenSearchURL `xml:"Url"`
+}
+
+// OpenSearchURL is the URL element in OpenSearch description
+type OpenSearchURL struct {
+	Type     string `xml:"type,attr"`
+	Template string `xml:"template,attr"`
+}
+
 // Feed is a main frame of OPDS.
 type Feed struct {
 	XMLName xml.Name `xml:"feed"`
@@ -80,6 +95,18 @@ func BuildFeed(id, title, href string, entries []Entry, additionalLinks []Link) 
 		Updated: time.Now().UTC().Format(AtomTime),
 		Link:    finalLinks,
 		Entry:   entries,
+	}
+}
+
+func BuildOpenSearchDescription() *OpenSearchDescription {
+	return &OpenSearchDescription{
+		Xmlns:       "http://a9.com/-/spec/opensearch/1.1/",
+		ShortName:   "KOmpanion",
+		Description: "Search KOmpanion library",
+		URL: OpenSearchURL{
+			Type:     "application/atom+xml",
+			Template: "/opds/search/{searchTerms}/",
+		},
 	}
 }
 

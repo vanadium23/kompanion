@@ -15,6 +15,7 @@ type (
 			sortBy, sortOrder string,
 			page, perPage int,
 		) (PaginatedBookList, error)
+		SearchBooks(ctx context.Context, query string, page, perPage int) (PaginatedBookList, error)
 		ViewBook(ctx context.Context, bookID string) (entity.Book, error)
 		DownloadBook(ctx context.Context, bookID string) (entity.Book, *os.File, error)
 		UpdateBookMetadata(ctx context.Context, bookID string, metadata entity.Book) (entity.Book, error)
@@ -28,7 +29,9 @@ type (
 			sortBy, sortOrder string,
 			page, perPage int,
 		) ([]entity.Book, error)
+		Search(ctx context.Context, query string, page, perPage int) ([]entity.Book, error)
 		Count(ctx context.Context) (int, error)
+		CountSearch(ctx context.Context, query string) (int, error)
 		GetById(context.Context, string) (entity.Book, error)
 		GetByFileHash(context.Context, string) (entity.Book, error)
 		Update(context.Context, entity.Book) error

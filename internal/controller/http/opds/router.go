@@ -31,7 +31,8 @@ func NewRouter(
 		h.GET("/", sh.listShelves)
 		h.GET("/newest/", sh.listNewest)
 		h.GET("/book/:bookID/download", sh.downloadBook)
-		// TODO: search
+		h.GET("/search.xml", sh.openSearchDescription)
+		h.GET("/search/:searchTerms/", sh.searchBooks)
 	}
 }
 
@@ -87,6 +88,34 @@ func (r *OPDSRouter) downloadBook(c *gin.Context) {
 	c.Header("Content-Disposition", "attachment; filename="+book.Filename())
 	c.Header("Content-Type", "application/octet-stream")
 	c.File(file.Name())
+}
+
+func (r *OPDSRouter) openSearchDescription(c *gin.Context) {
+	c.Header("Content-Type", "application/opensearchdescription+xml")
+	c.XML(http.StatusOK, BuildOpenSearchDescription())
+}
+
+func (r *OPDSRouter) searchBooks(c *gin.Context) {
+	searchTerms := c.Param("searchTerms")
+
+	pageStr := c.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	books, err := r.books.SearchBooks(c.Request.Context(), searchTerms, page, 10)
+	if err != nil {
+		r.logger.Error("failed to search books", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		return
+	}
+
+	baseUrl := "/opds/search/" + searchTerms + "/"
+	entries := translateBooksToEntries(books.Books)
+	navLinks := formNavLinks(baseUrl, books)
+	feed := BuildFeed("urn:kompanion:search", "KOmpanion library - Search: "+searchTerms, baseUrl, entries, navLinks)
+	c.XML(http.StatusOK, feed)
 }
 
 func basicAuth(auth auth.AuthInterface) gin.HandlerFunc {

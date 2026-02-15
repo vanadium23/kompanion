@@ -116,6 +116,27 @@ func (uc *BookShelf) ListBooks(ctx context.Context,
 	return pbl, nil
 }
 
+func (uc *BookShelf) SearchBooks(ctx context.Context, query string, page, perPage int) (PaginatedBookList, error) {
+	books, err := uc.repo.Search(ctx, query, page, perPage)
+	if err != nil {
+		return PaginatedBookList{}, fmt.Errorf("BookShelf - SearchBooks - s.repo.Search: %w", err)
+	}
+
+	totalCount, err := uc.repo.CountSearch(ctx, query)
+	if err != nil {
+		return PaginatedBookList{}, fmt.Errorf("BookShelf - SearchBooks - s.repo.CountSearch: %w", err)
+	}
+
+	pbl := NewPaginatedBookList(
+		books,
+		perPage,
+		page,
+		totalCount,
+	)
+
+	return pbl, nil
+}
+
 func (uc *BookShelf) ViewBook(ctx context.Context, bookID string) (entity.Book, error) {
 	book, err := uc.repo.GetById(ctx, bookID)
 	if err != nil {

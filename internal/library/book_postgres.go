@@ -187,3 +187,59 @@ func (bdr *BookDatabaseRepo) Count(ctx context.Context) (int, error) {
 
 	return count, nil
 }
+
+// Search -. search books by query in title and author fields
+func (bdr *BookDatabaseRepo) Search(ctx context.Context, query string, page, perPage int) ([]entity.Book, error) {
+	if page <= 0 {
+		page = 1
+	}
+	if perPage <= 0 || perPage > 100 {
+		perPage = 25
+	}
+
+	// Use parameterized query with ILIKE for case-insensitive search
+	// Search in title, author, series, and summary fields
+	searchPattern := "%" + query + "%"
+	sql := `
+		SELECT
+			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, language, pages, summary
+		FROM library_book
+		WHERE title ILIKE $1 OR author ILIKE $1 OR series ILIKE $1 OR summary ILIKE $1
+		ORDER BY created_at DESC
+		LIMIT $2 OFFSET $3
+	`
+	args := []interface{}{searchPattern, perPage, (page - 1) * perPage}
+
+	rows, err := bdr.Pool.Query(ctx, sql, args...)
+	if err != nil {
+		return nil, fmt.Errorf("BookDatabaseRepo - Search - r.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	books := make([]entity.Book, 0)
+	for rows.Next() {
+		var book entity.Book
+		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &book.Language, &book.Pages, &book.Summary)
+		if err != nil {
+			return nil, fmt.Errorf("BookDatabaseRepo - Search - rows.Scan: %w", err)
+		}
+		books = append(books, book)
+	}
+
+	return books, nil
+}
+
+// CountSearch -. count search results for query
+func (bdr *BookDatabaseRepo) CountSearch(ctx context.Context, query string) (int, error) {
+	searchPattern := "%" + query + "%"
+	sql := `SELECT count(*) FROM library_book WHERE title ILIKE $1 OR author ILIKE $1 OR series ILIKE $1 OR summary ILIKE $1`
+
+	row := bdr.Pool.QueryRow(ctx, sql, searchPattern)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("BookDatabaseRepo - CountSearch - r.Pool.QueryRow: %w", err)
+	}
+
+	return count, nil
+}
