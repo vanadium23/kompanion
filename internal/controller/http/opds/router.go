@@ -97,14 +97,20 @@ func (r *OPDSRouter) getCover(c *gin.Context) {
 
 	file, err := r.books.ViewCover(c.Request.Context(), bookID)
 	if err != nil {
-		r.logger.Error(err, "http - opds - getCover")
-		c.XML(http.StatusNotFound, gin.H{"message": "Cover not found"})
+		r.logger.Error("http - opds - getCover", err)
+		c.Data(http.StatusNotFound, "text/xml; charset=utf-8", []byte(`<?xml version="1.0" encoding="UTF-8"?><error><message>Cover not found</message></error>`))
 		return
 	}
 	defer file.Close()
 
-	c.Header("Content-Type", "image/jpeg")
-	c.File(file.Name())
+	stat, err := file.Stat()
+	if err != nil {
+		r.logger.Error("http - opds - getCover - file stat", err)
+		c.Data(http.StatusNotFound, "text/xml; charset=utf-8", []byte(`<?xml version="1.0" encoding="UTF-8"?><error><message>Cover not found</message></error>`))
+		return
+	}
+
+	c.DataFromReader(http.StatusOK, stat.Size(), "image/jpeg", file, nil)
 }
 
 func (r *OPDSRouter) openSearchDescription(c *gin.Context) {
