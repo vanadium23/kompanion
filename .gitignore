@@ -30,3 +30,12 @@ bin/
 release/
 
 docker-compose-local.yml
+
+# Flow-Next
+.flow/
+
+# Ralph autonomous harness
+scripts/ralph/
+
+# Quint FPF
+.quint/
