@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/moroz/uuidv7-go"
@@ -76,6 +77,14 @@ func (uc *BookShelf) StoreBook(ctx context.Context, tempFile *os.File, uploadedF
 		FilePath:   storagepath,
 		Format:     m.Format,
 		CoverPath:  coverPath,
+		Series:     m.Series,
+	}
+
+	// Convert SeriesIndex from string to *float64
+	if m.SeriesIndex != "" {
+		if index, err := strconv.ParseFloat(m.SeriesIndex, 64); err == nil {
+			book.SeriesIndex = &index
+		}
 	}
 
 	// place in database
@@ -128,13 +137,20 @@ func (uc *BookShelf) UpdateBookMetadata(ctx context.Context, bookID string, meta
 	}
 
 	updatedBook := entity.Book{
-		ID:        book.ID,
-		Title:     utils.If(metadata.Title == "", book.Title, metadata.Title),
-		Author:    utils.If(metadata.Author == "", book.Author, metadata.Author),
-		Publisher: utils.If(metadata.Publisher == "", book.Publisher, metadata.Publisher),
-		Year:      utils.If(metadata.Year == 0, book.Year, metadata.Year),
-		ISBN:      utils.If(metadata.ISBN == "", book.ISBN, metadata.ISBN),
-		UpdatedAt: time.Now(),
+		ID:         book.ID,
+		Title:      utils.If(metadata.Title == "", book.Title, metadata.Title),
+		Author:     utils.If(metadata.Author == "", book.Author, metadata.Author),
+		Publisher:  utils.If(metadata.Publisher == "", book.Publisher, metadata.Publisher),
+		Year:       utils.If(metadata.Year == 0, book.Year, metadata.Year),
+		ISBN:       utils.If(metadata.ISBN == "", book.ISBN, metadata.ISBN),
+		Series:     utils.If(metadata.Series == "", book.Series, metadata.Series),
+		SeriesIndex: metadata.SeriesIndex,
+		UpdatedAt:  time.Now(),
+	}
+
+	// If SeriesIndex is not provided in update, keep existing
+	if metadata.SeriesIndex == nil {
+		updatedBook.SeriesIndex = book.SeriesIndex
 	}
 
 	err = uc.repo.Update(ctx, updatedBook)
