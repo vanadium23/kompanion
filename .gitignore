@@ -30,3 +30,9 @@ bin/
 release/
 
 docker-compose-local.yml
+
+# Flow-Next (task tracking)
+.flow/
+
+# Ralph (autonomous agent harness)
+scripts/ralph/
