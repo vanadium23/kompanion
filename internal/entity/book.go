@@ -11,10 +11,12 @@ var ErrBookAlreadyExists = errors.New("Book already exists")
 // Book represents a book entity in the database.
 type Book struct {
 	ID         string    // unique identifier for the book
-	Title      string    `form:"title"`     // title of the book
-	Author     string    `form:"author"`    // author of the book
-	Publisher  string    `form:"publisher"` // publisher of the book
-	Year       int       `form:"year"`      // year of publication
+	Title      string    `form:"title"`        // title of the book
+	Author     string    `form:"author"`       // author of the book
+	Publisher  string    `form:"publisher"`    // publisher of the book
+	Year       int       `form:"year"`         // year of publication
+	Series     string    `form:"series"`       // series the book belongs to
+	SeriesIndex *float64 `form:"series_index"` // position in the series (nullable)
 	CreatedAt  time.Time // timestamp of when the book was created
 	UpdatedAt  time.Time // timestamp of when the book was last updated
 	ISBN       string    // ISBN of the book
