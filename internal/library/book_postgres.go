@@ -2,10 +2,10 @@ package library
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"strings"
 
+	"github.com/shopspring/decimal"
 	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/pkg/postgres"
 )
@@ -115,13 +115,13 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 	books := make([]entity.Book, 0)
 	for rows.Next() {
 		var book entity.Book
-		var seriesIndex sql.NullFloat64
+		var seriesIndex decimal.NullDecimal
 		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
 		if err != nil {
 			return nil, fmt.Errorf("BookDatabaseRepo - List - rows.Scan: %w", err)
 		}
 		if seriesIndex.Valid {
-			book.SeriesIndex = &seriesIndex.Float64
+			book.SeriesIndex = &seriesIndex
 		}
 		books = append(books, book)
 	}
@@ -140,13 +140,13 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 
 	row := bdr.Pool.QueryRow(ctx, query, args...)
 	var book entity.Book
-	var seriesIndex sql.NullFloat64
+	var seriesIndex decimal.NullDecimal
 	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - Get - r.Pool.QueryRow: %w", err)
 	}
 	if seriesIndex.Valid {
-		book.SeriesIndex = &seriesIndex.Float64
+		book.SeriesIndex = &seriesIndex
 	}
 
 	return book, nil
@@ -163,13 +163,13 @@ func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string)
 
 	row := bdr.Pool.QueryRow(ctx, query, args...)
 	var book entity.Book
-	var seriesIndex sql.NullFloat64
+	var seriesIndex decimal.NullDecimal
 	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - GetByFileHash - r.Pool.QueryRow: %w", err)
 	}
 	if seriesIndex.Valid {
-		book.SeriesIndex = &seriesIndex.Float64
+		book.SeriesIndex = &seriesIndex
 	}
 
 	return book, nil

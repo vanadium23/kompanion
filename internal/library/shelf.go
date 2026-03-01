@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
-	"strconv"
 	"time"
 
 	"github.com/moroz/uuidv7-go"
+	"github.com/shopspring/decimal"
 
 	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/internal/storage"
@@ -80,10 +80,11 @@ func (uc *BookShelf) StoreBook(ctx context.Context, tempFile *os.File, uploadedF
 		Series:     m.Series,
 	}
 
-	// Convert SeriesIndex from string to *float64
+	// Convert SeriesIndex from string to *decimal.NullDecimal
 	if m.SeriesIndex != "" {
-		if index, err := strconv.ParseFloat(m.SeriesIndex, 64); err == nil {
-			book.SeriesIndex = &index
+		if d, err := decimal.NewFromString(m.SeriesIndex); err == nil {
+			seriesIndex := decimal.NewNullDecimal(d)
+			book.SeriesIndex = &seriesIndex
 		}
 	}
 
