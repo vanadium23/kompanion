@@ -93,6 +93,10 @@ func translateBooksToEntries(books []entity.Book) []Entry {
 			Author: Author{
 				Name: book.Author,
 			},
+			Summary: Summary{
+				Type: "text",
+				Text: truncateText(book.Description, 300),
+			},
 			Link: []Link{
 				{
 					Href: fmt.Sprintf("/opds/book/%s/download", book.ID),
@@ -104,6 +108,16 @@ func translateBooksToEntries(books []entity.Book) []Entry {
 		})
 	}
 	return entries
+}
+
+func truncateText(text string, maxLen int) string {
+	if len(text) <= maxLen {
+		return text
+	}
+	if maxLen <= 3 {
+		return text[:maxLen]
+	}
+	return text[:maxLen-3] + "..."
 }
 
 func formNavLinks(baseURL string, books library.PaginatedBookList) []Link {
