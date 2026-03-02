@@ -2,6 +2,7 @@ package library
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"strings"
 
@@ -23,13 +24,13 @@ func NewBookDatabaseRepo(pg *postgres.Postgres) *BookDatabaseRepo {
 // Store -. only insert in database
 func (bdr *BookDatabaseRepo) Store(ctx context.Context, book entity.Book) error {
 	query := `
-		INSERT INTO library_book (id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
+		INSERT INTO library_book (id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index, summary)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14)
 	`
 	args := []interface{}{
 		book.ID, book.Title, book.Author, book.Publisher, book.Year,
 		book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath,
-		book.DocumentID, book.CoverPath, book.Series, book.SeriesIndex,
+		book.DocumentID, book.CoverPath, book.Series, book.SeriesIndex, book.Description,
 	}
 
 	_, err := bdr.Pool.Exec(ctx, query, args...)
@@ -54,12 +55,13 @@ func (bdr *BookDatabaseRepo) Update(ctx context.Context, book entity.Book) error
 			updated_at = $5,
 			isbn = $6,
 			series = $7,
-			series_index = $8
-		WHERE id = $9
+			series_index = $8,
+			summary = $9
+		WHERE id = $10
 	`
 	args := []interface{}{
 		book.Title, book.Author, book.Publisher, book.Year,
-		book.UpdatedAt, book.ISBN, book.Series, book.SeriesIndex, book.ID,
+		book.UpdatedAt, book.ISBN, book.Series, book.SeriesIndex, book.Description, book.ID,
 	}
 
 	rows, err := bdr.Pool.Exec(ctx, query, args...)
@@ -100,7 +102,7 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 	// (yes, it's not the best way to do pagination)
 	query := fmt.Sprintf(`
 		SELECT
-			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index
+			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index, summary
 		FROM library_book
 		ORDER BY %s %s
 		LIMIT %d OFFSET %d
@@ -116,12 +118,16 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 	for rows.Next() {
 		var book entity.Book
 		var seriesIndex decimal.NullDecimal
-		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
+		var summary sql.NullString
+		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
 		if err != nil {
 			return nil, fmt.Errorf("BookDatabaseRepo - List - rows.Scan: %w", err)
 		}
 		if seriesIndex.Valid {
 			book.SeriesIndex = &seriesIndex
+		}
+		if summary.Valid {
+			book.Description = summary.String
 		}
 		books = append(books, book)
 	}
@@ -132,7 +138,7 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 // Get -. only select from database
 func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Book, error) {
 	query := `
-		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index
+		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index, summary
 		FROM library_book
 		WHERE id = $1
 	`
@@ -141,12 +147,16 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 	row := bdr.Pool.QueryRow(ctx, query, args...)
 	var book entity.Book
 	var seriesIndex decimal.NullDecimal
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
+	var summary sql.NullString
+	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - Get - r.Pool.QueryRow: %w", err)
 	}
 	if seriesIndex.Valid {
 		book.SeriesIndex = &seriesIndex
+	}
+	if summary.Valid {
+		book.Description = summary.String
 	}
 
 	return book, nil
@@ -155,7 +165,7 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 // GetByFileHash -. only select from database
 func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string) (entity.Book, error) {
 	query := `
-		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index
+		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index, summary
 		FROM library_book
 		WHERE koreader_partial_md5 = $1
 	`
@@ -164,12 +174,16 @@ func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string)
 	row := bdr.Pool.QueryRow(ctx, query, args...)
 	var book entity.Book
 	var seriesIndex decimal.NullDecimal
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
+	var summary sql.NullString
+	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - GetByFileHash - r.Pool.QueryRow: %w", err)
 	}
 	if seriesIndex.Valid {
 		book.SeriesIndex = &seriesIndex
+	}
+	if summary.Valid {
+		book.Description = summary.String
 	}
 
 	return book, nil
