@@ -57,9 +57,10 @@ func TestExtractBookMetadata(t *testing.T) {
 			name:     "FB2",
 			fileName: "Great Expectations -- Charles Dickens.fb2",
 			want: metadata.Metadata{
-				Title:  "Great Expectations",
-				Format: "fb2",
-				Cover:  readAll(pathToTestDataFolder + "../covers/Great Expectations -- Charles Dickens.jpg"),
+				Title:       "Great Expectations",
+				Description: "Great Expectations chronicles the progress of Pip from childhood through adulthood. As he moves from the marshes of Kent to London society, he encounters a variety of extraordinary characters: from Magwitch, the escaped convict, to Miss Havisham and her ward, the arrogant and beautiful Estella. In this fascinating story, Dickens shows the dangers of being driven by a desire for wealth and social status. Pip must establish a sense of self against the plans which others seem to have for him \n and somehow discover a firm set of values and priorities.",
+				Format:      "fb2",
+				Cover:       readAll(pathToTestDataFolder + "../covers/Great Expectations -- Charles Dickens.jpg"),
 			},
 		},
 	}
