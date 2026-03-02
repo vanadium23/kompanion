@@ -11,11 +11,13 @@ require (
 	github.com/gin-gonic/gin v1.7.7
 	github.com/golang-migrate/migrate/v4 v4.15.1
 	github.com/golang/mock v1.6.0
+	github.com/jackc/pgx-shopspring-decimal v0.0.0-20220624020537-1d36b5a1853e
 	github.com/jackc/pgx/v5 v5.6.0
 	github.com/mattn/go-sqlite3 v1.14.19
 	github.com/moroz/uuidv7-go v0.0.0-20240305042206-a7e3dca2a87e
 	github.com/prometheus/client_golang v1.11.0
 	github.com/rs/zerolog v1.26.1
+	github.com/shopspring/decimal v1.4.0
 	github.com/stretchr/testify v1.9.0
 	github.com/wcharczuk/go-chart/v2 v2.1.0
 	golang.org/x/crypto v0.31.0

@@ -25,6 +25,7 @@
                 </a>
             </h3>
             <p class="book-author">{{.Author}}</p>
+            {{ if .Series }}<p class="book-series">{{ .Series }}{{ with .SeriesIndex }} #{{ .Decimal }}{{ end }}</p>{{ end }}
             <p class="book-progress">{{ generateProgressBar .Progress 15 }} // {{ .Progress }}%</p>
         </div>
     </div>

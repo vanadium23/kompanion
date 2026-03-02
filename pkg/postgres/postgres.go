@@ -7,6 +7,7 @@ import (
 	"log"
 	"time"
 
+	"github.com/jackc/pgx-shopspring-decimal"
 	pgx "github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -50,6 +51,12 @@ func New(url string, opts ...Option) (*Postgres, error) {
 	poolConfig, err := pgxpool.ParseConfig(url)
 	if err != nil {
 		return nil, fmt.Errorf("postgres - NewPostgres - pgxpool.ParseConfig: %w", err)
+	}
+
+	// Register decimal type support for pgx using AfterConnect callback
+	poolConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		decimal.Register(conn.TypeMap())
+		return nil
 	}
 
 	poolConfig.MaxConns = int32(pg.maxPoolSize)

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/shopspring/decimal"
 	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/pkg/postgres"
 )
@@ -21,17 +22,17 @@ func NewBookDatabaseRepo(pg *postgres.Postgres) *BookDatabaseRepo {
 
 // Store -. only insert in database
 func (bdr *BookDatabaseRepo) Store(ctx context.Context, book entity.Book) error {
-	sql := `
-		INSERT INTO library_book (id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path)
-		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
+	query := `
+		INSERT INTO library_book (id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index)
+		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13)
 	`
 	args := []interface{}{
 		book.ID, book.Title, book.Author, book.Publisher, book.Year,
 		book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath,
-		book.DocumentID, book.CoverPath,
+		book.DocumentID, book.CoverPath, book.Series, book.SeriesIndex,
 	}
 
-	_, err := bdr.Pool.Exec(ctx, sql, args...)
+	_, err := bdr.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		if strings.Contains(err.Error(), "duplicate key value violates unique constraint") {
 			return fmt.Errorf("BookDatabaseRepo - Store - r.Pool.Exec: %w", entity.ErrBookAlreadyExists)
@@ -44,22 +45,24 @@ func (bdr *BookDatabaseRepo) Store(ctx context.Context, book entity.Book) error 
 
 // Update -. only update in database
 func (bdr *BookDatabaseRepo) Update(ctx context.Context, book entity.Book) error {
-	sql := `
+	query := `
 		UPDATE library_book
 		SET title = $1,
 			author = $2,
 			publisher = $3,
 			year = $4,
 			updated_at = $5,
-			isbn = $6
-		WHERE id = $7
+			isbn = $6,
+			series = $7,
+			series_index = $8
+		WHERE id = $9
 	`
 	args := []interface{}{
 		book.Title, book.Author, book.Publisher, book.Year,
-		book.UpdatedAt, book.ISBN, book.ID,
+		book.UpdatedAt, book.ISBN, book.Series, book.SeriesIndex, book.ID,
 	}
 
-	rows, err := bdr.Pool.Exec(ctx, sql, args...)
+	rows, err := bdr.Pool.Exec(ctx, query, args...)
 	if err != nil {
 		return fmt.Errorf("BookDatabaseRepo - Update - r.Pool.Exec: %w", err)
 	}
@@ -95,15 +98,15 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 
 	// Use limit and offset for pagination, because we don't have a lot of books
 	// (yes, it's not the best way to do pagination)
-	sql := fmt.Sprintf(`
-		SELECT 
-			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path
+	query := fmt.Sprintf(`
+		SELECT
+			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index
 		FROM library_book
 		ORDER BY %s %s
 		LIMIT %d OFFSET %d
 	`, sortBy, sortOrder, perPage, (page-1)*perPage)
 
-	rows, err := bdr.Pool.Query(ctx, sql)
+	rows, err := bdr.Pool.Query(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("BookDatabaseRepo - List - r.Pool.Query: %w", err)
 	}
@@ -112,9 +115,13 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 	books := make([]entity.Book, 0)
 	for rows.Next() {
 		var book entity.Book
-		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath)
+		var seriesIndex decimal.NullDecimal
+		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
 		if err != nil {
 			return nil, fmt.Errorf("BookDatabaseRepo - List - rows.Scan: %w", err)
+		}
+		if seriesIndex.Valid {
+			book.SeriesIndex = &seriesIndex
 		}
 		books = append(books, book)
 	}
@@ -124,18 +131,22 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 
 // Get -. only select from database
 func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Book, error) {
-	sql := `
-		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path
+	query := `
+		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index
 		FROM library_book
 		WHERE id = $1
 	`
 	args := []interface{}{id}
 
-	row := bdr.Pool.QueryRow(ctx, sql, args...)
+	row := bdr.Pool.QueryRow(ctx, query, args...)
 	var book entity.Book
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath)
+	var seriesIndex decimal.NullDecimal
+	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - Get - r.Pool.QueryRow: %w", err)
+	}
+	if seriesIndex.Valid {
+		book.SeriesIndex = &seriesIndex
 	}
 
 	return book, nil
@@ -143,18 +154,22 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 
 // GetByFileHash -. only select from database
 func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string) (entity.Book, error) {
-	sql := `
-		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path
+	query := `
+		SELECT id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index
 		FROM library_book
 		WHERE koreader_partial_md5 = $1
 	`
 	args := []interface{}{fileHash}
 
-	row := bdr.Pool.QueryRow(ctx, sql, args...)
+	row := bdr.Pool.QueryRow(ctx, query, args...)
 	var book entity.Book
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath)
+	var seriesIndex decimal.NullDecimal
+	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - GetByFileHash - r.Pool.QueryRow: %w", err)
+	}
+	if seriesIndex.Valid {
+		book.SeriesIndex = &seriesIndex
 	}
 
 	return book, nil

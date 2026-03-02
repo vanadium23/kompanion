@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/moroz/uuidv7-go"
+	"github.com/shopspring/decimal"
 
 	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/internal/storage"
@@ -76,6 +77,15 @@ func (uc *BookShelf) StoreBook(ctx context.Context, tempFile *os.File, uploadedF
 		FilePath:   storagepath,
 		Format:     m.Format,
 		CoverPath:  coverPath,
+		Series:     m.Series,
+	}
+
+	// Convert SeriesIndex from string to *decimal.NullDecimal
+	if m.SeriesIndex != "" {
+		if d, err := decimal.NewFromString(m.SeriesIndex); err == nil {
+			seriesIndex := decimal.NewNullDecimal(d)
+			book.SeriesIndex = &seriesIndex
+		}
 	}
 
 	// place in database
@@ -128,13 +138,20 @@ func (uc *BookShelf) UpdateBookMetadata(ctx context.Context, bookID string, meta
 	}
 
 	updatedBook := entity.Book{
-		ID:        book.ID,
-		Title:     utils.If(metadata.Title == "", book.Title, metadata.Title),
-		Author:    utils.If(metadata.Author == "", book.Author, metadata.Author),
-		Publisher: utils.If(metadata.Publisher == "", book.Publisher, metadata.Publisher),
-		Year:      utils.If(metadata.Year == 0, book.Year, metadata.Year),
-		ISBN:      utils.If(metadata.ISBN == "", book.ISBN, metadata.ISBN),
-		UpdatedAt: time.Now(),
+		ID:         book.ID,
+		Title:      utils.If(metadata.Title == "", book.Title, metadata.Title),
+		Author:     utils.If(metadata.Author == "", book.Author, metadata.Author),
+		Publisher:  utils.If(metadata.Publisher == "", book.Publisher, metadata.Publisher),
+		Year:       utils.If(metadata.Year == 0, book.Year, metadata.Year),
+		ISBN:       utils.If(metadata.ISBN == "", book.ISBN, metadata.ISBN),
+		Series:     utils.If(metadata.Series == "", book.Series, metadata.Series),
+		SeriesIndex: metadata.SeriesIndex,
+		UpdatedAt:  time.Now(),
+	}
+
+	// If SeriesIndex is not provided in update, keep existing
+	if metadata.SeriesIndex == nil {
+		updatedBook.SeriesIndex = book.SeriesIndex
 	}
 
 	err = uc.repo.Update(ctx, updatedBook)

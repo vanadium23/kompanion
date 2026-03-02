@@ -38,6 +38,13 @@ type TitleInfo struct {
 			Href string `xml:"href,attr"`
 		} `xml:"image"`
 	} `xml:"coverpage"`
+	Sequence *Sequence `xml:"sequence"`
+}
+
+// Sequence struct holds series information
+type Sequence struct {
+	Name   string `xml:"name,attr"`
+	Number string `xml:"number,attr"`
 }
 
 // PubInfo struct holds publisher information
@@ -76,10 +83,18 @@ func getFb2Metatada(tmpFile *os.File) (Metadata, error) {
 		fmt.Println("Error finding cover:", err)
 	}
 
+	var series, seriesIndex string
+	if book.Description.Title.Sequence != nil {
+		series = book.Description.Title.Sequence.Name
+		seriesIndex = book.Description.Title.Sequence.Number
+	}
+
 	return Metadata{
-		Title:     book.Description.Title.BookTitle,
-		Publisher: book.Description.Publish.Publisher,
-		Cover:     cover,
+		Title:       book.Description.Title.BookTitle,
+		Publisher:   book.Description.Publish.Publisher,
+		Series:      series,
+		SeriesIndex: seriesIndex,
+		Cover:       cover,
 	}, nil
 }
 

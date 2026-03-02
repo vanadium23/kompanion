@@ -16,6 +16,8 @@ type Metadata struct {
 	Publisher   string
 	Language    string
 	Format      string
+	Series      string
+	SeriesIndex string
 	Cover       []byte
 }
 
