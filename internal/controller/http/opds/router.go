@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/vanadium23/kompanion/internal/auth"
+	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/sync"
 	"github.com/vanadium23/kompanion/pkg/logger"
@@ -60,7 +61,14 @@ func (r *OPDSRouter) listNewest(c *gin.Context) {
 	if err != nil {
 		page = 1
 	}
-	books, err := r.books.ListBooks(c.Request.Context(), "created_at", "desc", page, 10)
+
+	query := entity.SearchQuery{
+		SortBy:    "created_at",
+		SortOrder: "desc",
+		Page:      page,
+		Limit:     10,
+	}
+	books, err := r.books.ListBooks(c.Request.Context(), query)
 	if err != nil {
 		r.logger.Error("failed to list newest books", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})

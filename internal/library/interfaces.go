@@ -11,11 +11,7 @@ type (
 	// Shelf -.
 	Shelf interface {
 		StoreBook(ctx context.Context, tempFile *os.File, uploadedFilename string) (entity.Book, error)
-		ListBooks(ctx context.Context,
-			sortBy, sortOrder string,
-			page, perPage int,
-		) (PaginatedBookList, error)
-		SearchBooks(ctx context.Context, query entity.SearchQuery) (PaginatedBookList, error)
+		ListBooks(ctx context.Context, query entity.SearchQuery) (PaginatedBookList, error)
 		ViewBook(ctx context.Context, bookID string) (entity.Book, error)
 		DownloadBook(ctx context.Context, bookID string) (entity.Book, *os.File, error)
 		UpdateBookMetadata(ctx context.Context, bookID string, metadata entity.Book) (entity.Book, error)

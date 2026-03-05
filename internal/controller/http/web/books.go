@@ -32,15 +32,37 @@ func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.R
 }
 
 func (r *booksRoutes) listBooks(c *gin.Context) {
+	// Parse pagination parameters
 	page := 1
-	perPage := 12 // Show 12 books per page for grid layout
 	if pageStr := c.Query("page"); pageStr != "" {
 		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
 			page = p
 		}
 	}
+	perPage := 12 // Show 12 books per page for grid layout
 
-	books, err := r.shelf.ListBooks(c.Request.Context(), "created_at", "desc", page, perPage)
+	// Parse search query parameters
+	searchQuery := c.Query("search")
+	sortBy := c.Query("sort")
+	sortOrder := c.Query("order")
+
+	// Default sort to created_at for web UI (newest first)
+	if sortBy == "" {
+		sortBy = "created_at"
+	}
+	if sortOrder == "" {
+		sortOrder = "desc"
+	}
+
+	query := entity.SearchQuery{
+		Search:    searchQuery,
+		SortBy:    sortBy,
+		SortOrder: sortOrder,
+		Page:      page,
+		Limit:     perPage,
+	}
+
+	books, err := r.shelf.ListBooks(c.Request.Context(), query)
 	if err != nil {
 		c.HTML(500, "error", passStandartContext(c, gin.H{"error": err.Error()}))
 		return

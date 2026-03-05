@@ -100,53 +100,80 @@ func (uc *BookShelf) StoreBook(ctx context.Context, tempFile *os.File, uploadedF
 	return book, nil
 }
 
-func (uc *BookShelf) ListBooks(ctx context.Context,
-	sortBy, sortOrder string,
-	page, perPage int) (PaginatedBookList, error) {
-	books, err := uc.repo.List(ctx, sortBy, sortOrder, page, perPage)
-	if err != nil {
-		return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooks - s.repo.List: %w", err)
-	}
-
-	totalCount, err := uc.repo.Count(ctx)
-	if err != nil {
-		return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooks - s.repo.Count: %w", err)
-	}
-
-	pbl := NewPaginatedBookList(
-		books,
-		perPage,
-		page,
-		totalCount,
-	)
-
-	return pbl, nil
+// validSortFields contains the allowed sort fields for book queries.
+var validSortFields = map[string]bool{
+	"title":      true,
+	"author":     true,
+	"series":     true,
+	"created_at": true,
 }
 
-func (uc *BookShelf) SearchBooks(ctx context.Context, query entity.SearchQuery) (PaginatedBookList, error) {
-	books, err := uc.repo.Search(ctx, query)
-	if err != nil {
-		return PaginatedBookList{}, fmt.Errorf("BookShelf - SearchBooks - s.repo.Search: %w", err)
+// validSortOrders contains the allowed sort orders.
+var validSortOrders = map[string]bool{
+	"asc":  true,
+	"desc": true,
+}
+
+// normalizeSearchQuery validates and sets defaults for a SearchQuery.
+// Invalid sort fields default to "title", invalid sort orders default to "asc".
+// Empty search returns all books (backward compatibility).
+func normalizeSearchQuery(query entity.SearchQuery) entity.SearchQuery {
+	// Validate and set default for sort order
+	if !validSortOrders[query.SortOrder] {
+		query.SortOrder = "asc"
 	}
 
-	totalCount, err := uc.repo.SearchCount(ctx, query)
-	if err != nil {
-		return PaginatedBookList{}, fmt.Errorf("BookShelf - SearchBooks - s.repo.SearchCount: %w", err)
+	// Validate and set default for sort field
+	if !validSortFields[query.SortBy] {
+		query.SortBy = "title"
 	}
 
-	limit := query.Limit
-	if limit <= 0 || limit > 100 {
-		limit = 25
+	// Set default for page
+	if query.Page <= 0 {
+		query.Page = 1
 	}
-	page := query.Page
-	if page <= 0 {
-		page = 1
+
+	// Set default for limit
+	if query.Limit <= 0 || query.Limit > 100 {
+		query.Limit = 25
+	}
+
+	return query
+}
+
+func (uc *BookShelf) ListBooks(ctx context.Context, query entity.SearchQuery) (PaginatedBookList, error) {
+	// Normalize and validate the query parameters
+	query = normalizeSearchQuery(query)
+
+	var books []entity.Book
+	var totalCount int
+	var err error
+
+	// If there's a search term, use search; otherwise use list all
+	if query.Search != "" {
+		books, err = uc.repo.Search(ctx, query)
+		if err != nil {
+			return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooks - s.repo.Search: %w", err)
+		}
+		totalCount, err = uc.repo.SearchCount(ctx, query)
+		if err != nil {
+			return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooks - s.repo.SearchCount: %w", err)
+		}
+	} else {
+		books, err = uc.repo.List(ctx, query.SortBy, query.SortOrder, query.Page, query.Limit)
+		if err != nil {
+			return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooks - s.repo.List: %w", err)
+		}
+		totalCount, err = uc.repo.Count(ctx)
+		if err != nil {
+			return PaginatedBookList{}, fmt.Errorf("BookShelf - ListBooks - s.repo.Count: %w", err)
+		}
 	}
 
 	pbl := NewPaginatedBookList(
 		books,
-		limit,
-		page,
+		query.Limit,
+		query.Page,
 		totalCount,
 	)
 
