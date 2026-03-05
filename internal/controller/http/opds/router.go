@@ -1,6 +1,7 @@
 package opds
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -62,7 +63,11 @@ func (r *OPDSRouter) listNewest(c *gin.Context) {
 		page = 1
 	}
 
+	// Parse search query parameter
+	searchQuery := c.Query("search")
+
 	query := entity.SearchQuery{
+		Search:    searchQuery,
 		SortBy:    "created_at",
 		SortOrder: "desc",
 		Page:      page,
@@ -75,9 +80,18 @@ func (r *OPDSRouter) listNewest(c *gin.Context) {
 		return
 	}
 	baseUrl := "/opds/newest/"
+
+	// Build self URL including search query if present
+	selfUrl := baseUrl
+	feedTitle := "KOmpanion library"
+	if searchQuery != "" {
+		selfUrl = fmt.Sprintf("%s?search=%s", baseUrl, searchQuery)
+		feedTitle = fmt.Sprintf("KOmpanion library - Search: %s", searchQuery)
+	}
+
 	entries := translateBooksToEntries(books.Books)
-	navLinks := formNavLinks(baseUrl, books)
-	feed := BuildFeed("urn:kompanion:newest", "KOmpanion library", baseUrl, entries, navLinks)
+	navLinks := formNavLinks(baseUrl, searchQuery, books)
+	feed := BuildFeed("urn:kompanion:newest", feedTitle, selfUrl, entries, navLinks)
 	c.XML(http.StatusOK, feed)
 }
 
