@@ -2,6 +2,7 @@ package web
 
 import (
 	"fmt"
+	"net/url"
 	"os"
 	"strconv"
 
@@ -86,8 +87,24 @@ func (r *booksRoutes) listBooks(c *gin.Context) {
 		}
 	}
 
+	// Build query string for pagination links (preserves search/sort/order)
+	queryParams := ""
+	if searchQuery != "" {
+		queryParams += "&search=" + url.QueryEscape(searchQuery)
+	}
+	if sortBy != "" {
+		queryParams += "&sort=" + url.QueryEscape(sortBy)
+	}
+	if sortOrder != "" {
+		queryParams += "&order=" + url.QueryEscape(sortOrder)
+	}
+
 	c.HTML(200, "books", passStandartContext(c, gin.H{
-		"books": booksWithProgress,
+		"books":        booksWithProgress,
+		"searchQuery":  searchQuery,
+		"sortBy":       sortBy,
+		"sortOrder":    sortOrder,
+		"queryParams":  queryParams,
 		"pagination": gin.H{
 			"currentPage": page,
 			"perPage":     perPage,

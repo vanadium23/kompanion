@@ -9,7 +9,31 @@
         <button style="flex-grow: 1;">Upload</button>
     </form>
 </div>
+
+<!-- Search and Sort Controls -->
+<div class="search-controls">
+    <form method="get" action="/books" class="search-form">
+        <div class="search-input-group">
+            <input type="text" name="search" value="{{ .searchQuery }}" placeholder="Search books..." class="search-box">
+            <button type="submit" class="search-button">Search</button>
+        </div>
+        <div class="sort-controls">
+            <label for="sort">Sort by:</label>
+            <select name="sort" id="sort" onchange="this.form.submit()">
+                <option value="created_at" {{ if eq .sortBy "created_at" }}selected{{ end }}>Date Added</option>
+                <option value="title" {{ if eq .sortBy "title" }}selected{{ end }}>Title</option>
+                <option value="author" {{ if eq .sortBy "author" }}selected{{ end }}>Author</option>
+                <option value="series" {{ if eq .sortBy "series" }}selected{{ end }}>Series</option>
+            </select>
+            <select name="order" id="order" onchange="this.form.submit()">
+                <option value="desc" {{ if eq .sortOrder "desc" }}selected{{ end }}>Descending</option>
+                <option value="asc" {{ if eq .sortOrder "asc" }}selected{{ end }}>Ascending</option>
+            </select>
+        </div>
+    </form>
+</div>
 <section>
+    {{ if .books }}
     {{ range .books }}
     <!-- Another example -->
     <div class="book-card">
@@ -31,34 +55,40 @@
         </div>
     </div>
     {{ end }}
+    {{ else }}
+    <div class="no-books">
+        <p>No books found{{ with .searchQuery }} matching "{{ . }}"{{ end }}.</p>
+        {{ if .searchQuery }}<p><a href="/books">Clear search</a></p>{{ end }}
+    </div>
+    {{ end }}
 </section>
 
-{{ with .pagination }}
+{{ with $.pagination }}
 <nav class="pagination" role="navigation" aria-label="pagination">
     {{ if .hasPrev }}
-    <a href="?page={{ .prevPage }}" class="pagination-prev">Previous</a>
+    <a href="?page={{ .prevPage }}{{ $.queryParams }}" class="pagination-prev">Previous</a>
     {{ end }}
 
     {{ if .hasNext }}
-    <a href="?page={{ .nextPage }}" class="pagination-next">Next</a>
+    <a href="?page={{ .nextPage }}{{ $.queryParams }}" class="pagination-next">Next</a>
     {{ end }}
 
     <ul class="pagination-list">
         {{ if gt .currentPage 1 }}
-        <li><a href="?page=1" class="pagination-link" aria-label="Goto page 1">1</a></li>
+        <li><a href="?page=1{{ $.queryParams }}" class="pagination-link" aria-label="Goto page 1">1</a></li>
         {{ if gt .currentPage 2 }}
         <li><span class="pagination-ellipsis">&hellip;</span></li>
         {{ end }}
         {{ end }}
 
-        <li><a href="?page={{ .currentPage }}" class="pagination-link is-current" aria-label="Page {{ .currentPage }}"
+        <li><a href="?page={{ .currentPage }}{{ $.queryParams }}" class="pagination-link is-current" aria-label="Page {{ .currentPage }}"
                 aria-current="page">{{ .currentPage }}</a></li>
 
         {{ if lt .currentPage .totalPages }}
         {{ if lt .currentPage (subtract .totalPages 1) }}
         <li><span class="pagination-ellipsis">&hellip;</span></li>
         {{ end }}
-        <li><a href="?page={{ .totalPages }}" class="pagination-link" aria-label="Goto page {{ .totalPages }}">{{
+        <li><a href="?page={{ .totalPages }}{{ $.queryParams }}" class="pagination-link" aria-label="Goto page {{ .totalPages }}">{{
                 .totalPages }}</a></li>
         {{ end }}
     </ul>
