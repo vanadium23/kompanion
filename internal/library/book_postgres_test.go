@@ -19,6 +19,7 @@ func TestBookDatabaseRepoCreate(t *testing.T) {
 		ID:          "1",
 		Title:       "title",
 		Author:      "author",
+		Description: "A test book description",
 		Publisher:   "publisher",
 		Year:        2021,
 		CreatedAt:   time.Now(),
@@ -36,7 +37,7 @@ func TestBookDatabaseRepoCreate(t *testing.T) {
 	defer mock.Close()
 
 	mock.ExpectExec("INSERT INTO library_book").
-		WithArgs(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.SeriesIndex).
+		WithArgs(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.SeriesIndex, book.Description).
 		WillReturnResult(pgxmock.NewResult("INSERT", 1))
 
 	// вызвать Create
@@ -49,17 +50,18 @@ func TestBookDatabaseRepoCreate(t *testing.T) {
 func TestBookDatabaseRepoCreateWithoutSeries(t *testing.T) {
 	// book without series
 	book := entity.Book{
-		ID:         "1",
-		Title:      "title",
-		Author:     "author",
-		Publisher:  "publisher",
-		Year:       2021,
-		CreatedAt:  time.Now(),
-		UpdatedAt:  time.Now(),
-		ISBN:       "isbn",
-		FilePath:   "file_path",
-		DocumentID: "document_id",
-		CoverPath:  "cover_path",
+		ID:          "1",
+		Title:       "title",
+		Author:      "author",
+		Description: "",
+		Publisher:   "publisher",
+		Year:        2021,
+		CreatedAt:   time.Now(),
+		UpdatedAt:   time.Now(),
+		ISBN:        "isbn",
+		FilePath:    "file_path",
+		DocumentID:  "document_id",
+		CoverPath:   "cover_path",
 	}
 
 	// создать mock
@@ -67,7 +69,7 @@ func TestBookDatabaseRepoCreateWithoutSeries(t *testing.T) {
 	defer mock.Close()
 
 	mock.ExpectExec("INSERT INTO library_book").
-		WithArgs(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.SeriesIndex).
+		WithArgs(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, book.SeriesIndex, book.Description).
 		WillReturnResult(pgxmock.NewResult("INSERT", 1))
 
 	// вызвать Create
@@ -84,6 +86,7 @@ func TestBookDatabaseRepoGetById(t *testing.T) {
 		ID:          "1",
 		Title:       "title",
 		Author:      "author",
+		Description: "A test book description for GetById",
 		Publisher:   "publisher",
 		Year:        2021,
 		CreatedAt:   time.Now(),
@@ -101,8 +104,8 @@ func TestBookDatabaseRepoGetById(t *testing.T) {
 	defer mock.Close()
 
 	// Pass float64 for series_index - pgxmock will use scanner to convert
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index"}).
-		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, 2.0)
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index", "summary"}).
+		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, 2.0, book.Description)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
 		WithArgs(book.ID).
@@ -123,6 +126,9 @@ func TestBookDatabaseRepoGetById(t *testing.T) {
 	if result.SeriesIndex == nil || !result.SeriesIndex.Valid || !book.SeriesIndex.Valid ||
 		!result.SeriesIndex.Decimal.Equal(book.SeriesIndex.Decimal) {
 		t.Errorf("expected SeriesIndex %v, got %v", book.SeriesIndex, result.SeriesIndex)
+	}
+	if result.Description != book.Description {
+		t.Errorf("expected Description %v, got %v", book.Description, result.Description)
 	}
 }
 
@@ -146,8 +152,8 @@ func TestBookDatabaseRepoGetByIdWithoutSeries(t *testing.T) {
 	mock, bdr := setupTestBookDatabaseRepo()
 	defer mock.Close()
 
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index"}).
-		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, nil)
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index", "summary"}).
+		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, nil, nil)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
 		WithArgs(book.ID).
@@ -165,6 +171,9 @@ func TestBookDatabaseRepoGetByIdWithoutSeries(t *testing.T) {
 	if result.SeriesIndex != nil {
 		t.Errorf("expected SeriesIndex nil, got %v", *result.SeriesIndex)
 	}
+	if result.Description != "" {
+		t.Errorf("expected Description empty, got %v", result.Description)
+	}
 }
 
 func TestBookDatabaseRepoGetByFileHash(t *testing.T) {
@@ -174,6 +183,7 @@ func TestBookDatabaseRepoGetByFileHash(t *testing.T) {
 		ID:          "1",
 		Title:       "title",
 		Author:      "author",
+		Description: "A test book description for GetByFileHash",
 		Publisher:   "publisher",
 		Year:        2021,
 		CreatedAt:   time.Now(),
@@ -191,8 +201,8 @@ func TestBookDatabaseRepoGetByFileHash(t *testing.T) {
 	defer mock.Close()
 
 	// Pass float64 for series_index - pgxmock will use scanner to convert
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index"}).
-		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, 1.0)
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index", "summary"}).
+		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, 1.0, book.Description)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
 		WithArgs(book.DocumentID).
@@ -210,6 +220,9 @@ func TestBookDatabaseRepoGetByFileHash(t *testing.T) {
 	if result.Series != book.Series {
 		t.Errorf("expected Series %v, got %v", book.Series, result.Series)
 	}
+	if result.Description != book.Description {
+		t.Errorf("expected Description %v, got %v", book.Description, result.Description)
+	}
 }
 
 func TestBookDatabaseRepoList(t *testing.T) {
@@ -219,6 +232,7 @@ func TestBookDatabaseRepoList(t *testing.T) {
 		ID:          "1",
 		Title:       "title",
 		Author:      "author",
+		Description: "A test book description for List",
 		Publisher:   "publisher",
 		Year:        2021,
 		CreatedAt:   time.Now(),
@@ -236,8 +250,8 @@ func TestBookDatabaseRepoList(t *testing.T) {
 	defer mock.Close()
 
 	// Pass float64 for series_index - pgxmock will use scanner to convert
-	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index"}).
-		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, 3.5)
+	rows := pgxmock.NewRows([]string{"id", "title", "author", "publisher", "year", "created_at", "updated_at", "isbn", "file_path", "file_hash", "cover_path", "series", "series_index", "summary"}).
+		AddRow(book.ID, book.Title, book.Author, book.Publisher, book.Year, book.CreatedAt, book.UpdatedAt, book.ISBN, book.FilePath, book.DocumentID, book.CoverPath, book.Series, 3.5, book.Description)
 
 	mock.ExpectQuery("SELECT (.+) FROM library_book").
 		WillReturnRows(rows)
@@ -261,6 +275,9 @@ func TestBookDatabaseRepoList(t *testing.T) {
 	if results[0].SeriesIndex == nil || !results[0].SeriesIndex.Valid || !book.SeriesIndex.Valid ||
 		!results[0].SeriesIndex.Decimal.Equal(book.SeriesIndex.Decimal) {
 		t.Errorf("expected SeriesIndex %v, got %v", book.SeriesIndex, results[0].SeriesIndex)
+	}
+	if results[0].Description != book.Description {
+		t.Errorf("expected Description %v, got %v", book.Description, results[0].Description)
 	}
 }
 

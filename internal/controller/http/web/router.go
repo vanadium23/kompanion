@@ -67,6 +67,15 @@ func NewRouter(
 			return template.HTMLEscapeString(version)
 		},
 		"generateProgressBar": generateProgressBar,
+		"truncate": func(s string, maxLen int) string {
+			if len(s) <= maxLen {
+				return s
+			}
+			if maxLen <= 3 {
+				return s[:maxLen]
+			}
+			return s[:maxLen-3] + "..."
+		},
 	}
 	gv := ginview.New(config)
 	gv.SetFileHandler(embeddedFH)

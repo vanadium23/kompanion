@@ -27,15 +27,15 @@ func extractPdfMetadata(tmpFile *os.File) (Metadata, error) {
 		if strings.Contains(line, "/Author") {
 			PDFmetadata.Author = extractValue(line, "/Author")
 		}
-		// if strings.Contains(line, "/Subject") {
-		// 	PDFmetadata.Subject = extractValue(line, "/Subject")
-		// }
+		if strings.Contains(line, "/Subject") {
+			PDFmetadata.Description = extractValue(line, "/Subject")
+		}
 		// if strings.Contains(line, "/Keywords") {
 		// 	PDFmetadata.Keywords = extractValue(line, "/Keywords")
 		// }
 
 		// Break early if we've found all fields
-		if PDFmetadata.Title != "" && PDFmetadata.Author != "" {
+		if PDFmetadata.Title != "" && PDFmetadata.Author != "" && PDFmetadata.Description != "" {
 			break
 		}
 	}

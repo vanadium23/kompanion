@@ -15,6 +15,7 @@ type Book struct {
 	ID          string                 // unique identifier for the book
 	Title       string                 `form:"title"`        // title of the book
 	Author      string                 `form:"author"`       // author of the book
+	Description string                 `form:"description"`  // description/summary of the book
 	Publisher   string                 `form:"publisher"`    // publisher of the book
 	Year        int                    `form:"year"`         // year of publication
 	Series      string                 `form:"series"`       // series the book belongs to

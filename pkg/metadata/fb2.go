@@ -31,8 +31,11 @@ type Description struct {
 
 // TitleInfo struct holds title metadata
 type TitleInfo struct {
-	XMLName   xml.Name `xml:"title-info"`
-	BookTitle string   `xml:"book-title"`
+	XMLName    xml.Name `xml:"title-info"`
+	BookTitle  string   `xml:"book-title"`
+	Annotation struct {
+		Content string `xml:",innerxml"`
+	} `xml:"annotation"`
 	Coverpage struct {
 		Image struct {
 			Href string `xml:"href,attr"`
@@ -89,8 +92,12 @@ func getFb2Metatada(tmpFile *os.File) (Metadata, error) {
 		seriesIndex = book.Description.Title.Sequence.Number
 	}
 
+	// Extract annotation and strip HTML tags
+	description := stripHTMLTags(book.Description.Title.Annotation.Content)
+
 	return Metadata{
 		Title:       book.Description.Title.BookTitle,
+		Description: description,
 		Publisher:   book.Description.Publish.Publisher,
 		Series:      series,
 		SeriesIndex: seriesIndex,
@@ -119,4 +126,24 @@ func findFB2Cover(metadata FictionBook) ([]byte, error) {
 		return nil, err
 	}
 	return decodedImage, nil
+}
+
+// stripHTMLTags removes HTML tags from a string and returns plain text
+func stripHTMLTags(s string) string {
+	var result strings.Builder
+	inTag := false
+	for _, r := range s {
+		if r == '<' {
+			inTag = true
+			continue
+		}
+		if r == '>' {
+			inTag = false
+			continue
+		}
+		if !inTag {
+			result.WriteRune(r)
+		}
+	}
+	return strings.TrimSpace(result.String())
 }
