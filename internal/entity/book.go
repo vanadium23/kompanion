@@ -10,6 +10,15 @@ import (
 
 var ErrBookAlreadyExists = errors.New("Book already exists")
 
+// SearchQuery represents search and filter parameters for book queries.
+type SearchQuery struct {
+	Search   string // search string for text matching
+	SortBy   string // field to sort by (title, author, series, created_at)
+	SortOrder string // asc or desc
+	Page     int    // page number (1-indexed)
+	Limit    int    // items per page
+}
+
 // Book represents a book entity in the database.
 type Book struct {
 	ID          string                 // unique identifier for the book

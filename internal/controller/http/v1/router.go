@@ -31,4 +31,8 @@ func NewRouter(handler *gin.Engine, l logger.Interface, a auth.AuthInterface, p 
 	syncRoutes := handler.Group("/syncs")
 	syncRoutes.Use(authDeviceMiddleware(a, l))
 	newSyncRoutes(syncRoutes, p, l)
+
+	// API v1 routes
+	apiV1 := handler.Group("/api/v1")
+	newBooksRoutes(apiV1, shelf, a, l)
 }

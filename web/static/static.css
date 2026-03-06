@@ -44,3 +44,69 @@
     flex-grow: 1;
     margin-top: 0;
 }
+
+/* Search and Sort Controls */
+.search-controls {
+    margin: 1.5rem 0;
+    padding: 1rem;
+    border: var(--border-thickness) solid var(--text-color);
+}
+
+.search-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.search-input-group {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.search-box {
+    flex-grow: 1;
+    padding: 0.5rem;
+    border: var(--border-thickness) solid var(--text-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    font-family: inherit;
+}
+
+.search-button {
+    padding: 0.5rem 1rem;
+    border: var(--border-thickness) solid var(--text-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    cursor: pointer;
+    font-family: inherit;
+}
+
+.search-button:hover {
+    background: var(--text-color);
+    color: var(--background-color);
+}
+
+.sort-controls {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.sort-controls label {
+    font-weight: bold;
+}
+
+.sort-controls select {
+    padding: 0.5rem;
+    border: var(--border-thickness) solid var(--text-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    font-family: inherit;
+}
+
+.no-books {
+    text-align: center;
+    padding: 2rem;
+    border: var(--border-thickness) solid var(--text-color);
+}
