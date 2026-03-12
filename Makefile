@@ -9,6 +9,8 @@ endif
 LOCAL_BIN:=$(CURDIR)/bin
 PATH:=$(LOCAL_BIN):$(PATH)
 
+COMPOSE_CMD := $(shell command -v docker-compose >/dev/null 2>&1 && echo "docker-compose" || echo "docker compose")
+
 # HELP =================================================================================================================
 # This will output the help for each task
 # thanks to https://marmelab.com/blog/2016/02/29/auto-documented-makefile.html
@@ -18,19 +20,19 @@ help: ## Display this help screen
 	@awk 'BEGIN {FS = ":.*##"; printf "\nUsage:\n  make \033[36m<target>\033[0m\n"} /^[a-zA-Z_-]+:.*?##/ { printf "  \033[36m%-15s\033[0m %s\n", $$1, $$2 } /^##@/ { printf "\n\033[1m%s\033[0m\n", substr($$0, 5) } ' $(MAKEFILE_LIST)
 
 compose-up: ### Run docker-compose
-	docker-compose up --build -d postgres && docker-compose logs -f
+	$(COMPOSE_CMD) up --build -d postgres && $(COMPOSE_CMD) logs -f
 .PHONY: compose-up
 
 compose-all: ### Run all containers
-	UID=$(id -u) GID=$(id -g) docker-compose up --build
+	UID=$(id -u) GID=$(id -g) $(COMPOSE_CMD) up --build
 .PHONY: compose-all
 
 compose-up-integration-test: ### Run docker-compose with integration test
-	docker-compose -f docker-compose.yml -f docker-compose-integration.yml up --build --abort-on-container-exit --exit-code-from integration
+	$(COMPOSE_CMD) -f docker-compose.yml -f docker-compose-integration.yml up --build --abort-on-container-exit --exit-code-from integration
 .PHONY: compose-up-integration-test
 
 compose-down: ### Down docker-compose
-	docker-compose down --remove-orphans
+	$(COMPOSE_CMD) down --remove-orphans
 .PHONY: compose-down
 
 run: ### swag run

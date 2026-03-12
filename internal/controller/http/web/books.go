@@ -14,14 +14,15 @@ import (
 )
 
 type booksRoutes struct {
-	shelf    library.Shelf
-	stats    stats.ReadingStats
-	progress syncpkg.Progress
-	logger   logger.Interface
+	urlPrefix string
+	shelf     library.Shelf
+	stats     stats.ReadingStats
+	progress  syncpkg.Progress
+	logger    logger.Interface
 }
 
-func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.ReadingStats, progress syncpkg.Progress, l logger.Interface) {
-	r := &booksRoutes{shelf: shelf, stats: stats, progress: progress, logger: l}
+func newBooksRoutes(handler *gin.RouterGroup, urlPrefix string, shelf library.Shelf, stats stats.ReadingStats, progress syncpkg.Progress, l logger.Interface) {
+	r := &booksRoutes{urlPrefix: urlPrefix, shelf: shelf, stats: stats, progress: progress, logger: l}
 
 	handler.GET("/", r.listBooks)
 	handler.POST("/upload", r.uploadBook)
@@ -65,7 +66,8 @@ func (r *booksRoutes) listBooks(c *gin.Context) {
 	}
 
 	c.HTML(200, "books", passStandartContext(c, gin.H{
-		"books": booksWithProgress,
+		"urlPrefix": r.urlPrefix,
+		"books":     booksWithProgress,
 		"pagination": gin.H{
 			"currentPage": page,
 			"perPage":     perPage,
@@ -107,7 +109,7 @@ func (r *booksRoutes) uploadBook(c *gin.Context) {
 		c.JSON(500, passStandartContext(c, gin.H{"message": "internal server error"}))
 		return
 	}
-	c.Redirect(302, "/books/"+book.ID)
+	c.Redirect(302, r.urlPrefix+"/books/"+book.ID)
 }
 
 func (r *booksRoutes) downloadBook(c *gin.Context) {
@@ -141,8 +143,9 @@ func (r *booksRoutes) viewBook(c *gin.Context) {
 	}
 
 	c.HTML(200, "book", passStandartContext(c, gin.H{
-		"book":  book,
-		"stats": bookStats,
+		"urlPrefix": r.urlPrefix,
+		"book":      book,
+		"stats":     bookStats,
 	}))
 }
 
@@ -166,7 +169,7 @@ func (r *booksRoutes) updateBookMetadata(c *gin.Context) {
 	}
 
 	// TODO: why not redirect?
-	c.HTML(200, "book", passStandartContext(c, gin.H{"book": book}))
+	c.HTML(200, "book", passStandartContext(c, gin.H{"urlPrefix": r.urlPrefix, "book": book}))
 }
 
 func (r *booksRoutes) viewBookCover(c *gin.Context) {
