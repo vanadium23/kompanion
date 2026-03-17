@@ -2,14 +2,14 @@ name: Build and Push Kompanion Docker Image
 
 on:
   push:
-    branches: [ "main" ]  # 每次 push 到 main 分支都会触发
+    branches: [ "main" ]  # 每次 push 到 main 分支触发
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1️⃣ 拉取仓库
+      # 1️⃣ Checkout 代码
       - name: Checkout repository
         uses: actions/checkout@v3
 
@@ -19,7 +19,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_PAT }}  # 这里引用你添加的 Secret
+          password: ${{ secrets.GHCR_PAT }}   # 这里使用你仓库的 PAT Secret
 
       # 3️⃣ 构建并推送 Docker 镜像
       - name: Build and push Docker image
