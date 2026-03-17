@@ -1,3 +1,4 @@
+# 仅做了群晖docker发布，请关注原作者
 # KOmpanion - bookshelf companion for KOreader
 
 KOmpanion is a minimalistic library web application, that tightly coupled to KOReader features.
