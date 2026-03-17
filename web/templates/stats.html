@@ -3,7 +3,7 @@
 {{ define "content" }}
 <article>
     <header>
-        <h1>Reading Statistics</h1>
+        <h1>阅读统计</h1>
     </header>
 
     <section>
@@ -18,10 +18,10 @@
         <table>
             <thead>
                 <tr>
-                    <th>Book Title</th>
-                    <th>Pages Read</th>
-                    <th>Time Spent</th>
-                    <th>Days Read</th>
+                    <th>书名</th>
+                    <th>页数</th>
+                    <th>用时</th>
+                    <th>天数</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,7 +34,7 @@
                 </tr>
                 {{ end }}
                 <tr class="total-row">
-                    <td><strong>Total / Average</strong></td>
+                    <td><strong>总计</strong></td>
                     <td><strong>{{ .stats.TotalReadPages }}</strong></td>
                     <td><strong>{{ formatDuration .stats.TotalReadTime }}</strong></td>
                     <td><strong>{{ .stats.AveragePagePerDay }} pages/day</strong></td>
@@ -44,7 +44,7 @@
     </section>
 
     <section>
-        <h2>Daily Reading Progress</h2>
+        <h2>每日阅读统计</h2>
         <img src="/stats/chart?from={{ .from }}&to={{ .to }}" alt="Daily Reading Progress"
             style="width: 100%; max-width: 800px;">
     </section>
