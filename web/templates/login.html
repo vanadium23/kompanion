@@ -1,21 +1,25 @@
-
-{{ define "title" }}欢迎使用 - KOmpanion{{ end }}
+{{ define "title" }}登录 - KOmpanion{{ end }}
 
 {{ define "content" }}
 <form class="auth-form" method="post">
+
     {{if .error}}
     <div class="error-message">
         {{.error}}
     </div>
     {{end}}
+
     <div>
-        <label for="username">Username</label>
-        <input type="text" id="username" name="用户名" required>
+        <label for="username">用户名</label>
+        <input type="text" id="username" name="username" placeholder="请输入用户名" required>
     </div>
+
     <div class="form-group">
-        <label for="password">Password</label>
-        <input type="password" id="password" name="密码" required>
+        <label for="password">密码</label>
+        <input type="password" id="password" name="password" placeholder="请输入密码" required>
     </div>
+
     <button type="submit" class="btn-primary">登录</button>
+
 </form>
 {{ end }}
