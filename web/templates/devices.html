@@ -10,22 +10,25 @@
     </blockquote>
     {{end}}
 
+    <!-- 添加设备 -->
     <section>
         <h2>添加新设备</h2>
         <form action="/devices/add" method="POST" class="grid">
-            <input type="text" name="设备名" required placeholder="请输入设备名">
-            <input type="text" name="密码" required placeholder="请输入密码">
+            <input type="text" name="name" required placeholder="请输入设备名称">
+            <input type="text" name="password" required placeholder="请输入设备密码">
             <button type="submit">添加设备</button>
         </form>
     </section>
 
+    <!-- 设备列表 -->
     <section>
         <h2>已添加设备</h2>
+
         {{if .devices}}
         <table>
             <thead>
                 <tr>
-                    <th>设备名</th>
+                    <th>设备名称</th>
                     <th>操作</th>
                 </tr>
             </thead>
@@ -34,20 +37,58 @@
                 <tr>
                     <td>{{.Name}}</td>
                     <td>
-                        <form action="/devices/deactivate/{{.Name}}" method="POST">
+
+                        <!-- 停用 -->
+                        <form action="/devices/deactivate/{{.Name}}" method="POST" style="display:inline;">
                             <button type="submit"
-                                onclick="return confirm('确定要停用吗?')">
+                                onclick="return confirm('确定要停用该设备吗？')">
                                 停用
                             </button>
                         </form>
+
+                        <!-- 删除（新增） -->
+                        <button onclick="deleteDevice('{{.Name}}')" class="danger">
+                            删除
+                        </button>
+
                     </td>
                 </tr>
                 {{end}}
             </tbody>
         </table>
+
         {{else}}
-        <p><em>还没有添加设备</em></p>
+        <p><em>暂无设备</em></p>
         {{end}}
     </section>
 </main>
+
+<!-- 删除设备脚本 -->
+<script>
+async function deleteDevice(name) {
+    if (!confirm("确定删除该设备吗？此操作不可恢复！")) return;
+
+    try {
+        const res = await fetch("/api/devices/delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ name })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            alert("删除成功");
+            location.reload();
+        } else {
+            alert("删除失败：" + data.error);
+        }
+    } catch (e) {
+        alert("请求失败");
+    }
+}
+</script>
+
 {{end}}
