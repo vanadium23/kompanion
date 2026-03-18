@@ -65,12 +65,11 @@
                 <a href="/books/{{.ID}}/download" target="_blank">
                     <button type="button" class="button">下载</button>
                 </a>
-
-                <!-- 删除按钮（重点） -->
-                <button type="button" class="button danger" onclick="deleteBook('{{.ID}}')">
-                    删除
-                </button>
             </div>
+        </form>
+
+        <form method="post" action="/books/{{.ID}}/delete" onsubmit="return confirm('确定删除这本书吗？此操作不可恢复！');">
+            <button type="submit" class="button danger">删除</button>
         </form>
     </div>
 
@@ -108,33 +107,5 @@
     </table>
 </section>
 {{ end }}
-
-<!-- 删除脚本 -->
-<script>
-async function deleteBook(id) {
-    if (!confirm("确定删除这本书吗？此操作不可恢复！")) return;
-
-    try {
-        const res = await fetch("/api/books/delete", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ id })
-        });
-
-        const data = await res.json();
-
-        if (data.success) {
-            alert("删除成功");
-            window.location.href = "/books/";
-        } else {
-            alert("删除失败：" + data.error);
-        }
-    } catch (e) {
-        alert("请求失败");
-    }
-}
-</script>
 
 {{ end }}

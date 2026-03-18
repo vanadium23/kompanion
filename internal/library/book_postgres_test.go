@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/shopspring/decimal"
 	"github.com/pashagolub/pgxmock/v4"
+	"github.com/shopspring/decimal"
 	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/pkg/postgres"
@@ -278,6 +278,20 @@ func TestBookDatabaseRepoList(t *testing.T) {
 	}
 	if results[0].Description != book.Description {
 		t.Errorf("expected Description %v, got %v", book.Description, results[0].Description)
+	}
+}
+
+func TestBookDatabaseRepoDelete(t *testing.T) {
+	mock, bdr := setupTestBookDatabaseRepo()
+	defer mock.Close()
+
+	mock.ExpectExec("DELETE FROM library_book").
+		WithArgs("1").
+		WillReturnResult(pgxmock.NewResult("DELETE", 1))
+
+	err := bdr.Delete(context.Background(), "1")
+	if err != nil {
+		t.Errorf("unexpected error: %v", err)
 	}
 }
 

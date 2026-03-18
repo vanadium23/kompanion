@@ -40,4 +40,14 @@ func TestMemoryStorage(t *testing.T) {
 	if string(readBody) != string(body) {
 		t.Errorf("Expected body %s, got %s", string(body), string(readBody))
 	}
+
+	err = storage.Delete(ctx, "test")
+	if err != nil {
+		t.Errorf("Error deleting file: %v", err)
+	}
+
+	_, err = storage.Read(ctx, "test")
+	if err == nil {
+		t.Errorf("Expected read error after delete, got nil")
+	}
 }

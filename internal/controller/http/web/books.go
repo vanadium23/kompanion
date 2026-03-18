@@ -27,6 +27,7 @@ func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.R
 	handler.POST("/upload", r.uploadBook)
 	handler.GET("/:bookID", r.viewBook)
 	handler.POST("/:bookID", r.updateBookMetadata)
+	handler.POST("/:bookID/delete", r.deleteBook)
 	handler.GET("/:bookID/download", r.downloadBook)
 	handler.GET("/:bookID/cover", r.viewBookCover)
 }
@@ -202,4 +203,16 @@ func (r *booksRoutes) viewBookCover(c *gin.Context) {
 		return
 	}
 	c.File(cover.Name())
+}
+
+func (r *booksRoutes) deleteBook(c *gin.Context) {
+	bookID := c.Param("bookID")
+
+	if err := r.shelf.DeleteBook(c.Request.Context(), bookID); err != nil {
+		r.logger.Error(err, "http - web - shelf - deleteBook")
+		c.HTML(500, "error", passStandartContext(c, gin.H{"error": "删除书籍失败"}))
+		return
+	}
+
+	c.Redirect(302, "/books")
 }

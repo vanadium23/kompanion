@@ -72,3 +72,19 @@ func (ps *PostgresStorage) Read(ctx context.Context, filepath string) (*os.File,
 	}
 	return tempFile, nil
 }
+
+func (ps *PostgresStorage) Delete(ctx context.Context, filepath string) error {
+	sql := `
+		DELETE FROM storage_blob
+		WHERE file_path = $1
+	`
+	result, err := ps.Pool.Exec(ctx, sql, filepath)
+	if err != nil {
+		return fmt.Errorf("PostgresStorage - Delete - r.Pool.Exec: %w", err)
+	}
+	if result.RowsAffected() == 0 {
+		return ErrNotFound
+	}
+
+	return nil
+}

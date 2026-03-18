@@ -176,6 +176,29 @@ func (uc *BookShelf) DownloadBook(ctx context.Context, bookID string) (entity.Bo
 	return book, file, nil
 }
 
+func (uc *BookShelf) DeleteBook(ctx context.Context, bookID string) error {
+	book, err := uc.repo.GetById(ctx, bookID)
+	if err != nil {
+		return fmt.Errorf("BookShelf - DeleteBook - s.repo.Get: %w", err)
+	}
+
+	if err := uc.repo.Delete(ctx, bookID); err != nil {
+		return fmt.Errorf("BookShelf - DeleteBook - s.repo.Delete: %w", err)
+	}
+
+	if err := uc.storage.Delete(ctx, book.FilePath); err != nil && !errors.Is(err, storage.ErrNotFound) {
+		return fmt.Errorf("BookShelf - DeleteBook - s.storage.Delete(file): %w", err)
+	}
+
+	if book.CoverPath != "" {
+		if err := uc.storage.Delete(ctx, book.CoverPath); err != nil && !errors.Is(err, storage.ErrNotFound) {
+			return fmt.Errorf("BookShelf - DeleteBook - s.storage.Delete(cover): %w", err)
+		}
+	}
+
+	return nil
+}
+
 func (uc *BookShelf) ViewCover(ctx context.Context, bookID string) (*os.File, error) {
 	book, err := uc.repo.GetById(ctx, bookID)
 	if err != nil {

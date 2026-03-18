@@ -58,6 +58,13 @@ func TestPostgresStorage(t *testing.T) {
 		require.NoError(t, err)
 		assert.Equal(t, content, readContent)
 
+		mock.ExpectExec("DELETE FROM storage_blob").
+			WithArgs("test.txt").
+			WillReturnResult(pgxmock.NewResult("DELETE", 1))
+
+		err = store.Delete(context.Background(), "test.txt")
+		require.NoError(t, err)
+
 		err = mock.ExpectationsWereMet()
 		require.NoError(t, err)
 	})
