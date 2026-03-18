@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 
 <head>
     <meta charset="UTF-8">
@@ -12,36 +12,36 @@
 
 <body>
 
-    <!-- Main site header -->
+    <!-- 主站头部 -->
     <header class="header">
         <table>
             <tr>
                 <td style="flex-grow: 1;">KOmpanion</td>
                 {{ if .isAuthenticated }}
-                <td><a href="/books/">> Books</a></td>
-                <td><a href="/stats/">> Statistics</a></td>
-                <td><a href="/devices/">> Devices</a></td>
-                <td><a href="/auth/logout/">Log Out</a></td>
+                <td><a href="/books/">> 书籍</a></td>
+                <td><a href="/stats/">> 统计</a></td>
+                <td><a href="/devices/">> 设备</a></td>
+                <td><a href="/auth/logout/">退出登录</a></td>
                 {{ else }}
-                <td>Login Page</td>
+                <td>登录页面</td>
                 {{ end}}
             </tr>
         </table>
     </header>
 
-
     <main>
-        {{ block "content" . }}Default Content{{ end }}
+        {{ block "content" . }}默认内容{{ end }}
     </main>
 
     <footer>
-        <!-- Simple Footer -->
-        <hr> <!-- Adds a nice divider line -->
+        <!-- 简单页脚 -->
+        <hr>
         <p style="text-align: center; color: var(--text-color-alt);">
-            Powered by <a href="https://github.com/vanadium23/kompanion/">KOmpanion</a>, Version: <strong>{{ Version }}</strong>, Page: <strong>{{ LoadTimes .startTime }}</strong>
+            由 <a href="https://github.com/vanadium23/kompanion/">KOmpanion</a> 驱动，
+            版本：<strong>{{ Version }}</strong>，
+            页面耗时：<strong>{{ LoadTimes .startTime }}</strong>
         </p>
     </footer>
-
 
 </body>
 
