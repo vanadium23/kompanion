@@ -1,86 +1,103 @@
-{{ define "title" }}{{ .book.Author }} - {{ .book.Title }} - Books - KOmpanion{{ end }}
+{{ define "title" }}{{ .book.Author }} - {{ .book.Title }} - 书籍 - KOmpanion{{ end }}
 
 {{ define "content" }}
 {{ with .book }}
 <article class="edit-book-article">
-    <!-- Обложка книги -->
+
+    <!-- 书籍封面 -->
     <div class="cover">
         <img src="/books/{{.ID}}/cover" alt="{{.Title}} - {{.Author}}">
     </div>
 
-
-    <!-- Форма для редактирования метаданных -->
+    <!-- 编辑书籍信息 -->
     <div>
-        <form aria-labelledby="Редактирование книги" method="post">
+        <form aria-labelledby="编辑书籍" method="post">
             <div class="grid">
                 <label>
-                    Title
-                    <input type="text" name="书名" placeholder="Enter title" required value="{{ .Title }}">
+                    书名
+                    <input type="text" name="title" placeholder="请输入书名" required value="{{ .Title }}">
                 </label>
                 <label>
-                    Author
-                    <input type="text" name="作者" placeholder="Enter author" required value="{{ .Author }}">
+                    作者
+                    <input type="text" name="author" placeholder="请输入作者" required value="{{ .Author }}">
                 </label>
             </div>
+
             <div class="grid">
                 <label>
                     ISBN
-                    <input type="text" name="isbn" placeholder="Enter ISBN" value="{{ .ISBN }}">
+                    <input type="text" name="isbn" placeholder="请输入 ISBN" value="{{ .ISBN }}">
                 </label>
             </div>
+
             <div class="grid">
                 <label>
-                    Series
-                    <input type="text" name="类型" placeholder="Enter series name" value="{{ .Series }}">
+                    系列
+                    <input type="text" name="series" placeholder="请输入系列名称" value="{{ .Series }}">
                 </label>
                 <label>
-                    Series Index
-                    <input type="number" name="索引" placeholder="e.g. 1 or 1.5" step="0.1" min="0" value="{{ with .SeriesIndex }}{{ .Decimal }}{{ end }}">
+                    系列序号
+                    <input type="number" name="series_index" placeholder="如：1 或 1.5" step="0.1" min="0"
+                        value="{{ with .SeriesIndex }}{{ .Decimal }}{{ end }}">
                 </label>
             </div>
+
             <div>
-                <label for="description">Description</label>
-                <textarea name="描述" id="description" rows="4" placeholder="Enter book description">{{ .Description }}</textarea>
+                <label for="description">简介</label>
+                <textarea name="description" id="description" rows="4"
+                    placeholder="请输入书籍简介">{{ .Description }}</textarea>
             </div>
+
             <div class="grid">
                 <label>
-                    Year
-                    <input type="number" name="年份" placeholder="YYYY" min="1000" max="9999" value="{{ .Year }}">
+                    出版年份
+                    <input type="number" name="year" placeholder="YYYY" min="1000" max="9999" value="{{ .Year }}">
                 </label>
                 <label>
-                    Publisher
-                    <input type="text" name="出版社" placeholder="Enter publisher" value="{{ .Publisher }}">
+                    出版社
+                    <input type="text" name="publisher" placeholder="请输入出版社" value="{{ .Publisher }}">
                 </label>
             </div>
+
             <div class="grid">
                 <button type="submit" class="button success">保存</button>
-                <button type="button" class="button"><a href="/books/{{.ID}}/download"
-                        target="_blank">下载</a></button>
+
+                <a href="/books/{{.ID}}/download" target="_blank">
+                    <button type="button" class="button">下载</button>
+                </a>
+
+                <!-- 删除按钮（重点） -->
+                <button type="button" class="button danger" onclick="deleteBook('{{.ID}}')">
+                    删除
+                </button>
             </div>
         </form>
     </div>
+
 </article>
 {{ end }}
-<!-- Статистика чтения -->
+
+<!-- 阅读统计 -->
 {{ with $.stats }}
 <section class="reading-stats">
     <hgroup>
         <h3>阅读统计</h3>
     </hgroup>
+
     <table>
         <tr>
             <td style="width: 50%;">
-                <strong>页数</strong>
+                <strong>阅读页数</strong>
                 <p>{{ .TotalReadPages }}</p>
             </td>
             <td>
-                <strong>用时</strong>
+                <strong>总用时</strong>
                 <p>{{ formatDuration .TotalReadTime }}</p>
             </td>
         </tr>
         <tr>
             <td>
-                <strong>平均用时</strong>
+                <strong>平均每页用时</strong>
                 <p>{{ formatDuration .AverageTimePerPage }}</p>
             </td>
             <td>
@@ -91,4 +108,33 @@
     </table>
 </section>
 {{ end }}
+
+<!-- 删除脚本 -->
+<script>
+async function deleteBook(id) {
+    if (!confirm("确定删除这本书吗？此操作不可恢复！")) return;
+
+    try {
+        const res = await fetch("/api/books/delete", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ id })
+        });
+
+        const data = await res.json();
+
+        if (data.success) {
+            alert("删除成功");
+            window.location.href = "/books/";
+        } else {
+            alert("删除失败：" + data.error);
+        }
+    } catch (e) {
+        alert("请求失败");
+    }
+}
+</script>
+
 {{ end }}
