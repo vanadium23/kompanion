@@ -1,4 +1,4 @@
-{{ define "title" }}Reading Statistics - KOmpanion{{ end }}
+{{ define "title" }}阅读统计 - KOmpanion{{ end }}
 
 {{ define "content" }}
 <article>
@@ -6,22 +6,24 @@
         <h1>阅读统计</h1>
     </header>
 
+    <!-- 时间筛选 -->
     <section>
         <form method="GET" action="/stats" class="grid">
             <input type="date" id="from" name="from" value="{{ .from }}">
             <input type="date" id="to" name="to" value="{{ .to }}">
-            <button type="submit" style="flex-grow: 1;">Update</button>
+            <button type="submit" style="flex-grow: 1;">查询</button>
         </form>
     </section>
 
+    <!-- 统计表 -->
     <section>
         <table>
             <thead>
                 <tr>
                     <th>书名</th>
-                    <th>页数</th>
-                    <th>用时</th>
-                    <th>天数</th>
+                    <th>阅读页数</th>
+                    <th>阅读时长</th>
+                    <th>阅读天数</th>
                 </tr>
             </thead>
             <tbody>
@@ -33,19 +35,23 @@
                     <td>{{ .TotalReadDays }}</td>
                 </tr>
                 {{ end }}
+
                 <tr class="total-row">
                     <td><strong>总计</strong></td>
                     <td><strong>{{ .stats.TotalReadPages }}</strong></td>
                     <td><strong>{{ formatDuration .stats.TotalReadTime }}</strong></td>
-                    <td><strong>{{ .stats.AveragePagePerDay }} pages/day</strong></td>
+                    <td>
+                        <strong>{{ .stats.AveragePagePerDay }} 页/天</strong>
+                    </td>
                 </tr>
             </tbody>
         </table>
     </section>
 
+    <!-- 图表 -->
     <section>
-        <h2>每日阅读统计</h2>
-        <img src="/stats/chart?from={{ .from }}&to={{ .to }}" alt="Daily Reading Progress"
+        <h2>每日阅读趋势</h2>
+        <img src="/stats/chart?from={{ .from }}&to={{ .to }}" alt="每日阅读统计"
             style="width: 100%; max-width: 800px;">
     </section>
 </article>
