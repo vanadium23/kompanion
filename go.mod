@@ -1,8 +1,6 @@
 module github.com/vanadium23/kompanion
 
-go 1.22.0
-
-toolchain go1.23.0
+go 1.26.0
 
 require (
 	github.com/Eun/go-hit v0.5.23
