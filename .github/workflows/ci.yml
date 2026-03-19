@@ -6,7 +6,7 @@ jobs:
     name: runner / hadolint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: reviewdog/action-hadolint@v1
         with:
           fail_on_error: true
@@ -16,7 +16,7 @@ jobs:
     name: runner / dotenv-linter
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: dotenv-linter/action-dotenv-linter@v2
         with:
           reporter: github-pr-review
@@ -31,11 +31,7 @@ jobs:
           go-version: '1.26'
 
       - name: Unit Tests
-        run: "go test \
-          -v \
-          -covermode atomic \
-          -coverprofile=coverage.txt \
-          ./internal/..."
+        run: go test -v -covermode atomic -coverprofile=coverage.txt ./internal/...
       - name: Upload coverage report
         run: bash <(curl -s https://codecov.io/bash)
 
@@ -43,12 +39,31 @@ jobs:
     name: runner / integration tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: docker/setup-buildx-action@v3
       - name: Integration tests
-        run: "docker compose \
-          -f docker-compose.yml -f docker-compose-integration.yml \
-          up \
-          --build \
-          --abort-on-container-exit \
-          --exit-code-from integration"
+        run: |
+          docker compose \
+            -f docker-compose.yml -f docker-compose-integration.yml \
+            up \
+            --build \
+            --abort-on-container-exit \
+            --exit-code-from integration
+
+  build:
+    name: runner / build
+    runs-on: ubuntu-latest
+    needs: [tests, integration-tests]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Build Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: false
+          tags: kompanion:test
+          build-args: |
+            KOMPANION_VERSION=ci-${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
