@@ -25,10 +25,10 @@ jobs:
     name: runner / tests
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-go@v2
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
         with:
-          go-version: 1.22
+          go-version: '1.26'
 
       - name: Unit Tests
         run: "go test \
