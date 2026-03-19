@@ -1,12 +1,14 @@
 package opds
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/vanadium23/kompanion/internal/auth"
+	"github.com/vanadium23/kompanion/internal/entity"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/sync"
 	"github.com/vanadium23/kompanion/pkg/logger"
@@ -60,16 +62,36 @@ func (r *OPDSRouter) listNewest(c *gin.Context) {
 	if err != nil {
 		page = 1
 	}
-	books, err := r.books.ListBooks(c.Request.Context(), "created_at", "desc", page, 10)
+
+	// Parse search query parameter
+	searchQuery := c.Query("search")
+
+	query := entity.SearchQuery{
+		Search:    searchQuery,
+		SortBy:    "created_at",
+		SortOrder: "desc",
+		Page:      page,
+		Limit:     10,
+	}
+	books, err := r.books.ListBooks(c.Request.Context(), query)
 	if err != nil {
 		r.logger.Error("failed to list newest books", err)
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
 		return
 	}
 	baseUrl := "/opds/newest/"
+
+	// Build self URL including search query if present
+	selfUrl := baseUrl
+	feedTitle := "KOmpanion library"
+	if searchQuery != "" {
+		selfUrl = fmt.Sprintf("%s?search=%s", baseUrl, searchQuery)
+		feedTitle = fmt.Sprintf("KOmpanion library - Search: %s", searchQuery)
+	}
+
 	entries := translateBooksToEntries(books.Books)
-	navLinks := formNavLinks(baseUrl, books)
-	feed := BuildFeed("urn:kompanion:newest", "KOmpanion library", baseUrl, entries, navLinks)
+	navLinks := formNavLinks(baseUrl, searchQuery, books)
+	feed := BuildFeed("urn:kompanion:newest", feedTitle, selfUrl, entries, navLinks)
 	c.XML(http.StatusOK, feed)
 }
 

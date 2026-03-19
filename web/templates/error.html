@@ -1,0 +1,11 @@
+{{ define "error" }}
+{{ template "master" . }}
+{{ end }}
+
+{{ define "content" }}
+<div class="error-container">
+    <h1>Error</h1>
+    <p>{{ .Message }}</p>
+    <a href="/books/">Return to Books</a>
+</div>
+{{ end }}

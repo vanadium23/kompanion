@@ -3,6 +3,7 @@ package opds
 import (
 	"encoding/xml"
 	"fmt"
+	"net/url"
 	"time"
 
 	"github.com/vanadium23/kompanion/internal/entity"
@@ -120,7 +121,15 @@ func truncateText(text string, maxLen int) string {
 	return text[:maxLen-3] + "..."
 }
 
-func formNavLinks(baseURL string, books library.PaginatedBookList) []Link {
+// formNavLinks creates navigation links for OPDS pagination.
+// If searchQuery is not empty, it is included in the pagination links.
+func formNavLinks(baseURL string, searchQuery string, books library.PaginatedBookList) []Link {
+	// Build query string prefix
+	queryPrefix := "?"
+	if searchQuery != "" {
+		queryPrefix = fmt.Sprintf("?search=%s&", url.QueryEscape(searchQuery))
+	}
+
 	links := []Link{
 		{
 			Href: baseURL,
@@ -128,21 +137,21 @@ func formNavLinks(baseURL string, books library.PaginatedBookList) []Link {
 			Rel:  "start",
 		},
 		{
-			Href: fmt.Sprintf("%s?page=%d", baseURL, books.Last()),
+			Href: fmt.Sprintf("%spage=%d", queryPrefix, books.Last()),
 			Type: DirMime,
 			Rel:  "last",
 		},
 	}
 	if books.HasNext() {
 		links = append(links, Link{
-			Href: fmt.Sprintf("%s?page=%d", baseURL, books.Next()),
+			Href: fmt.Sprintf("%spage=%d", queryPrefix, books.Next()),
 			Type: DirMime,
 			Rel:  "next",
 		})
 	}
 	if books.HasPrev() {
 		links = append(links, Link{
-			Href: fmt.Sprintf("%s?page=%d", baseURL, books.Prev()),
+			Href: fmt.Sprintf("%spage=%d", queryPrefix, books.Prev()),
 			Type: DirMime,
 			Rel:  "prev",
 		})

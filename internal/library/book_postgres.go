@@ -119,7 +119,12 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 		var book entity.Book
 		var seriesIndex decimal.NullDecimal
 		var summary sql.NullString
-		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
+		var author sql.NullString
+		var publisher sql.NullString
+		var isbn sql.NullString
+		var coverPath sql.NullString
+		var series sql.NullString
+		err = rows.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
 		if err != nil {
 			return nil, fmt.Errorf("BookDatabaseRepo - List - rows.Scan: %w", err)
 		}
@@ -128,6 +133,21 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 		}
 		if summary.Valid {
 			book.Description = summary.String
+		}
+		if author.Valid {
+			book.Author = author.String
+		}
+		if publisher.Valid {
+			book.Publisher = publisher.String
+		}
+		if isbn.Valid {
+			book.ISBN = isbn.String
+		}
+		if coverPath.Valid {
+			book.CoverPath = coverPath.String
+		}
+		if series.Valid {
+			book.Series = series.String
 		}
 		books = append(books, book)
 	}
@@ -148,7 +168,12 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 	var book entity.Book
 	var seriesIndex decimal.NullDecimal
 	var summary sql.NullString
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
+	var author sql.NullString
+	var publisher sql.NullString
+	var isbn sql.NullString
+	var coverPath sql.NullString
+	var series sql.NullString
+	err := row.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - Get - r.Pool.QueryRow: %w", err)
 	}
@@ -157,6 +182,21 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 	}
 	if summary.Valid {
 		book.Description = summary.String
+	}
+	if author.Valid {
+		book.Author = author.String
+	}
+	if publisher.Valid {
+		book.Publisher = publisher.String
+	}
+	if isbn.Valid {
+		book.ISBN = isbn.String
+	}
+	if coverPath.Valid {
+		book.CoverPath = coverPath.String
+	}
+	if series.Valid {
+		book.Series = series.String
 	}
 
 	return book, nil
@@ -175,7 +215,12 @@ func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string)
 	var book entity.Book
 	var seriesIndex decimal.NullDecimal
 	var summary sql.NullString
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
+	var author sql.NullString
+	var publisher sql.NullString
+	var isbn sql.NullString
+	var coverPath sql.NullString
+	var series sql.NullString
+	err := row.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - GetByFileHash - r.Pool.QueryRow: %w", err)
 	}
@@ -184,6 +229,21 @@ func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string)
 	}
 	if summary.Valid {
 		book.Description = summary.String
+	}
+	if author.Valid {
+		book.Author = author.String
+	}
+	if publisher.Valid {
+		book.Publisher = publisher.String
+	}
+	if isbn.Valid {
+		book.ISBN = isbn.String
+	}
+	if coverPath.Valid {
+		book.CoverPath = coverPath.String
+	}
+	if series.Valid {
+		book.Series = series.String
 	}
 
 	return book, nil
@@ -198,6 +258,167 @@ func (bdr *BookDatabaseRepo) Count(ctx context.Context) (int, error) {
 	err := row.Scan(&count)
 	if err != nil {
 		return 0, fmt.Errorf("BookDatabaseRepo - Count - r.Pool.QueryRow: %w", err)
+	}
+
+	return count, nil
+}
+
+// Search -. search books with ILIKE and sorting
+func (bdr *BookDatabaseRepo) Search(ctx context.Context, query entity.SearchQuery) ([]entity.Book, error) {
+	// Validate and set defaults for sort order
+	sortOrder := query.SortOrder
+	switch sortOrder {
+	case "asc", "desc":
+	default:
+		sortOrder = "asc"
+	}
+
+	// Validate and set defaults for sort field
+	sortBy := query.SortBy
+	switch sortBy {
+	case "title", "author", "series", "created_at":
+	default:
+		sortBy = "title"
+	}
+
+	// Set defaults for pagination
+	page := query.Page
+	if page <= 0 {
+		page = 1
+	}
+	limit := query.Limit
+	if limit <= 0 || limit > 100 {
+		limit = 25
+	}
+
+	// Build WHERE clause for search
+	whereClause := ""
+	args := []interface{}{}
+	argIndex := 1
+
+	if query.Search != "" {
+		// Split search into words and create AND conditions
+		words := strings.Fields(query.Search)
+		conditions := make([]string, 0, len(words))
+
+		for _, word := range words {
+			likePattern := "%" + strings.ToLower(word) + "%"
+			conditions = append(conditions, fmt.Sprintf(
+				"(LOWER(title) LIKE $%d OR LOWER(author) LIKE $%d OR LOWER(COALESCE(series, '')) LIKE $%d OR LOWER(COALESCE(summary, '')) LIKE $%d)",
+				argIndex, argIndex, argIndex, argIndex,
+			))
+			args = append(args, likePattern)
+			argIndex++
+		}
+
+		if len(conditions) > 0 {
+			whereClause = "WHERE " + strings.Join(conditions, " AND ")
+		}
+	}
+
+	// Build ORDER BY clause with NULL series sorted last
+	orderByClause := ""
+	if sortBy == "series" {
+		// Sort by series, with NULL values last
+		if sortOrder == "asc" {
+			orderByClause = "ORDER BY series IS NULL, series ASC"
+		} else {
+			orderByClause = "ORDER BY series IS NULL, series DESC"
+		}
+	} else {
+		orderByClause = fmt.Sprintf("ORDER BY %s %s", sortBy, sortOrder)
+	}
+
+	// Build complete query
+	baseQuery := `
+		SELECT
+			id, title, author, publisher, year, created_at, updated_at, isbn, storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index, summary
+		FROM library_book
+	`
+	queryStr := fmt.Sprintf("%s %s %s LIMIT %d OFFSET %d",
+		baseQuery, whereClause, orderByClause, limit, (page-1)*limit)
+
+	rows, err := bdr.Pool.Query(ctx, queryStr, args...)
+	if err != nil {
+		return nil, fmt.Errorf("BookDatabaseRepo - Search - r.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	books := make([]entity.Book, 0)
+	for rows.Next() {
+		var book entity.Book
+		var seriesIndex decimal.NullDecimal
+		var summary sql.NullString
+		var author sql.NullString
+		var publisher sql.NullString
+		var isbn sql.NullString
+		var coverPath sql.NullString
+		var series sql.NullString
+		err = rows.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
+		if err != nil {
+			return nil, fmt.Errorf("BookDatabaseRepo - Search - rows.Scan: %w", err)
+		}
+		if seriesIndex.Valid {
+			book.SeriesIndex = &seriesIndex
+		}
+		if summary.Valid {
+			book.Description = summary.String
+		}
+		if author.Valid {
+			book.Author = author.String
+		}
+		if publisher.Valid {
+			book.Publisher = publisher.String
+		}
+		if isbn.Valid {
+			book.ISBN = isbn.String
+		}
+		if coverPath.Valid {
+			book.CoverPath = coverPath.String
+		}
+		if series.Valid {
+			book.Series = series.String
+		}
+		books = append(books, book)
+	}
+
+	return books, nil
+}
+
+// SearchCount -. count search results
+func (bdr *BookDatabaseRepo) SearchCount(ctx context.Context, query entity.SearchQuery) (int, error) {
+	// Build WHERE clause for search (same as Search)
+	whereClause := ""
+	args := []interface{}{}
+	argIndex := 1
+
+	if query.Search != "" {
+		// Split search into words and create AND conditions
+		words := strings.Fields(query.Search)
+		conditions := make([]string, 0, len(words))
+
+		for _, word := range words {
+			likePattern := "%" + strings.ToLower(word) + "%"
+			conditions = append(conditions, fmt.Sprintf(
+				"(LOWER(title) LIKE $%d OR LOWER(author) LIKE $%d OR LOWER(COALESCE(series, '')) LIKE $%d OR LOWER(COALESCE(summary, '')) LIKE $%d)",
+				argIndex, argIndex, argIndex, argIndex,
+			))
+			args = append(args, likePattern)
+			argIndex++
+		}
+
+		if len(conditions) > 0 {
+			whereClause = "WHERE " + strings.Join(conditions, " AND ")
+		}
+	}
+
+	queryStr := fmt.Sprintf("SELECT count(*) FROM library_book %s", whereClause)
+
+	row := bdr.Pool.QueryRow(ctx, queryStr, args...)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("BookDatabaseRepo - SearchCount - r.Pool.QueryRow: %w", err)
 	}
 
 	return count, nil
