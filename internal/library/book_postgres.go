@@ -119,7 +119,12 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 		var book entity.Book
 		var seriesIndex decimal.NullDecimal
 		var summary sql.NullString
-		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
+		var author sql.NullString
+		var publisher sql.NullString
+		var isbn sql.NullString
+		var coverPath sql.NullString
+		var series sql.NullString
+		err = rows.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
 		if err != nil {
 			return nil, fmt.Errorf("BookDatabaseRepo - List - rows.Scan: %w", err)
 		}
@@ -128,6 +133,21 @@ func (bdr *BookDatabaseRepo) List(ctx context.Context,
 		}
 		if summary.Valid {
 			book.Description = summary.String
+		}
+		if author.Valid {
+			book.Author = author.String
+		}
+		if publisher.Valid {
+			book.Publisher = publisher.String
+		}
+		if isbn.Valid {
+			book.ISBN = isbn.String
+		}
+		if coverPath.Valid {
+			book.CoverPath = coverPath.String
+		}
+		if series.Valid {
+			book.Series = series.String
 		}
 		books = append(books, book)
 	}
@@ -148,7 +168,12 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 	var book entity.Book
 	var seriesIndex decimal.NullDecimal
 	var summary sql.NullString
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
+	var author sql.NullString
+	var publisher sql.NullString
+	var isbn sql.NullString
+	var coverPath sql.NullString
+	var series sql.NullString
+	err := row.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - Get - r.Pool.QueryRow: %w", err)
 	}
@@ -157,6 +182,21 @@ func (bdr *BookDatabaseRepo) GetById(ctx context.Context, id string) (entity.Boo
 	}
 	if summary.Valid {
 		book.Description = summary.String
+	}
+	if author.Valid {
+		book.Author = author.String
+	}
+	if publisher.Valid {
+		book.Publisher = publisher.String
+	}
+	if isbn.Valid {
+		book.ISBN = isbn.String
+	}
+	if coverPath.Valid {
+		book.CoverPath = coverPath.String
+	}
+	if series.Valid {
+		book.Series = series.String
 	}
 
 	return book, nil
@@ -175,7 +215,12 @@ func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string)
 	var book entity.Book
 	var seriesIndex decimal.NullDecimal
 	var summary sql.NullString
-	err := row.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
+	var author sql.NullString
+	var publisher sql.NullString
+	var isbn sql.NullString
+	var coverPath sql.NullString
+	var series sql.NullString
+	err := row.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
 	if err != nil {
 		return entity.Book{}, fmt.Errorf("BookDatabaseRepo - GetByFileHash - r.Pool.QueryRow: %w", err)
 	}
@@ -184,6 +229,21 @@ func (bdr *BookDatabaseRepo) GetByFileHash(ctx context.Context, fileHash string)
 	}
 	if summary.Valid {
 		book.Description = summary.String
+	}
+	if author.Valid {
+		book.Author = author.String
+	}
+	if publisher.Valid {
+		book.Publisher = publisher.String
+	}
+	if isbn.Valid {
+		book.ISBN = isbn.String
+	}
+	if coverPath.Valid {
+		book.CoverPath = coverPath.String
+	}
+	if series.Valid {
+		book.Series = series.String
 	}
 
 	return book, nil
@@ -289,7 +349,12 @@ func (bdr *BookDatabaseRepo) Search(ctx context.Context, query entity.SearchQuer
 		var book entity.Book
 		var seriesIndex decimal.NullDecimal
 		var summary sql.NullString
-		err = rows.Scan(&book.ID, &book.Title, &book.Author, &book.Publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &book.ISBN, &book.FilePath, &book.DocumentID, &book.CoverPath, &book.Series, &seriesIndex, &summary)
+		var author sql.NullString
+		var publisher sql.NullString
+		var isbn sql.NullString
+		var coverPath sql.NullString
+		var series sql.NullString
+		err = rows.Scan(&book.ID, &book.Title, &author, &publisher, &book.Year, &book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath, &book.DocumentID, &coverPath, &series, &seriesIndex, &summary)
 		if err != nil {
 			return nil, fmt.Errorf("BookDatabaseRepo - Search - rows.Scan: %w", err)
 		}
@@ -298,6 +363,21 @@ func (bdr *BookDatabaseRepo) Search(ctx context.Context, query entity.SearchQuer
 		}
 		if summary.Valid {
 			book.Description = summary.String
+		}
+		if author.Valid {
+			book.Author = author.String
+		}
+		if publisher.Valid {
+			book.Publisher = publisher.String
+		}
+		if isbn.Valid {
+			book.ISBN = isbn.String
+		}
+		if coverPath.Valid {
+			book.CoverPath = coverPath.String
+		}
+		if series.Valid {
+			book.Series = series.String
 		}
 		books = append(books, book)
 	}
