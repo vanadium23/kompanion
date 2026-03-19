@@ -34,7 +34,7 @@ func NewRouter(
 		device := c.GetString("device_name")
 		err := rs.Write(c.Request.Context(), c.Request.Body, device)
 		if err != nil {
-			l.Info("error writing statistics", err)
+			l.Info("error writing statistics: %v", err)
 			c.JSON(http.StatusInternalServerError, gin.H{"message": "error writing statistics"})
 			return
 		}
