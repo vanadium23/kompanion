@@ -11,25 +11,21 @@ import (
 	"github.com/vanadium23/kompanion/internal/sync"
 )
 
-type test struct {
-	name string
-	mock func()
-	res  interface{}
-	err  error
-}
-
 func TestProgressFetch(t *testing.T) {
 	t.Parallel()
-
-	progressSync, repo := mockedProgress(t)
 
 	bookID := "bookID"
 	errInternalServErr := errors.New("internal server error")
 
-	tests := []test{
+	tests := []struct {
+		name string
+		mock func(*MockProgressRepo)
+		res  entity.Progress
+		err  error
+	}{
 		{
 			name: "empty result",
-			mock: func() {
+			mock: func(repo *MockProgressRepo) {
 				repo.EXPECT().GetBookHistory(context.Background(), bookID, 1).Return(nil, nil)
 			},
 			res: entity.Progress{},
@@ -37,7 +33,7 @@ func TestProgressFetch(t *testing.T) {
 		},
 		{
 			name: "first result",
-			mock: func() {
+			mock: func(repo *MockProgressRepo) {
 				repo.EXPECT().GetBookHistory(context.Background(), bookID, 1).Return(
 					[]entity.Progress{{
 						Document: bookID,
@@ -52,7 +48,7 @@ func TestProgressFetch(t *testing.T) {
 		},
 		{
 			name: "result with error",
-			mock: func() {
+			mock: func(repo *MockProgressRepo) {
 				repo.EXPECT().GetBookHistory(context.Background(), bookID, 1).Return(nil, errInternalServErr)
 			},
 			res: entity.Progress{},
@@ -66,11 +62,12 @@ func TestProgressFetch(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			tc.mock()
+			progressSync, repo := mockedProgress(t)
+			tc.mock(repo)
 
-			res, err := progressSync.Fetch(context.Background(), "bookID")
+			res, err := progressSync.Fetch(context.Background(), bookID)
 
-			require.Equal(t, res, tc.res)
+			require.Equal(t, tc.res, res)
 			require.ErrorIs(t, err, tc.err)
 		})
 	}
@@ -79,29 +76,29 @@ func TestProgressFetch(t *testing.T) {
 func TestProgressSync(t *testing.T) {
 	t.Parallel()
 
-	progressSync, repo := mockedProgress(t)
-
 	progressDoc := entity.Progress{
 		Document:  "bookID",
 		Timestamp: 1,
 	}
 	errInternalServErr := errors.New("internal server error")
 
-	tests := []test{
+	tests := []struct {
+		name string
+		mock func(*MockProgressRepo)
+		err  error
+	}{
 		{
 			name: "empty result",
-			mock: func() {
+			mock: func(repo *MockProgressRepo) {
 				repo.EXPECT().Store(context.Background(), progressDoc).Return(nil)
 			},
-			res: nil,
 			err: nil,
 		},
 		{
 			name: "result with error",
-			mock: func() {
+			mock: func(repo *MockProgressRepo) {
 				repo.EXPECT().Store(context.Background(), progressDoc).Return(errInternalServErr)
 			},
-			res: nil,
 			err: errInternalServErr,
 		},
 	}
@@ -112,7 +109,8 @@ func TestProgressSync(t *testing.T) {
 		t.Run(tc.name, func(t *testing.T) {
 			t.Parallel()
 
-			tc.mock()
+			progressSync, repo := mockedProgress(t)
+			tc.mock(repo)
 
 			_, err := progressSync.Sync(context.Background(), progressDoc)
 
@@ -125,10 +123,8 @@ func mockedProgress(t *testing.T) (*sync.ProgressSyncUseCase, *MockProgressRepo)
 	t.Helper()
 
 	mockCtl := gomock.NewController(t)
-	defer mockCtl.Finish()
 
 	repo := NewMockProgressRepo(mockCtl)
-
 	progress := sync.NewProgressSync(repo)
 
 	return progress, repo
