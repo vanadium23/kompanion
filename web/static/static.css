@@ -44,3 +44,112 @@
     flex-grow: 1;
     margin-top: 0;
 }
+
+/* Books toolbar - brutalist style */
+.books-toolbar {
+    border: var(--border-thickness) solid var(--text-color);
+    display: flex;
+    width: 100%;
+    margin-bottom: var(--line-height);
+}
+
+/* Search form - fills remaining space */
+.search-form {
+    display: flex;
+    flex: 1;
+    border-right: var(--border-thickness) solid var(--text-color);
+    margin: 0;
+}
+
+.search-form input[type="text"] {
+    flex: 1;
+    border: none;
+    background: var(--background-color);
+    color: var(--text-color);
+    margin: 0;
+    outline: none;
+    min-width: 0;
+    height: calc(var(--line-height) * 1em);
+    padding: 0 1ch;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+.search-form button {
+    border: none;
+    border-left: var(--border-thickness) solid var(--text-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    cursor: pointer;
+    margin: 0;
+    white-space: nowrap;
+    height: calc(var(--line-height) * 1em);
+    padding: 0 1ch;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+.search-form button:hover {
+    background: var(--background-color-alt);
+}
+
+.search-form button:active {
+    transform: translate(2px, 2px);
+}
+
+/* Clear search button */
+.button-clear {
+    border: none;
+    border-left: var(--border-thickness) solid var(--text-color);
+    background: var(--background-color);
+    color: var(--text-color);
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: calc(var(--line-height) * 1em);
+    padding: 0 1ch;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+.button-clear:hover {
+    background: var(--background-color-alt);
+}
+
+/* Upload form */
+.upload-form {
+    display: flex;
+    flex-shrink: 0;
+    margin: 0;
+}
+
+.upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: none;
+    background: var(--background-color);
+    color: var(--text-color);
+    cursor: pointer;
+    margin: 0;
+    white-space: nowrap;
+    height: calc(var(--line-height) * 1em);
+    padding: 0 1ch;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+.upload-label:hover {
+    background: var(--background-color-alt);
+}
+
+.upload-label:active {
+    transform: translate(2px, 2px);
+}
+
+.upload-label input[type="file"] {
+    display: none;
+}

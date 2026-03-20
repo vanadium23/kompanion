@@ -3,7 +3,7 @@ services:
   postgres:
     image: postgres
     volumes:
-      - pg-data:/var/lib/postgresql/data
+      - pg-data:/var/lib/postgresql
     environment:
       POSTGRES_USER: 'user'
       POSTGRES_PASSWORD: 'pass'
