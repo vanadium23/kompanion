@@ -13,6 +13,9 @@ import (
 	"github.com/vanadium23/kompanion/pkg/logger"
 )
 
+// SearchSortByRank sorts search results by relevance
+const SearchSortByRank = "rank"
+
 type booksRoutes struct {
 	shelf    library.Shelf
 	stats    stats.ReadingStats
@@ -40,7 +43,17 @@ func (r *booksRoutes) listBooks(c *gin.Context) {
 		}
 	}
 
-	books, err := r.shelf.ListBooks(c.Request.Context(), "created_at", "desc", page, perPage)
+	searchQuery := c.Query("q")
+
+	var books library.PaginatedBookList
+	var err error
+
+	if searchQuery != "" {
+		books, err = r.shelf.SearchBooks(c.Request.Context(), searchQuery, "rank", "desc", page, perPage)
+	} else {
+		books, err = r.shelf.ListBooks(c.Request.Context(), "created_at", "desc", page, perPage)
+	}
+
 	if err != nil {
 		c.HTML(500, "error", passStandartContext(c, gin.H{"error": err.Error()}))
 		return
@@ -65,7 +78,8 @@ func (r *booksRoutes) listBooks(c *gin.Context) {
 	}
 
 	c.HTML(200, "books", passStandartContext(c, gin.H{
-		"books": booksWithProgress,
+		"books":       booksWithProgress,
+		"searchQuery": searchQuery,
 		"pagination": gin.H{
 			"currentPage": page,
 			"perPage":     perPage,

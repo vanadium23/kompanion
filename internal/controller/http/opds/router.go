@@ -2,7 +2,9 @@ package opds
 
 import (
 	"net/http"
+	"net/url"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -30,8 +32,8 @@ func NewRouter(
 	{
 		h.GET("/", sh.listShelves)
 		h.GET("/newest/", sh.listNewest)
+		h.GET("/search/*searchTerms", sh.searchBooks)
 		h.GET("/book/:bookID/download", sh.downloadBook)
-		// TODO: search
 	}
 }
 
@@ -70,6 +72,48 @@ func (r *OPDSRouter) listNewest(c *gin.Context) {
 	entries := translateBooksToEntries(books.Books)
 	navLinks := formNavLinks(baseUrl, books)
 	feed := BuildFeed("urn:kompanion:newest", "KOmpanion library", baseUrl, entries, navLinks)
+	c.XML(http.StatusOK, feed)
+}
+
+func (r *OPDSRouter) searchBooks(c *gin.Context) {
+	searchTerms := c.Param("searchTerms")
+	// Remove leading slash if present
+	searchTerms = strings.TrimPrefix(searchTerms, "/")
+
+	// Also support query parameter
+	if searchTerms == "" {
+		searchTerms = c.Query("q")
+	}
+
+	// URL decode the search terms
+	decodedTerms, err := url.PathUnescape(searchTerms)
+	if err != nil {
+		decodedTerms = searchTerms
+	}
+
+	if decodedTerms == "" {
+		feed := BuildFeed("urn:kompanion:search", "Search Results", "/opds/search/", []Entry{}, []Link{})
+		c.XML(http.StatusOK, feed)
+		return
+	}
+
+	pageStr := c.Query("page")
+	page, err := strconv.Atoi(pageStr)
+	if err != nil {
+		page = 1
+	}
+
+	books, err := r.books.SearchBooks(c.Request.Context(), decodedTerms, "rank", "desc", page, 10)
+	if err != nil {
+		r.logger.Error("failed to search books", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
+		return
+	}
+
+	baseUrl := "/opds/search/" + searchTerms + "/"
+	entries := translateBooksToEntries(books.Books)
+	navLinks := formNavLinks(baseUrl, books)
+	feed := BuildFeed("urn:kompanion:search", "Search: "+decodedTerms, baseUrl, entries, navLinks)
 	c.XML(http.StatusOK, feed)
 }
 

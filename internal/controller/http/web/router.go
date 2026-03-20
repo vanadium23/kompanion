@@ -76,6 +76,12 @@ func NewRouter(
 			}
 			return s[:maxLen-3] + "..."
 		},
+		"paginationLink": func(searchQuery string, page int) string {
+			if searchQuery != "" {
+				return fmt.Sprintf("?q=%s&page=%d", template.URLQueryEscaper(searchQuery), page)
+			}
+			return fmt.Sprintf("?page=%d", page)
+		},
 	}
 	gv := ginview.New(config)
 	gv.SetFileHandler(embeddedFH)

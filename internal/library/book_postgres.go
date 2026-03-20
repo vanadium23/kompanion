@@ -262,3 +262,125 @@ func (bdr *BookDatabaseRepo) Count(ctx context.Context) (int, error) {
 
 	return count, nil
 }
+
+// Search -. full-text search on books
+func (bdr *BookDatabaseRepo) Search(ctx context.Context,
+	query, sortBy, sortOrder string,
+	page, perPage int,
+) ([]entity.Book, error) {
+	// Sanitize and validate
+	if len(query) > 500 {
+		query = query[:500]
+	}
+
+	switch sortOrder {
+	case "asc", "desc":
+	default:
+		sortOrder = "desc"
+	}
+
+	// For search, default sort by relevance (rank)
+	var orderBy string
+	switch sortBy {
+	case "title", "author", "publisher", "year", "created_at", "updated_at":
+		orderBy = fmt.Sprintf("%s %s", sortBy, sortOrder)
+	case "rank":
+		orderBy = "rank DESC"
+	default:
+		orderBy = "rank DESC"
+	}
+
+	if page <= 0 {
+		page = 1
+	}
+	if perPage <= 0 || perPage > 100 {
+		perPage = 25
+	}
+
+	// Use plainto_tsquery for user-friendly search (handles special chars)
+	sqlQuery := fmt.Sprintf(`
+		SELECT
+			id, title, author, publisher, year, created_at, updated_at, isbn,
+			storage_file_path, koreader_partial_md5, storage_cover_path, series, series_index, summary,
+			ts_rank(search_vector, plainto_tsquery('english', $1)) as rank
+		FROM library_book
+		WHERE search_vector @@ plainto_tsquery('english', $1)
+		ORDER BY %s
+		LIMIT %d OFFSET %d
+	`, orderBy, perPage, (page-1)*perPage)
+
+	rows, err := bdr.Pool.Query(ctx, sqlQuery, query)
+	if err != nil {
+		return nil, fmt.Errorf("BookDatabaseRepo - Search - r.Pool.Query: %w", err)
+	}
+	defer rows.Close()
+
+	books := make([]entity.Book, 0)
+	for rows.Next() {
+		var book entity.Book
+		var seriesIndex decimal.NullDecimal
+		var summary sql.NullString
+		var author sql.NullString
+		var publisher sql.NullString
+		var isbn sql.NullString
+		var coverPath sql.NullString
+		var series sql.NullString
+		var rank float64 // We don't use this but need to scan it
+
+		err = rows.Scan(
+			&book.ID, &book.Title, &author, &publisher, &book.Year,
+			&book.CreatedAt, &book.UpdatedAt, &isbn, &book.FilePath,
+			&book.DocumentID, &coverPath, &series, &seriesIndex, &summary, &rank,
+		)
+		if err != nil {
+			return nil, fmt.Errorf("BookDatabaseRepo - Search - rows.Scan: %w", err)
+		}
+
+		if seriesIndex.Valid {
+			book.SeriesIndex = &seriesIndex
+		}
+		if summary.Valid {
+			book.Description = summary.String
+		}
+		if author.Valid {
+			book.Author = author.String
+		}
+		if publisher.Valid {
+			book.Publisher = publisher.String
+		}
+		if isbn.Valid {
+			book.ISBN = isbn.String
+		}
+		if coverPath.Valid {
+			book.CoverPath = coverPath.String
+		}
+		if series.Valid {
+			book.Series = series.String
+		}
+		books = append(books, book)
+	}
+
+	return books, nil
+}
+
+// SearchCount -. count search results
+func (bdr *BookDatabaseRepo) SearchCount(ctx context.Context, query string) (int, error) {
+	if len(query) > 500 {
+		query = query[:500]
+	}
+
+	sqlQuery := `
+		SELECT count(*)
+		FROM library_book
+		WHERE search_vector @@ plainto_tsquery('english', $1)
+	`
+
+	row := bdr.Pool.QueryRow(ctx, sqlQuery, query)
+	var count int
+	err := row.Scan(&count)
+	if err != nil {
+		return 0, fmt.Errorf("BookDatabaseRepo - SearchCount - r.Pool.QueryRow: %w", err)
+	}
+
+	return count, nil
+}
