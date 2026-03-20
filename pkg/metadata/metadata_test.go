@@ -1,6 +1,7 @@
 package metadata_test
 
 import (
+	"io"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -15,12 +16,23 @@ func getProjectRoot() string {
 	return filepath.Join(filepath.Dir(b), "..", "..")
 }
 
+func readAll(path string) []byte {
+	file, err := os.Open(path)
+	if err != nil {
+		return nil
+	}
+	defer file.Close()
+	b, _ := io.ReadAll(file)
+	return b
+}
+
 // epubDescription contains typographic quotes (U+201C, U+201D) and apostrophe (U+2019)
 const epubDescription = "(From Wikipedia): Crime and Punishment (Russian: Преступл\u00e9ние и наказ\u00e1ние, Prestupleniye i nakazaniye) is a novel by the Russian author Fyodor Dostoyevsky. It was first published in the literary journal The Russian Messenger in twelve monthly installments during 1866. It was later published in a single volume. It is the second of Dostoyevsky\u2019s full-length novels following his return from ten years of exile in Siberia. Crime and Punishment is the first great novel of his \u201cmature\u201d period of writing. Crime and Punishment focuses on the mental anguish and moral dilemmas of Rodion Raskolnikov, an impoverished ex-student in St. Petersburg who formulates and executes a plan to kill an unscrupulous pawnbroker for her cash. Raskolnikov argues that with the pawnbroker\u2019s money he can perform good deeds to counterbalance the crime, while ridding the world of a worthless vermin. He also commits this murder to test his own hypothesis that some people are naturally capable of such things, and even have the right to do them. Several times throughout the novel, Raskolnikov justifies his actions by comparing himself with Napoleon Bonaparte, believing that murder is permissible in pursuit of a higher purpose."
 
 func TestExtractBookMetadata(t *testing.T) {
 	projectRoot := getProjectRoot()
 	booksPath := filepath.Join(projectRoot, "test", "test_data", "books")
+	coversPath := filepath.Join(projectRoot, "test", "test_data", "covers")
 
 	tests := []struct {
 		name     string
@@ -45,8 +57,10 @@ func TestExtractBookMetadata(t *testing.T) {
 				Language:    "en-us",
 				Publisher:   "BB eBooks Co., Ltd.",
 				Date:        "2016-01-03",
-				Format:      "epub",
+				ISBN:        "urn:uuid:12c6fed8-ec29-4343-ab36-9a48312ee01d",
 				Description: epubDescription,
+				Format:      "epub",
+				Cover:       readAll(filepath.Join(coversPath, "CrimePunishment-EPUB2.jpg")),
 			},
 		},
 		{
@@ -55,6 +69,7 @@ func TestExtractBookMetadata(t *testing.T) {
 			want: metadata.Metadata{
 				Title:  "Great Expectations",
 				Format: "fb2",
+				Cover:  readAll(filepath.Join(coversPath, "Great Expectations -- Charles Dickens.jpg")),
 			},
 		},
 	}
@@ -73,6 +88,8 @@ func TestExtractBookMetadata(t *testing.T) {
 			require.Equal(t, tt.want.Title, got.Title)
 			require.Equal(t, tt.want.Author, got.Author)
 			require.Equal(t, tt.want.Format, got.Format)
+			require.Equal(t, tt.want.ISBN, got.ISBN)
+			require.Equal(t, tt.want.Cover, got.Cover)
 			if tt.want.Description != "" {
 				require.Equal(t, tt.want.Description, got.Description)
 			}
