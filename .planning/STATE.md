@@ -5,7 +5,7 @@ milestone_name: milestone
 status: unknown
 last_updated: "2026-03-21T19:08:25.043Z"
 progress:
-  total_phases: 2
+  total_phases: 3
   completed_phases: 2
   total_plans: 7
   completed_plans: 7
@@ -48,6 +48,9 @@ Plan: Not started
 | Phase 02-web-ui P01 | 3min | 4 tasks | 3 files |
 
 ## Accumulated Context
+
+### Roadmap Evolution
+- Phase 3 added: XMNote API endpoint
 
 ### Decisions
 

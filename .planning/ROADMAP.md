@@ -81,6 +81,16 @@ Plans:
 **Total:** 21 requirements mapped to 2 phases
 **Orphaned:** 0
 
+### Phase 3: XMNote API endpoint
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 2
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 3 to break down)
+
 ---
 
 *Roadmap created: 2026-03-21*
