@@ -43,6 +43,11 @@ func (uc *HighlightSyncUseCase) Fetch(ctx context.Context, documentID string) ([
 	return uc.repo.GetByDocumentID(ctx, documentID)
 }
 
+// GetDocumentsByDevice retrieves unique documents with highlights for a device.
+func (uc *HighlightSyncUseCase) GetDocumentsByDevice(ctx context.Context, deviceName string) ([]DocumentInfo, error) {
+	return uc.repo.GetDocumentsByDevice(ctx, deviceName)
+}
+
 // generateHash creates MD5 hash from text:page:timestamp for deduplication.
 func generateHash(text, page string, timestamp int64) string {
 	data := fmt.Sprintf("%s:%s:%d", text, page, timestamp)
