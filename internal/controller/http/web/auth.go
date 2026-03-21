@@ -1,6 +1,8 @@
 package web
 
 import (
+	"net"
+
 	"github.com/gin-gonic/gin"
 	"github.com/vanadium23/kompanion/internal/auth"
 	"github.com/vanadium23/kompanion/pkg/logger"
@@ -35,7 +37,7 @@ func (r *authRoutes) logoutAction(c *gin.Context) {
 }
 
 func (r *authRoutes) loginAction(c *gin.Context) {
-	clientIP, _ := c.RemoteIP()
+	clientIP := net.ParseIP(c.RemoteIP())
 	sessionKey, err := r.auth.Login(
 		c.Request.Context(),
 		c.PostForm("username"),
