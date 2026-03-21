@@ -15,6 +15,7 @@ import (
 	v1 "github.com/vanadium23/kompanion/internal/controller/http/v1"
 	"github.com/vanadium23/kompanion/internal/controller/http/web"
 	"github.com/vanadium23/kompanion/internal/controller/http/webdav"
+	"github.com/vanadium23/kompanion/internal/highlight"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/stats"
 	"github.com/vanadium23/kompanion/internal/storage"
@@ -56,13 +57,14 @@ func Run(cfg *config.Config) {
 		cfg.Auth.Password,
 	)
 	progress := sync.NewProgressSync(sync.NewProgressDatabaseRepo(pg))
+	highlightSync := highlight.NewHighlightSync(highlight.NewHighlightDatabaseRepo(pg))
 	shelf := library.NewBookShelf(bookStorage, library.NewBookDatabaseRepo(pg), l)
 	rs := stats.NewKOReaderPGStats(pg)
 
 	// HTTP Server
 	handler := gin.New()
 	web.NewRouter(handler, l, authService, progress, shelf, rs, cfg.Version)
-	v1.NewRouter(handler, l, authService, progress, shelf)
+	v1.NewRouter(handler, l, authService, progress, shelf, highlightSync)
 	opds.NewRouter(handler, l, authService, progress, shelf)
 	webdav.NewRouter(handler, authService, l, rs)
 	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
