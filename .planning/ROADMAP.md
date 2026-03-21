@@ -54,7 +54,7 @@ Plans:
 **Plans:** 3 plans
 
 Plans:
-- [ ] 02-01-PLAN.md - Wire highlight dependency through router and fetch highlights in viewBook handler
+- [x] 02-01-PLAN.md - Wire highlight dependency through router and fetch highlights in viewBook handler
 - [x] 02-02-PLAN.md - Add highlights template section to book.html
 - [x] 02-03-PLAN.md - Add CSS styling for highlights
 
