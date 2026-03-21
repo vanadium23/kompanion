@@ -9,10 +9,10 @@ Requirements for highlights sync feature. Each maps to roadmap phases.
 
 ### API
 
-- [ ] **API-01**: KOReader can sync highlights via HTTP POST to `/syncs/highlights`
-- [ ] **API-02**: API accepts array of highlights in single request
-- [ ] **API-03**: API uses device authentication (MD5 hash, existing pattern)
-- [ ] **API-04**: API returns synced count and total count
+- [x] **API-01**: KOReader can sync highlights via HTTP POST to `/syncs/highlights`
+- [x] **API-02**: API accepts array of highlights in single request
+- [x] **API-03**: API uses device authentication (MD5 hash, existing pattern)
+- [x] **API-04**: API returns synced count and total count
 
 ### Data Storage
 
@@ -31,7 +31,7 @@ Requirements for highlights sync feature. Each maps to roadmap phases.
 
 - [x] **SYNC-01**: Re-syncing same highlights does not create duplicates
 - [x] **SYNC-02**: Highlights for books not in library are stored (orphan handling)
-- [ ] **SYNC-03**: Both KOReader data models supported (annotations + legacy)
+- [x] **SYNC-03**: Both KOReader data models supported (annotations + legacy)
 
 ### Web UI
 
@@ -74,10 +74,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| API-01 | Phase 1 | Pending |
-| API-02 | Phase 1 | Pending |
-| API-03 | Phase 1 | Pending |
-| API-04 | Phase 1 | Pending |
+| API-01 | Phase 1 | Complete |
+| API-02 | Phase 1 | Complete |
+| API-03 | Phase 1 | Complete |
+| API-04 | Phase 1 | Complete |
 | DATA-01 | Phase 1 | Complete |
 | DATA-02 | Phase 1 | Complete |
 | DATA-03 | Phase 1 | Complete |
@@ -90,7 +90,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-10 | Phase 1 | Complete |
 | SYNC-01 | Phase 1 | Complete |
 | SYNC-02 | Phase 1 | Complete |
-| SYNC-03 | Phase 1 | Pending |
+| SYNC-03 | Phase 1 | Complete |
 | UI-01 | Phase 2 | Pending |
 | UI-02 | Phase 2 | Pending |
 | UI-03 | Phase 2 | Pending |
