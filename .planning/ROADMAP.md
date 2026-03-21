@@ -74,7 +74,7 @@ Plans:
 **Plans:** 2 plans in 2 waves
 
 Plans:
-- [ ] 03-01-PLAN.md - Create notes package with markdown formatter (Wave 1)
+- [x] 03-01-PLAN.md - Create notes package with markdown formatter (Wave 1)
 - [ ] 03-02-PLAN.md - Implement Notes API handlers and wire routes (Wave 2, depends on 03-01)
 
 ---
