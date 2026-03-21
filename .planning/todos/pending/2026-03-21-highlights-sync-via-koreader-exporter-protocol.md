@@ -23,40 +23,52 @@ Users want to sync their highlights from KOReader to Kompanion so they can:
 
 ## Solution
 
-**Approach: HTTP API endpoint (like Readwise)**
+**Approach: Use XMNote exporter protocol (configurable IP)**
 
-Create a new target in Kompanion that accepts highlights via HTTP POST, similar to how Readwise accepts them. This allows creating a custom KOReader exporter target or using the existing JSON exporter with a custom endpoint.
+XMNote is the only KOReader exporter target that allows custom IP configuration.
+Users can set their Kompanion server IP and port (8080) to send highlights.
 
 **API Design:**
-- `PUT /syncs/highlights` - Receive highlights from device
-- `GET /syncs/highlights/{document}` - Return highlights for a book (optional, for bidirectional sync)
+- `POST /send` - Accept highlights in XMNote format (same endpoint path as XMNote app)
 
-**Data model from KOReader exporter (clip.lua):**
+**XMNote request format (from xmnote.lua):**
 ```json
 {
   "title": "Book Title",
   "author": "Author Name",
+  "type": 1,
+  "locationUnit": 1,
+  "readingStatus": 2,
+  "readingStatusChangedDate": 1234567890,
+  "source": "KOReader",
   "entries": [
     {
-      "page": 42,
-      "time": 1398127554,
-      "text": "Highlighted text...",
-      "note": "User note (optional)",
+      "text": "highlighted text",
+      "note": "user note",
       "chapter": "Chapter 1",
-      "sort": "highlight"
+      "time": 1234567890,
+      "page": 42
     }
-  ]
+  ],
+  "fuzzyReadingDurations": [...]
 }
 ```
 
+**Mapping to highlight_annotations:**
+- `entries[].text` → `text`
+- `entries[].note` → `note`
+- `entries[].page` → `page`
+- `entries[].chapter` → `chapter`
+- `entries[].time` → `highlight_time`
+- `title + author` → lookup `koreader_partial_md5` from books table
+
 **Implementation steps:**
-1. Create `internal/highlights/` package with entity, repo, usecase
-2. Add `highlights` table migration
-3. Create `/syncs/highlights` endpoint with device auth
-4. Add Web UI to view highlights per book
-5. (Optional) Create KOReader exporter plugin for Kompanion
+1. Create `POST /send` endpoint (no auth initially, or IP-based)
+2. Parse XMNote format and map to highlight_annotations
+3. Lookup book by title/author to get document_id (MD5)
+4. Store highlights with deduplication
 
 **Reference files:**
-- KOReader exporter: `/home/deploy/koreader/plugins/exporter.koplugin/`
-- Existing sync pattern: `internal/sync/progress.go`
-- Device auth: `internal/auth/auth.go`
+- XMNote exporter: `/home/deploy/koreader/plugins/exporter.koplugin/target/xmnote.lua`
+- Existing highlight sync: `internal/highlight/`
+- Device auth pattern: `internal/auth/auth.go`
