@@ -44,3 +44,31 @@
     flex-grow: 1;
     margin-top: 0;
 }
+
+/* Highlights section */
+.highlights-section {
+    margin-top: 2rem;
+    padding: 1rem;
+}
+
+.highlight-card {
+    border-left: 4px solid var(--text-color);
+    padding-left: 1rem;
+    margin-bottom: 1rem;
+}
+
+.highlight-text {
+    font-style: italic;
+    margin: 0;
+}
+
+.highlight-note {
+    margin-top: 0.5rem;
+    color: var(--text-color-alt);
+}
+
+.highlight-meta {
+    font-size: 0.875rem;
+    color: var(--text-color-alt);
+    margin-top: 0.25rem;
+}
