@@ -7,6 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 	"github.com/vanadium23/kompanion/internal/entity"
+	"github.com/vanadium23/kompanion/internal/highlight"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/stats"
 	syncpkg "github.com/vanadium23/kompanion/internal/sync"
@@ -14,14 +15,15 @@ import (
 )
 
 type booksRoutes struct {
-	shelf    library.Shelf
-	stats    stats.ReadingStats
-	progress syncpkg.Progress
-	logger   logger.Interface
+	shelf     library.Shelf
+	stats     stats.ReadingStats
+	progress  syncpkg.Progress
+	highlight highlight.Highlight
+	logger    logger.Interface
 }
 
-func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.ReadingStats, progress syncpkg.Progress, l logger.Interface) {
-	r := &booksRoutes{shelf: shelf, stats: stats, progress: progress, logger: l}
+func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.ReadingStats, progress syncpkg.Progress, h highlight.Highlight, l logger.Interface) {
+	r := &booksRoutes{shelf: shelf, stats: stats, progress: progress, highlight: h, logger: l}
 
 	handler.GET("/", r.listBooks)
 	handler.POST("/upload", r.uploadBook)
@@ -140,9 +142,16 @@ func (r *booksRoutes) viewBook(c *gin.Context) {
 		bookStats = &stats.BookStats{} // Use empty stats in case of error
 	}
 
+	highlights, err := r.highlight.Fetch(c.Request.Context(), book.DocumentID)
+	if err != nil {
+		r.logger.Error(err, "failed to fetch highlights")
+		highlights = []entity.Highlight{} // Use empty slice on error, NOT nil
+	}
+
 	c.HTML(200, "book", passStandartContext(c, gin.H{
-		"book":  book,
-		"stats": bookStats,
+		"book":       book,
+		"stats":      bookStats,
+		"highlights": highlights,
 	}))
 }
 
