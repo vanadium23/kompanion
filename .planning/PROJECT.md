@@ -27,9 +27,15 @@ Users can capture and review their book highlights in one place - Kompanion serv
 - ✓ Deduplication via content hash — ON CONFLICT DO NOTHING
 - ✓ Device authentication — MD5 hash, matches progress sync pattern
 
+### Validated (Phase 2: Web UI — 2026-03-21)
+
+- ✓ Display highlights on book detail page — read-only section with text, note, page/chapter
+- ✓ Highlight dependency wired through router to books handler
+- ✓ CSS styling matching existing design system
+
 ### Active
 
-- [ ] Display highlights on book detail page in web UI (Phase 2)
+- None — all milestone requirements complete
 
 ### Out of Scope
 
@@ -84,7 +90,7 @@ From KOReader, each highlight has:
 |----------|-----------|---------|
 | One-way sync only | KOReader exporter doesn't support fetching, user confirmed | ✓ Implemented |
 | HTTP API over WebDAV | Simpler implementation, matches progress sync pattern | ✓ Implemented |
-| Read-only UI | Editing adds complexity, can be added later | — Pending Phase 2 |
+| Read-only UI | Editing adds complexity, can be added later | ✓ Implemented |
 
 ---
-*Last updated: 2026-03-21 after Phase 1 completion*
+*Last updated: 2026-03-21 after Phase 2 completion*
