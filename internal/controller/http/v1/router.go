@@ -37,4 +37,9 @@ func NewRouter(handler *gin.Engine, l logger.Interface, a auth.AuthInterface, p 
 	highlightRoutes := handler.Group("/syncs")
 	highlightRoutes.Use(authDeviceMiddleware(a, l))
 	newHighlightRoutes(highlightRoutes, h, l)
+
+	// Notes API (Nextcloud Notes compatible, Basic Auth)
+	notesRoutes := handler.Group("/index.php/apps/notes/api/v1")
+	notesRoutes.Use(notesBasicAuth(a))
+	newNotesRoutes(notesRoutes, h, l)
 }
