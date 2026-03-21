@@ -17,7 +17,7 @@ This roadmap delivers the highlights sync feature in 2 phases. Each phase delive
 
 ## Phases
 
-- [ ] **Phase 1: API & Storage** - KOReader can sync highlights via HTTP API, stored in PostgreSQL
+- [x] **Phase 1: API & Storage** - KOReader can sync highlights via HTTP API, stored in PostgreSQL
 - [ ] **Phase 2: Web UI** - Users can view their synced highlights on the book detail page
 
 ---
@@ -51,7 +51,12 @@ Plans:
   3. User notes appear alongside highlight text
   4. Highlights are ordered chronologically or by page number
   5. Display is read-only (no editing controls shown)
-**Plans:** 2/4 plans executed
+**Plans:** 3 plans
+
+Plans:
+- [ ] 02-01-PLAN.md - Wire highlight dependency through router and fetch highlights in viewBook handler
+- [ ] 02-02-PLAN.md - Add highlights template section to book.html
+- [ ] 02-03-PLAN.md - Add CSS styling for highlights
 
 ---
 
@@ -59,8 +64,8 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|-----------------|--------|-----------|
-| 1. API & Storage | 2/4 | In Progress|  |
-| 2. Web UI | 0/1 | Not started | - |
+| 1. API & Storage | 4/4 | Complete | 2026-03-21 |
+| 2. Web UI | 0/3 | Not started | - |
 
 ---
 
@@ -79,3 +84,4 @@ Plans:
 ---
 
 *Roadmap created: 2026-03-21*
+*Last updated: 2026-03-21 after Phase 2 planning*
