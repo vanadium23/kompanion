@@ -8,9 +8,9 @@
 
 ## Overview
 
-This roadmap delivers the highlights sync feature in 2 phases. Each phase delivers a complete, verifiable capability.
+This roadmap delivers the highlights sync feature in 3 phases. Each phase delivers a complete, verifiable capability.
 
-**Total v1 Requirements:** 21
+**Total v1 Requirements:** 21 + Phase 3 (Nextcloud Notes API)
 **Granularity:** Coarse
 
 ---
@@ -18,7 +18,8 @@ This roadmap delivers the highlights sync feature in 2 phases. Each phase delive
 ## Phases
 
 - [x] **Phase 1: API & Storage** - KOReader can sync highlights via HTTP API, stored in PostgreSQL
-- [ ] **Phase 2: Web UI** - Users can view their synced highlights on the book detail page
+- [x] **Phase 2: Web UI** - Users can view their synced highlights on the book detail page
+- [ ] **Phase 3: Nextcloud Notes API** - KOReader Nextcloud Notes exporter compatibility
 
 ---
 
@@ -58,6 +59,24 @@ Plans:
 - [x] 02-02-PLAN.md - Add highlights template section to book.html
 - [x] 02-03-PLAN.md - Add CSS styling for highlights
 
+### Phase 3: Nextcloud Notes API Endpoint
+**Goal:** Implement Nextcloud Notes API-compatible endpoint for KOReader exporter (replaces XMNote due to auth security)
+**Depends on:** Phase 2
+**Requirements:** NC-01, NC-02, NC-03, NC-04, NC-05, NC-06
+
+**Success Criteria** (what must be TRUE):
+  1. KOReader can connect using Nextcloud Notes exporter with Basic Auth
+  2. GET /notes returns notes filtered by authenticated device
+  3. POST /notes creates note with highlights formatted as markdown
+  4. PUT /notes/{id} updates existing note by document hash
+  5. One note per book containing all highlights
+
+**Plans:** 2 plans in 2 waves
+
+Plans:
+- [ ] 03-01-PLAN.md - Create notes package with markdown formatter (Wave 1)
+- [ ] 03-02-PLAN.md - Implement Notes API handlers and wire routes (Wave 2, depends on 03-01)
+
 ---
 
 ## Progress
@@ -65,7 +84,8 @@ Plans:
 | Phase | Plans Complete | Status | Completed |
 |-------|-----------------|--------|-----------|
 | 1. API & Storage | 4/4 | Complete | 2026-03-21 |
-| 2. Web UI | 0/3 | Not started | - |
+| 2. Web UI | 3/3 | Complete | 2026-03-21 |
+| 3. Nextcloud Notes API | 0/2 | Not started | - |
 
 ---
 
@@ -77,21 +97,12 @@ Plans:
 | Data Storage | DATA-01 through DATA-10 | 1 |
 | Sync Behavior | SYNC-01, SYNC-02, SYNC-03 | 1 |
 | Web UI | UI-01 through UI-05 | 2 |
+| Notes API | NC-01, NC-02, NC-03, NC-04, NC-05, NC-06 | 3 |
 
-**Total:** 21 requirements mapped to 2 phases
+**Total:** 27 requirements mapped to 3 phases
 **Orphaned:** 0
-
-### Phase 3: XMNote API endpoint
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 2
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 3 to break down)
 
 ---
 
 *Roadmap created: 2026-03-21*
-*Last updated: 2026-03-21 after Phase 2 planning*
+*Last updated: 2026-03-21 after Phase 3 planning*
