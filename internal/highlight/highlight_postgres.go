@@ -67,3 +67,29 @@ func (r *HighlightDatabaseRepo) GetByDocumentID(ctx context.Context, documentID 
     }
     return highlights, nil
 }
+
+// GetDocumentsByDevice retrieves unique documents with highlights for a device.
+func (r *HighlightDatabaseRepo) GetDocumentsByDevice(ctx context.Context, deviceName string) ([]DocumentInfo, error) {
+    sql := `SELECT DISTINCT h.koreader_partial_md5, b.title, b.author
+            FROM highlight_annotations h
+            LEFT JOIN books b ON h.koreader_partial_md5 = b.partial_md5
+            WHERE h.auth_device_name = $1
+            ORDER BY b.title`
+
+    rows, err := r.Pool.Query(ctx, sql, deviceName)
+    if err != nil {
+        return nil, fmt.Errorf("HighlightDatabaseRepo - GetDocumentsByDevice - r.Pool.Query: %w", err)
+    }
+    defer rows.Close()
+
+    var docs []DocumentInfo
+    for rows.Next() {
+        var doc DocumentInfo
+        err = rows.Scan(&doc.PartialMD5, &doc.Title, &doc.Author)
+        if err != nil {
+            return nil, fmt.Errorf("HighlightDatabaseRepo - GetDocumentsByDevice - rows.Scan: %w", err)
+        }
+        docs = append(docs, doc)
+    }
+    return docs, nil
+}

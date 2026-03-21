@@ -118,6 +118,76 @@ func TestHighlightRepo_GetByDocumentID_Empty(t *testing.T) {
 	}
 }
 
+func TestHighlightRepo_GetDocumentsByDevice(t *testing.T) {
+	mock, hdr := setupTestHighlightDatabaseRepo()
+	defer mock.Close()
+
+	deviceName := "test-device"
+
+	rows := pgxmock.NewRows([]string{
+		"koreader_partial_md5", "title", "author",
+	}).
+		AddRow("doc-md5-1", "Book Title 1", "Author One").
+		AddRow("doc-md5-2", "Book Title 2", "Author Two")
+
+	mock.ExpectQuery("SELECT DISTINCT h.koreader_partial_md5, b.title, b.author").
+		WithArgs(deviceName).
+		WillReturnRows(rows)
+
+	docs, err := hdr.GetDocumentsByDevice(context.Background(), deviceName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(docs) != 2 {
+		t.Fatalf("Expected 2 documents, got %d", len(docs))
+	}
+
+	if docs[0].PartialMD5 != "doc-md5-1" {
+		t.Errorf("Expected PartialMD5 %s, got %s", "doc-md5-1", docs[0].PartialMD5)
+	}
+
+	if docs[0].Title != "Book Title 1" {
+		t.Errorf("Expected Title %s, got %s", "Book Title 1", docs[0].Title)
+	}
+
+	if docs[0].Author != "Author One" {
+		t.Errorf("Expected Author %s, got %s", "Author One", docs[0].Author)
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
+func TestHighlightRepo_GetDocumentsByDevice_Empty(t *testing.T) {
+	mock, hdr := setupTestHighlightDatabaseRepo()
+	defer mock.Close()
+
+	deviceName := "device-with-no-highlights"
+
+	rows := pgxmock.NewRows([]string{
+		"koreader_partial_md5", "title", "author",
+	})
+
+	mock.ExpectQuery("SELECT DISTINCT h.koreader_partial_md5, b.title, b.author").
+		WithArgs(deviceName).
+		WillReturnRows(rows)
+
+	docs, err := hdr.GetDocumentsByDevice(context.Background(), deviceName)
+	if err != nil {
+		t.Fatalf("Unexpected error: %v", err)
+	}
+
+	if len(docs) != 0 {
+		t.Fatalf("Expected 0 documents, got %d", len(docs))
+	}
+
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
+}
+
 func setupTestHighlightDatabaseRepo() (pgxmock.PgxPoolIface, *highlight.HighlightDatabaseRepo) {
 	mock, err := pgxmock.NewPool()
 	if err != nil {
