@@ -29,8 +29,8 @@ Requirements for highlights sync feature. Each maps to roadmap phases.
 
 ### Sync Behavior
 
-- [ ] **SYNC-01**: Re-syncing same highlights does not create duplicates
-- [ ] **SYNC-02**: Highlights for books not in library are stored (orphan handling)
+- [x] **SYNC-01**: Re-syncing same highlights does not create duplicates
+- [x] **SYNC-02**: Highlights for books not in library are stored (orphan handling)
 - [ ] **SYNC-03**: Both KOReader data models supported (annotations + legacy)
 
 ### Web UI
@@ -88,8 +88,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | DATA-08 | Phase 1 | Complete |
 | DATA-09 | Phase 1 | Complete |
 | DATA-10 | Phase 1 | Complete |
-| SYNC-01 | Phase 1 | Pending |
-| SYNC-02 | Phase 1 | Pending |
+| SYNC-01 | Phase 1 | Complete |
+| SYNC-02 | Phase 1 | Complete |
 | SYNC-03 | Phase 1 | Pending |
 | UI-01 | Phase 2 | Pending |
 | UI-02 | Phase 2 | Pending |

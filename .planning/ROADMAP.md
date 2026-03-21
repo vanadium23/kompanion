@@ -38,7 +38,7 @@ This roadmap delivers the highlights sync feature in 2 phases. Each phase delive
 Plans:
 - [x] 01-01-PLAN.md - Create Highlight entity and database migration
 - [x] 01-02-PLAN.md - Create highlight package interfaces
-- [ ] 01-03-PLAN.md - Implement use case and PostgreSQL repository
+- [x] 01-03-PLAN.md - Implement use case and PostgreSQL repository
 - [ ] 01-04-PLAN.md - Implement HTTP handler and wire dependencies
 
 ### Phase 2: Web UI

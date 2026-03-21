@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-21T17:26:00.622Z"
+last_updated: "2026-03-21T17:37:27.125Z"
 progress:
   total_phases: 2
   completed_phases: 0
   total_plans: 4
-  completed_plans: 2
+  completed_plans: 3
 ---
 
 # STATE: KOmpanion Highlights Sync
@@ -41,6 +41,7 @@ Plan: 4 of 4
 ---
 | Phase 01-api-storage P02 | 5min | 1 tasks | 2 files |
 | Phase 01-api-storage P01 | 4min | 2 tasks | 4 files |
+| Phase 01-api-storage P03 | 5min | 3 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -53,6 +54,8 @@ Plan: 4 of 4
 - [Phase 01-api-storage]: Use UUID with gen_random_uuid() for highlight ID (not BIGSERIAL like progress sync)
 - [Phase 01-api-storage]: Unique index on (koreader_partial_md5, highlight_hash) prevents duplicate highlights on re-sync
 - [Phase 01-api-storage]: koreader_device_id is nullable for consistency with progress sync pattern
+- [Phase 01-api-storage]: Use MD5 hash of (text:page:timestamp) for highlight deduplication
+- [Phase 01-api-storage]: Continue on individual Store errors to support idempotent batch sync
 
 ### Key Technical Context
 
