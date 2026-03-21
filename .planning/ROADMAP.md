@@ -36,7 +36,7 @@ This roadmap delivers the highlights sync feature in 2 phases. Each phase delive
   5. Highlights for unknown books are stored without errors (orphan handling)
 
 Plans:
-- [ ] 01-01-PLAN.md - Create Highlight entity and database migration
+- [x] 01-01-PLAN.md - Create Highlight entity and database migration
 - [x] 01-02-PLAN.md - Create highlight package interfaces
 - [ ] 01-03-PLAN.md - Implement use case and PostgreSQL repository
 - [ ] 01-04-PLAN.md - Implement HTTP handler and wire dependencies
@@ -51,7 +51,7 @@ Plans:
   3. User notes appear alongside highlight text
   4. Highlights are ordered chronologically or by page number
   5. Display is read-only (no editing controls shown)
-**Plans:** TBD
+**Plans:** 2/4 plans executed
 
 ---
 
@@ -59,7 +59,7 @@ Plans:
 
 | Phase | Plans Complete | Status | Completed |
 |-------|-----------------|--------|-----------|
-| 1. API & Storage | 0/4 | Not started | - |
+| 1. API & Storage | 2/4 | In Progress|  |
 | 2. Web UI | 0/1 | Not started | - |
 
 ---

@@ -16,16 +16,16 @@ Requirements for highlights sync feature. Each maps to roadmap phases.
 
 ### Data Storage
 
-- [ ] **DATA-01**: Highlights stored in PostgreSQL `highlight_annotations` table
-- [ ] **DATA-02**: Highlight text is stored (required)
-- [ ] **DATA-03**: User note is stored (optional)
-- [ ] **DATA-04**: Page/location is stored
-- [ ] **DATA-05**: Chapter is stored (optional)
-- [ ] **DATA-06**: Timestamp from KOReader is stored
-- [ ] **DATA-07**: Highlight style (drawer) and color are stored
-- [ ] **DATA-08**: Device name is stored
-- [ ] **DATA-09**: Document MD5 hash is stored for book matching
-- [ ] **DATA-10**: Content hash for deduplication is stored
+- [x] **DATA-01**: Highlights stored in PostgreSQL `highlight_annotations` table
+- [x] **DATA-02**: Highlight text is stored (required)
+- [x] **DATA-03**: User note is stored (optional)
+- [x] **DATA-04**: Page/location is stored
+- [x] **DATA-05**: Chapter is stored (optional)
+- [x] **DATA-06**: Timestamp from KOReader is stored
+- [x] **DATA-07**: Highlight style (drawer) and color are stored
+- [x] **DATA-08**: Device name is stored
+- [x] **DATA-09**: Document MD5 hash is stored for book matching
+- [x] **DATA-10**: Content hash for deduplication is stored
 
 ### Sync Behavior
 
@@ -78,16 +78,16 @@ Which phases cover which requirements. Updated during roadmap creation.
 | API-02 | Phase 1 | Pending |
 | API-03 | Phase 1 | Pending |
 | API-04 | Phase 1 | Pending |
-| DATA-01 | Phase 1 | Pending |
-| DATA-02 | Phase 1 | Pending |
-| DATA-03 | Phase 1 | Pending |
-| DATA-04 | Phase 1 | Pending |
-| DATA-05 | Phase 1 | Pending |
-| DATA-06 | Phase 1 | Pending |
-| DATA-07 | Phase 1 | Pending |
-| DATA-08 | Phase 1 | Pending |
-| DATA-09 | Phase 1 | Pending |
-| DATA-10 | Phase 1 | Pending |
+| DATA-01 | Phase 1 | Complete |
+| DATA-02 | Phase 1 | Complete |
+| DATA-03 | Phase 1 | Complete |
+| DATA-04 | Phase 1 | Complete |
+| DATA-05 | Phase 1 | Complete |
+| DATA-06 | Phase 1 | Complete |
+| DATA-07 | Phase 1 | Complete |
+| DATA-08 | Phase 1 | Complete |
+| DATA-09 | Phase 1 | Complete |
+| DATA-10 | Phase 1 | Complete |
 | SYNC-01 | Phase 1 | Pending |
 | SYNC-02 | Phase 1 | Pending |
 | SYNC-03 | Phase 1 | Pending |
