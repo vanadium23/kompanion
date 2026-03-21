@@ -63,7 +63,7 @@ func Run(cfg *config.Config) {
 
 	// HTTP Server
 	handler := gin.New()
-	web.NewRouter(handler, l, authService, progress, shelf, rs, cfg.Version)
+	web.NewRouter(handler, l, authService, progress, shelf, rs, highlightSync, cfg.Version)
 	v1.NewRouter(handler, l, authService, progress, shelf, highlightSync)
 	opds.NewRouter(handler, l, authService, progress, shelf)
 	webdav.NewRouter(handler, authService, l, rs)

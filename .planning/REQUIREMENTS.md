@@ -35,9 +35,9 @@ Requirements for highlights sync feature. Each maps to roadmap phases.
 
 ### Web UI
 
-- [ ] **UI-01**: Highlights displayed on book detail page
-- [ ] **UI-02**: Highlights shown with text, page, chapter (when available)
-- [ ] **UI-03**: User notes displayed alongside highlight text
+- [x] **UI-01**: Highlights displayed on book detail page
+- [x] **UI-02**: Highlights shown with text, page, chapter (when available)
+- [x] **UI-03**: User notes displayed alongside highlight text
 - [ ] **UI-04**: Highlights ordered chronologically or by page
 - [ ] **UI-05**: Read-only display (no editing in web UI)
 
@@ -91,9 +91,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SYNC-01 | Phase 1 | Complete |
 | SYNC-02 | Phase 1 | Complete |
 | SYNC-03 | Phase 1 | Complete |
-| UI-01 | Phase 2 | Pending |
-| UI-02 | Phase 2 | Pending |
-| UI-03 | Phase 2 | Pending |
+| UI-01 | Phase 2 | Complete |
+| UI-02 | Phase 2 | Complete |
+| UI-03 | Phase 2 | Complete |
 | UI-04 | Phase 2 | Pending |
 | UI-05 | Phase 2 | Pending |
 
