@@ -18,7 +18,7 @@ This roadmap delivers the highlights sync feature in 2 phases. Each phase delive
 ## Phases
 
 - [ ] **Phase 1: API & Storage** - KOReader can sync highlights via HTTP API, stored in PostgreSQL
-- [ ] **Phase 2: Web UI** - Users can view their highlights on the book detail page
+- [ ] **Phase 2: Web UI** - Users can view their synced highlights on the book detail page
 
 ---
 
@@ -34,7 +34,12 @@ This roadmap delivers the highlights sync feature in 2 phases. Each phase delive
   3. Highlights are stored in PostgreSQL with all metadata (text, note, page, chapter, timestamp, drawer, color, device, document hash)
   4. Re-syncing same highlights does not create duplicates (idempotent via content hash)
   5. Highlights for unknown books are stored without errors (orphan handling)
-**Plans:** TBD
+
+Plans:
+- [ ] 01-01-PLAN.md - Create Highlight entity and database migration
+- [ ] 01-02-PLAN.md - Create highlight package interfaces
+- [ ] 01-03-PLAN.md - Implement use case and PostgreSQL repository
+- [ ] 01-04-PLAN.md - Implement HTTP handler and wire dependencies
 
 ### Phase 2: Web UI
 **Goal:** Users can view their synced highlights on the book detail page
@@ -53,8 +58,8 @@ This roadmap delivers the highlights sync feature in 2 phases. Each phase delive
 ## Progress
 
 | Phase | Plans Complete | Status | Completed |
-|-------|----------------|--------|-----------|
-| 1. API & Storage | 0/1 | Not started | - |
+|-------|-----------------|--------|-----------|
+| 1. API & Storage | 0/4 | Not started | - |
 | 2. Web UI | 0/1 | Not started | - |
 
 ---
