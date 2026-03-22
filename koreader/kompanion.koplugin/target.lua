@@ -1,4 +1,3 @@
-local DataStorage = require("datastorage")
 local DocSettings = require("docsettings")
 local InfoMessage = require("ui/widget/infomessage")
 local MultiInputDialog = require("ui/widget/multiinputdialog")
@@ -8,9 +7,6 @@ local logger = require("logger")
 local T = require("ffi/util").template
 local _ = require("gettext")
 
--- G_reader_settings for reading device_id
-local G_reader_settings = require("luasettings"):open(DataStorage:getSettingsDir().."/reader.settings")
-
 -- Kompanion exporter for highlights sync
 local KompanionExporter = require("base"):new {
     name = "kompanion",
@@ -18,9 +14,8 @@ local KompanionExporter = require("base"):new {
 }
 
 function KompanionExporter:isReadyToExport()
-    -- D-06: device_name comes from G_reader_settings automatically
-    -- Only need url and device_password configured
-    return self.settings.url and self.settings.device_password
+    -- Need url, device_name and device_password configured
+    return self.settings.url and self.settings.device_name and self.settings.device_password
 end
 
 function KompanionExporter:getMenuTable()
@@ -49,8 +44,8 @@ function KompanionExporter:getMenuTable()
                         text = T(_([[Export highlights to your Kompanion server.
 
 1. Configure your Kompanion server URL (e.g., http://192.168.1.100:8080)
-2. Enter the device password from Kompanion's Devices page
-3. The device name is automatically read from KOReader settings
+2. Enter device name (must match name in Kompanion's Devices page)
+3. Enter device password from Kompanion's Devices page
 
 Make sure your KOReader and Kompanion server are on the same network.]])
                         )
@@ -62,8 +57,6 @@ Make sure your KOReader and Kompanion server are on the same network.]])
 end
 
 function KompanionExporter:showSetupDialog()
-    -- D-06: Only 2 fields - URL and Device Password
-    -- Device name is read automatically from G_reader_settings
     local dialog
     dialog = MultiInputDialog:new {
         title = _("Setup Kompanion"),
@@ -72,6 +65,12 @@ function KompanionExporter:showSetupDialog()
                 description = _("Server URL"),
                 hint = "http://192.168.1.100:8080",
                 text = self.settings.url,
+                input_type = "string"
+            },
+            {
+                description = _("Device Name"),
+                hint = _("Name from Kompanion Devices page"),
+                text = self.settings.device_name,
                 input_type = "string"
             },
             {
@@ -95,9 +94,14 @@ function KompanionExporter:showSetupDialog()
                     callback = function()
                         local fields = dialog:getFields()
                         local url = fields[1]
-                        local device_password = fields[2]
+                        local device_name = fields[2]
+                        local device_password = fields[3]
                         if url ~= "" then
                             self.settings.url = url
+                            self:saveSettings()
+                        end
+                        if device_name ~= "" then
+                            self.settings.device_name = device_name
                             self:saveSettings()
                         end
                         if device_password ~= "" then
@@ -152,19 +156,8 @@ function KompanionExporter:export(t)
         return false
     end
 
-    -- D-06: Get device_id from G_reader_settings automatically
-    local device_id = G_reader_settings:readSetting("device_id")
-    if not device_id then
-        logger.warn("KompanionExporter: device_id not found in G_reader_settings")
-        UIManager:show(InfoMessage:new {
-            text = _("Device ID not found. Please restart KOReader."),
-            timeout = 3,
-        })
-        return false
-    end
-
-    -- Build Basic Auth header: device_id:device_password
-    local auth = mime.b64(device_id .. ":" .. self.settings.device_password)
+    -- Build Basic Auth header: device_name:device_password
+    local auth = mime.b64(self.settings.device_name .. ":" .. self.settings.device_password)
     local headers = {
         ["Authorization"] = "Basic " .. auth,
     }
