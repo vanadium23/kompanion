@@ -20,8 +20,8 @@ This roadmap delivers the highlights sync feature in 5 phases. Each phase delive
 - [x] **Phase 1: API & Storage** - KOReader can sync highlights via HTTP API, stored in PostgreSQL
 - [x] **Phase 2: Web UI** - Users can view their synced highlights on the book detail page
 - [x] **Phase 3: Nextcloud Notes API** - KOReader Nextcloud Notes exporter compatibility
-- [ ] **Phase 4: KOReader Lua Plugin** - Dedicated plugin for Kompanion highlights sync
-- [ ] **Phase 5: Standalone KOReader Plugin** - WidgetContainer-based plugin with native highlight extraction
+- [~] **Phase 4: KOReader Lua Plugin** - DEPRECATED: Provider-based approach proved unreliable
+- [x] **Phase 5: Standalone KOReader Plugin** - WidgetContainer-based plugin with native highlight extraction
 
 ---
 
@@ -110,7 +110,7 @@ Plans:
 **Plans:** 1 plan in 1 wave
 
 Plans:
-- [ ] 05-01-PLAN.md - Create WidgetContainer-based KOReader plugin with native highlight extraction (Wave 1)
+- [x] 05-01-PLAN.md - Create WidgetContainer-based KOReader plugin with native highlight extraction (Wave 1)
 
 ---
 
@@ -121,8 +121,8 @@ Plans:
 | 1. API & Storage | 4/4 | Complete | 2026-03-21 |
 | 2. Web UI | 3/3 | Complete | 2026-03-21 |
 | 3. Nextcloud Notes API | 2/2 | Complete | 2026-03-21 |
-| 4. KOReader Lua Plugin | 0/1 | Not started | - |
-| 5. Standalone KOReader Plugin | 0/1 | Not started | - |
+| 4. KOReader Lua Plugin | N/A | Deprecated | - |
+| 5. Standalone KOReader Plugin | 1/1 | Complete | 2026-03-22 |
 
 ---
 
