@@ -33,6 +33,13 @@ Users can capture and review their book highlights in one place - Kompanion serv
 - ✓ Highlight dependency wired through router to books handler
 - ✓ CSS styling matching existing design system
 
+### Validated (Phase 4: KOReader Lua Plugin — 2026-03-22)
+
+- ✓ KOReader plugin for highlight export — `koreader/kompanion.koplugin/`
+- ✓ Provider system integration — appears in Export highlights menu
+- ✓ Automatic device name detection — from G_reader_settings
+- ✓ Success toast with synced count — D-13 compliance
+
 ### Active
 
 - None — all milestone requirements complete
@@ -91,6 +98,7 @@ From KOReader, each highlight has:
 | One-way sync only | KOReader exporter doesn't support fetching, user confirmed | ✓ Implemented |
 | HTTP API over WebDAV | Simpler implementation, matches progress sync pattern | ✓ Implemented |
 | Read-only UI | Editing adds complexity, can be added later | ✓ Implemented |
+| Provider-based plugin | Cleaner integration with existing exporter menu | ✓ Implemented |
 
 ---
-*Last updated: 2026-03-21 after Phase 2 completion*
+*Last updated: 2026-03-22 after Phase 4 completion*
