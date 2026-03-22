@@ -1,13 +1,14 @@
 local Device = require("device")
 local InfoMessage = require("ui/widget/infomessage")
+local md5 = require("ffi/sha2").md5
 local MultiInputDialog = require("ui/widget/multiinputdialog")
 local NetworkMgr = require("ui/network/manager")
 local UIManager = require("ui/uimanager")
 local WidgetContainer = require("ui/widget/container/widgetcontainer")
 local http = require("socket.http")
 local ltn12 = require("ltn12")
+local socket = require("socket")
 local logger = require("logger")
-local mime = require("mime")
 local rapidjson = require("rapidjson")
 local socketutil = require("socketutil")
 local T = require("ffi/util").template
@@ -31,6 +32,7 @@ end
 function Kompanion:addToMainMenu(menu_items)
     menu_items.kompanion_highlights = {
         text = _("Kompanion Highlights"),
+        sorting_hint = "tools",
         sub_item_table = {
             {
                 text = _("Setup"),
@@ -141,6 +143,15 @@ function Kompanion:doSync()
 end
 
 function Kompanion:performSync()
+    -- Safety check: ensure settings exist
+    if not self.settings.url or not self.settings.device_name or not self.settings.device_password then
+        UIManager:show(InfoMessage:new{
+            text = _("Please configure Kompanion first using Setup."),
+            timeout = 3,
+        })
+        return
+    end
+
     local highlights = self:getHighlights()
 
     if #highlights == 0 then
@@ -158,14 +169,29 @@ function Kompanion:performSync()
         highlights = highlights,
     }
 
-    local url = self.settings.url
-    if not url:match("/$") then url = url .. "/" end
+    local url = self.settings.url or ""
+    if url ~= "" and not url:match("/$") then url = url .. "/" end
     url = url .. "syncs/highlights"
 
-    local auth = mime.b64(self.settings.device_name .. ":" .. self.settings.device_password)
-    local response, err = self:makeJsonRequest(url, "POST", body, {
-        ["Authorization"] = "Basic " .. auth,
-    })
+    -- KOReader sync API uses x-auth-user and x-auth-key (MD5 hash of password)
+    local hashed_password = md5(self.settings.device_password or "")
+
+    -- Wrap HTTP call in pcall to prevent crashes
+    local ok, response, err = pcall(function()
+        return self:makeJsonRequest(url, "POST", body, {
+            ["x-auth-user"] = self.settings.device_name or "",
+            ["x-auth-key"] = hashed_password,
+        })
+    end)
+
+    if not ok then
+        UIManager:show(InfoMessage:new{
+            text = T(_("Sync failed: %1"), response or "internal error"),
+            timeout = 3,
+        })
+        logger.warn("Kompanion: sync crashed:", response)
+        return
+    end
 
     if response and response.synced then
         -- Show success toast with synced count
