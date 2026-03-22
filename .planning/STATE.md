@@ -25,6 +25,12 @@ progress:
 
 ---
 
+## Roadmap Evolution
+
+- Phase 04 added: Lua плагин для KOReader с sync/highlights API (встроенный устарел)
+
+---
+
 ## Current Position
 
 Phase: 03

@@ -102,6 +102,16 @@ Plans:
 **Total:** 27 requirements mapped to 3 phases
 **Orphaned:** 0
 
+### Phase 4: написать плагин на lua для koreader, который работает с нашим api sync/highlights, потому что встроенный помечен как outdated
+
+**Goal:** [To be planned]
+**Requirements**: TBD
+**Depends on:** Phase 3
+**Plans:** 0 plans
+
+Plans:
+- [ ] TBD (run /gsd:plan-phase 4 to break down)
+
 ---
 
 *Roadmap created: 2026-03-21*
