@@ -15,7 +15,6 @@ local _ = require("gettext")
 
 local Kompanion = WidgetContainer:extend{
     name = "kompanion",
-    is_doc_only = true,  -- Only active when document is open
 }
 
 Kompanion.default_settings = {
@@ -40,7 +39,9 @@ function Kompanion:addToMainMenu(menu_items)
             },
             {
                 text = _("Sync highlights"),
-                enabled_func = function() return self:isConfigured() end,
+                enabled_func = function()
+                    return self:isConfigured() and self.ui.document ~= nil
+                end,
                 callback = function() self:doSync() end,
             },
             {
@@ -112,6 +113,15 @@ function Kompanion:doSync()
     if not self:isConfigured() then
         UIManager:show(InfoMessage:new{
             text = _("Please configure Kompanion first using Setup."),
+            timeout = 3,
+        })
+        return
+    end
+
+    -- Check if document is open
+    if not self.ui.document then
+        UIManager:show(InfoMessage:new{
+            text = _("Please open a book first to sync highlights."),
             timeout = 3,
         })
         return
