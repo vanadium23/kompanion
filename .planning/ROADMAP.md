@@ -8,9 +8,9 @@
 
 ## Overview
 
-This roadmap delivers the highlights sync feature in 3 phases. Each phase delivers a complete, verifiable capability.
+This roadmap delivers the highlights sync feature in 4 phases. Each phase delivers a complete, verifiable capability.
 
-**Total v1 Requirements:** 21 + Phase 3 (Nextcloud Notes API)
+**Total v1 Requirements:** 31 (including Phase 4 Lua plugin)
 **Granularity:** Coarse
 
 ---
@@ -19,7 +19,8 @@ This roadmap delivers the highlights sync feature in 3 phases. Each phase delive
 
 - [x] **Phase 1: API & Storage** - KOReader can sync highlights via HTTP API, stored in PostgreSQL
 - [x] **Phase 2: Web UI** - Users can view their synced highlights on the book detail page
-- [ ] **Phase 3: Nextcloud Notes API** - KOReader Nextcloud Notes exporter compatibility
+- [x] **Phase 3: Nextcloud Notes API** - KOReader Nextcloud Notes exporter compatibility
+- [ ] **Phase 4: KOReader Lua Plugin** - Dedicated plugin for Kompanion highlights sync
 
 ---
 
@@ -77,6 +78,22 @@ Plans:
 - [x] 03-01-PLAN.md - Create notes package with markdown formatter (Wave 1)
 - [x] 03-02-PLAN.md - Implement Notes API handlers and wire routes (Wave 2, depends on 03-01)
 
+### Phase 4: KOReader Lua Plugin for Highlights Sync
+**Goal:** Create a KOReader Lua plugin that exports highlights to Kompanion's existing `/syncs/highlights` API. The built-in exporter plugin is marked deprecated, so this provides a dedicated integration path.
+**Depends on:** Phase 3
+**Requirements:** LUA-01, LUA-02, LUA-03, LUA-04
+
+**Success Criteria** (what must be TRUE):
+  1. KOReader user sees Kompanion option in Export highlights menu
+  2. User can configure server URL and device credentials via Setup dialog
+  3. Export sends highlights to Kompanion /syncs/highlights endpoint
+  4. Success/failure shows as toast notification in KOReader
+
+**Plans:** 1 plan in 1 wave
+
+Plans:
+- [ ] 04-01-PLAN.md - Create KOReader Lua plugin with Provider registration (Wave 1)
+
 ---
 
 ## Progress
@@ -85,7 +102,8 @@ Plans:
 |-------|-----------------|--------|-----------|
 | 1. API & Storage | 4/4 | Complete | 2026-03-21 |
 | 2. Web UI | 3/3 | Complete | 2026-03-21 |
-| 3. Nextcloud Notes API | 0/2 | Not started | - |
+| 3. Nextcloud Notes API | 2/2 | Complete | 2026-03-21 |
+| 4. KOReader Lua Plugin | 0/1 | Not started | - |
 
 ---
 
@@ -98,21 +116,12 @@ Plans:
 | Sync Behavior | SYNC-01, SYNC-02, SYNC-03 | 1 |
 | Web UI | UI-01 through UI-05 | 2 |
 | Notes API | NC-01, NC-02, NC-03, NC-04, NC-05, NC-06 | 3 |
+| Lua Plugin | LUA-01, LUA-02, LUA-03, LUA-04 | 4 |
 
-**Total:** 27 requirements mapped to 3 phases
+**Total:** 31 requirements mapped to 4 phases
 **Orphaned:** 0
-
-### Phase 4: написать плагин на lua для koreader, который работает с нашим api sync/highlights, потому что встроенный помечен как outdated
-
-**Goal:** [To be planned]
-**Requirements**: TBD
-**Depends on:** Phase 3
-**Plans:** 0 plans
-
-Plans:
-- [ ] TBD (run /gsd:plan-phase 4 to break down)
 
 ---
 
 *Roadmap created: 2026-03-21*
-*Last updated: 2026-03-21 after Phase 3 planning*
+*Last updated: 2026-03-22 after Phase 4 planning*

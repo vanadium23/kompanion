@@ -41,6 +41,22 @@ Requirements for highlights sync feature. Each maps to roadmap phases.
 - [x] **UI-04**: Highlights ordered chronologically or by page
 - [x] **UI-05**: Read-only display (no editing in web UI)
 
+### Nextcloud Notes API
+
+- [x] **NC-01**: GET /notes returns notes filtered by authenticated device
+- [x] **NC-02**: POST /notes creates note with highlights formatted as markdown
+- [x] **NC-03**: PUT /notes/{id} updates existing note by document hash
+- [x] **NC-04**: One note per book containing all highlights
+- [x] **NC-05**: Basic Auth with device credentials
+- [x] **NC-06**: CRC32 IEEE hash for stable integer IDs
+
+### KOReader Lua Plugin
+
+- [ ] **LUA-01**: Plugin appears in KOReader Export highlights menu
+- [ ] **LUA-02**: User can configure server URL and device credentials via Setup dialog
+- [ ] **LUA-03**: Export sends highlights to Kompanion /syncs/highlights endpoint with Basic Auth
+- [ ] **LUA-04**: Success/failure shows as toast notification in KOReader
+
 ## v2 Requirements
 
 Deferred to future release.
@@ -67,6 +83,8 @@ Explicitly excluded. Documented to prevent scope creep.
 | Image highlights | Complexity, deferred per PROJECT.md |
 | Real-time sync | Over-engineering for reading use case |
 | Highlight sharing | Out of scope for self-hosted tool |
+| Auto-sync on book close | Deferred - could be future enhancement |
+| Plugin auto-update | KOReader doesn't support this natively |
 
 ## Traceability
 
@@ -96,12 +114,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-03 | Phase 2 | Complete |
 | UI-04 | Phase 2 | Complete |
 | UI-05 | Phase 2 | Complete |
+| NC-01 | Phase 3 | Complete |
+| NC-02 | Phase 3 | Complete |
+| NC-03 | Phase 3 | Complete |
+| NC-04 | Phase 3 | Complete |
+| NC-05 | Phase 3 | Complete |
+| NC-06 | Phase 3 | Complete |
+| LUA-01 | Phase 4 | Not started |
+| LUA-02 | Phase 4 | Not started |
+| LUA-03 | Phase 4 | Not started |
+| LUA-04 | Phase 4 | Not started |
 
 **Coverage:**
-- v1 requirements: 21 total
-- Mapped to phases: 21
-- Unmapped: 0 ✓
+- v1 requirements: 31 total
+- Mapped to phases: 31
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-21*
-*Last updated: 2026-03-21 after initial definition*
+*Last updated: 2026-03-22 after Phase 4 planning*
