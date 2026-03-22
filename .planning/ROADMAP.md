@@ -8,7 +8,7 @@
 
 ## Overview
 
-This roadmap delivers the highlights sync feature in 4 phases. Each phase delivers a complete, verifiable capability.
+This roadmap delivers the highlights sync feature in 5 phases. Each phase delivers a complete, verifiable capability.
 
 **Total v1 Requirements:** 31 (including Phase 4 Lua plugin)
 **Granularity:** Coarse
@@ -21,6 +21,7 @@ This roadmap delivers the highlights sync feature in 4 phases. Each phase delive
 - [x] **Phase 2: Web UI** - Users can view their synced highlights on the book detail page
 - [x] **Phase 3: Nextcloud Notes API** - KOReader Nextcloud Notes exporter compatibility
 - [ ] **Phase 4: KOReader Lua Plugin** - Dedicated plugin for Kompanion highlights sync
+- [ ] **Phase 5: Standalone KOReader Plugin** - WidgetContainer-based plugin with native highlight extraction
 
 ---
 
@@ -94,6 +95,23 @@ Plans:
 Plans:
 - [x] 04-01-PLAN.md - Create KOReader Lua plugin with Provider registration (Wave 1)
 
+### Phase 5: Standalone KOReader Plugin with Native Highlight Extraction
+**Goal:** Create a standalone KOReader Lua plugin that directly extracts highlights from document sidecar files and syncs to Kompanion. Does NOT depend on the exporter.koplugin framework - reads DocSettings directly using clip.lua patterns.
+**Depends on:** Phase 4 (replaces unreliable Provider-based approach)
+**Requirements:** D-01 through D-16 (implementation decisions from CONTEXT.md)
+
+**Success Criteria** (what must be TRUE):
+  1. Plugin appears in KOReader Tools menu (not Export highlights submenu)
+  2. User can configure server URL, device name, and password via Setup dialog
+  3. Sync highlights menu item sends highlights to Kompanion /syncs/highlights endpoint
+  4. Plugin extracts highlights from both new `annotations` and legacy `highlight`+`bookmarks` formats
+  5. Success/failure shows as toast notification with synced count
+
+**Plans:** 1 plan in 1 wave
+
+Plans:
+- [ ] 05-01-PLAN.md - Create WidgetContainer-based KOReader plugin with native highlight extraction (Wave 1)
+
 ---
 
 ## Progress
@@ -104,6 +122,7 @@ Plans:
 | 2. Web UI | 3/3 | Complete | 2026-03-21 |
 | 3. Nextcloud Notes API | 2/2 | Complete | 2026-03-21 |
 | 4. KOReader Lua Plugin | 0/1 | Not started | - |
+| 5. Standalone KOReader Plugin | 0/1 | Not started | - |
 
 ---
 
@@ -117,11 +136,12 @@ Plans:
 | Web UI | UI-01 through UI-05 | 2 |
 | Notes API | NC-01, NC-02, NC-03, NC-04, NC-05, NC-06 | 3 |
 | Lua Plugin | LUA-01, LUA-02, LUA-03, LUA-04 | 4 |
+| Standalone Plugin | D-01 through D-16 | 5 |
 
-**Total:** 31 requirements mapped to 4 phases
+**Total:** 31 requirements mapped to 4 phases + Phase 5 implementation decisions
 **Orphaned:** 0
 
 ---
 
 *Roadmap created: 2026-03-21*
-*Last updated: 2026-03-22 after Phase 4 planning*
+*Last updated: 2026-03-22 after Phase 5 planning*
