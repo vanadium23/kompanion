@@ -92,7 +92,7 @@ Plans:
 **Plans:** 1 plan in 1 wave
 
 Plans:
-- [ ] 04-01-PLAN.md - Create KOReader Lua plugin with Provider registration (Wave 1)
+- [x] 04-01-PLAN.md - Create KOReader Lua plugin with Provider registration (Wave 1)
 
 ---
 

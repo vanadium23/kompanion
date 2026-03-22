@@ -52,10 +52,10 @@ Requirements for highlights sync feature. Each maps to roadmap phases.
 
 ### KOReader Lua Plugin
 
-- [ ] **LUA-01**: Plugin appears in KOReader Export highlights menu
-- [ ] **LUA-02**: User can configure server URL and device credentials via Setup dialog
-- [ ] **LUA-03**: Export sends highlights to Kompanion /syncs/highlights endpoint with Basic Auth
-- [ ] **LUA-04**: Success/failure shows as toast notification in KOReader
+- [x] **LUA-01**: Plugin appears in KOReader Export highlights menu
+- [x] **LUA-02**: User can configure server URL and device credentials via Setup dialog
+- [x] **LUA-03**: Export sends highlights to Kompanion /syncs/highlights endpoint with Basic Auth
+- [x] **LUA-04**: Success/failure shows as toast notification in KOReader
 
 ## v2 Requirements
 

@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-21T21:27:02.200Z"
+last_updated: "2026-03-22T06:33:40.366Z"
 progress:
-  total_phases: 3
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  total_phases: 4
+  completed_phases: 4
+  total_plans: 10
+  completed_plans: 10
 ---
 
 # STATE: KOmpanion Highlights Sync
@@ -21,7 +21,7 @@ progress:
 ## Project Reference
 
 **Core Value:** Users can capture and review their book highlights in one place
-**Current Focus:** Phase 03 — xmnote-api-endpoint
+**Current Focus:** Phase 04 — lua-koreader-api-sync-highlights-outdated
 
 ---
 
@@ -33,8 +33,8 @@ progress:
 
 ## Current Position
 
-Phase: 03
-Plan: Not started
+Phase: 04 (lua-koreader-api-sync-highlights-outdated) — EXECUTING
+Plan: 1 of 1
 
 ## Performance Metrics
 
@@ -54,6 +54,7 @@ Plan: Not started
 | Phase 02-web-ui P01 | 3min | 4 tasks | 3 files |
 | Phase 03-xmnote-api-endpoint P01 | 2min | 2 tasks | 2 files |
 | Phase 03-xmnote-api-endpoint P02 | 5min | 4 tasks | 7 files |
+| Phase 04-lua-koreader-api-sync-highlights-outdated P01 | 3min | 3 tasks | 3 files |
 
 ## Accumulated Context
 
@@ -82,6 +83,8 @@ Plan: Not started
 - [Phase 02-web-ui]: Reuse existing highlightSync instance from app.go for web UI, pass through router chain
 - [Phase 02-web-ui]: Initialize highlights to empty slice on error (not nil) to prevent template rendering issues
 - [Phase 03-xmnote-api-endpoint]: Use CRC32 IEEE for stable hash-to-integer conversion (Nextcloud Notes API requires int IDs)
+- [Phase 04-lua-koreader-api-sync-highlights-outdated]: D-06: Device name read automatically from G_reader_settings - no separate input field in Setup dialog
+- [Phase 04-lua-koreader-api-sync-highlights-outdated]: D-13: Success toast displays synced count from API response.synced
 
 ### Key Technical Context
 
