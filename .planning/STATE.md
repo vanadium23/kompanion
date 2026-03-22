@@ -3,12 +3,12 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: unknown
-last_updated: "2026-03-22T06:58:38.633Z"
+last_updated: "2026-03-22T08:16:56.115Z"
 progress:
-  total_phases: 4
-  completed_phases: 4
-  total_plans: 10
-  completed_plans: 10
+  total_phases: 5
+  completed_phases: 5
+  total_plans: 11
+  completed_plans: 11
 ---
 
 # STATE: KOmpanion Highlights Sync
@@ -21,19 +21,20 @@ progress:
 ## Project Reference
 
 **Core Value:** Users can capture and review their book highlights in one place
-**Current Focus:** Phase 04 — lua-koreader-api-sync-highlights-outdated
+**Current Focus:** Phase 05 — standalone-koreader-plugin-with-native-highlight-extraction
 
 ---
 
 ## Roadmap Evolution
 
 - Phase 04 added: Lua плагин для KOReader с sync/highlights API (встроенный устарел)
+- Phase 05 added: Standalone KOReader plugin with native highlight extraction (не завязан на exporter)
 
 ---
 
 ## Current Position
 
-Phase: 04
+Phase: 05
 Plan: Not started
 
 ## Performance Metrics
