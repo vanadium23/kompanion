@@ -16,6 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vanadium23/kompanion"
 	"github.com/vanadium23/kompanion/internal/auth"
+	"github.com/vanadium23/kompanion/internal/highlight"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/stats"
 	"github.com/vanadium23/kompanion/internal/sync"
@@ -29,6 +30,7 @@ func NewRouter(
 	p sync.Progress,
 	shelf library.Shelf,
 	stats stats.ReadingStats,
+	h highlight.Highlight,
 	version string,
 ) {
 	// Options
@@ -93,7 +95,7 @@ func NewRouter(
 	// Product pages
 	bookGroup := handler.Group("/books")
 	bookGroup.Use(authMiddleware(a))
-	newBooksRoutes(bookGroup, shelf, stats, p, l)
+	newBooksRoutes(bookGroup, shelf, stats, p, h, l)
 
 	// Stats pages
 	statsGroup := handler.Group("/stats")

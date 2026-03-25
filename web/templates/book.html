@@ -91,4 +91,36 @@
     </table>
 </section>
 {{ end }}
+<!-- Highlights section -->
+{{ with $.highlights }}
+<section class="highlights-section">
+    <hgroup>
+        <h3>Highlights</h3>
+        <p>{{ len . }} highlights synced from KOReader</p>
+    </hgroup>
+    {{ range . }}
+    <article class="highlight-card">
+        <blockquote class="highlight-text">
+            {{ .Text }}
+        </blockquote>
+        {{ with .Note }}
+        <div class="highlight-note">
+            <strong>Note:</strong> {{ . }}
+        </div>
+        {{ end }}
+        <footer class="highlight-meta">
+            {{ with .Page }}<span>Page {{ . }}</span>{{ end }}
+            {{ with .Chapter }}<span> / {{ . }}</span>{{ end }}
+        </footer>
+    </article>
+    {{ end }}
+</section>
+{{ else }}
+<section class="highlights-section">
+    <hgroup>
+        <h3>Highlights</h3>
+        <p>No highlights synced yet. Use KOReader to highlight text in this book.</p>
+    </hgroup>
+</section>
+{{ end }}
 {{ end }}
