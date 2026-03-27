@@ -30,7 +30,7 @@ func NewRouter(
 	p sync.Progress,
 	shelf library.Shelf,
 	stats stats.ReadingStats,
-	highlightRepo highlights.HighlightRepo,
+	highlightList highlights.HighlightList,
 	version string,
 ) {
 	// Options
@@ -99,7 +99,7 @@ func NewRouter(
 	// Product pages
 	bookGroup := handler.Group("/books")
 	bookGroup.Use(authMiddleware(a))
-	newBooksRoutes(bookGroup, shelf, stats, p, highlightRepo, l)
+	newBooksRoutes(bookGroup, shelf, stats, p, highlightList, l)
 
 	// Stats pages
 	statsGroup := handler.Group("/stats")

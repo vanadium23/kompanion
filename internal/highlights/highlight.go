@@ -24,6 +24,18 @@ func NewHighlightSyncUseCase(r HighlightRepo, l logger.Interface) *HighlightSync
 	}
 }
 
+// HighlightListUseCase implements HighlightList interface.
+type HighlightListUseCase struct {
+	repo HighlightRepo
+}
+
+// NewHighlightListUseCase creates a new HighlightListUseCase.
+func NewHighlightListUseCase(r HighlightRepo) *HighlightListUseCase {
+	return &HighlightListUseCase{
+		repo: r,
+	}
+}
+
 // Sync processes a batch of highlights from KOReader and stores them.
 func (uc *HighlightSyncUseCase) Sync(ctx context.Context, req entity.HighlightSyncRequest, deviceName string) (int, int, error) {
 	total := len(req.Entries)
@@ -61,4 +73,9 @@ func (uc *HighlightSyncUseCase) Sync(ctx context.Context, req entity.HighlightSy
 	}
 
 	return synced, total, nil
+}
+
+// List returns all highlights for a given document.
+func (uc *HighlightListUseCase) List(ctx context.Context, koreaderPartialMD5 string) ([]entity.Highlight, error) {
+	return uc.repo.ListHighlights(ctx, koreaderPartialMD5)
 }

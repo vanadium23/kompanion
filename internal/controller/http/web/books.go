@@ -18,12 +18,12 @@ type booksRoutes struct {
 	shelf         library.Shelf
 	stats         stats.ReadingStats
 	progress      syncpkg.Progress
-	highlightRepo highlights.HighlightRepo
+	highlightList highlights.HighlightList
 	logger        logger.Interface
 }
 
-func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.ReadingStats, progress syncpkg.Progress, hr highlights.HighlightRepo, l logger.Interface) {
-	r := &booksRoutes{shelf: shelf, stats: stats, progress: progress, highlightRepo: hr, logger: l}
+func newBooksRoutes(handler *gin.RouterGroup, shelf library.Shelf, stats stats.ReadingStats, progress syncpkg.Progress, hl highlights.HighlightList, l logger.Interface) {
+	r := &booksRoutes{shelf: shelf, stats: stats, progress: progress, highlightList: hl, logger: l}
 
 	handler.GET("/", r.listBooks)
 	handler.POST("/upload", r.uploadBook)
@@ -143,7 +143,7 @@ func (r *booksRoutes) viewBook(c *gin.Context) {
 	}
 
 	// Fetch highlights for this book
-	highlightsList, err := r.highlightRepo.ListHighlights(c.Request.Context(), book.DocumentID)
+	highlightsList, err := r.highlightList.List(c.Request.Context(), book.DocumentID)
 	if err != nil {
 		r.logger.Error(err, "failed to get highlights")
 		highlightsList = []entity.Highlight{} // Empty slice on error

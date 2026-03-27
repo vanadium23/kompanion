@@ -19,3 +19,8 @@ type HighlightRepo interface {
 type HighlightSync interface {
 	Sync(ctx context.Context, req entity.HighlightSyncRequest, deviceName string) (int, int, error)
 }
+
+// HighlightList defines use case interface for listing highlights.
+type HighlightList interface {
+	List(ctx context.Context, koreaderPartialMD5 string) ([]entity.Highlight, error)
+}

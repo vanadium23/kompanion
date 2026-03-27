@@ -64,10 +64,11 @@ func Run(cfg *config.Config) {
 		highlightRepo,
 		l,
 	)
+	highlightList := highlights.NewHighlightListUseCase(highlightRepo)
 
 	// HTTP Server
 	handler := gin.New()
-	web.NewRouter(handler, l, authService, progress, shelf, rs, highlightRepo, cfg.Version)
+	web.NewRouter(handler, l, authService, progress, shelf, rs, highlightList, cfg.Version)
 	v1.NewRouter(handler, l, authService, progress, shelf, highlightSync)
 	opds.NewRouter(handler, l, authService, progress, shelf)
 	webdav.NewRouter(handler, authService, l, rs)
