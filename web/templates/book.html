@@ -91,4 +91,26 @@
     </table>
 </section>
 {{ end }}
+<!-- Highlights -->
+<section class="highlights">
+    <hgroup>
+        <h3>Highlights</h3>
+        {{ if $.highlights }}
+        <p>{{ len $.highlights }} highlights</p>
+        {{ end }}
+    </hgroup>
+    {{ if $.highlights }}
+    {{ range $.highlights }}
+    <div class="highlight-card">
+        <p class="highlight-text">{{ .Text }}</p>
+        {{ with .Note }}<p class="highlight-note">{{ . }}</p>{{ end }}
+        <footer class="highlight-meta">
+            <span>Page {{ .Page }}</span>{{ with .Chapter }}<span> - {{ . }}</span>{{ end }}<span> - {{ .Time | formatTime }}</span>
+        </footer>
+    </div>
+    {{ end }}
+    {{ else }}
+    <p class="highlight-empty">No highlights yet. Sync from KOReader to see your highlights here.</p>
+    {{ end }}
+</section>
 {{ end }}

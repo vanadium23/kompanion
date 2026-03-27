@@ -16,6 +16,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/vanadium23/kompanion"
 	"github.com/vanadium23/kompanion/internal/auth"
+	"github.com/vanadium23/kompanion/internal/highlights"
 	"github.com/vanadium23/kompanion/internal/library"
 	"github.com/vanadium23/kompanion/internal/stats"
 	"github.com/vanadium23/kompanion/internal/sync"
@@ -29,6 +30,7 @@ func NewRouter(
 	p sync.Progress,
 	shelf library.Shelf,
 	stats stats.ReadingStats,
+	highlightList highlights.HighlightList,
 	version string,
 ) {
 	// Options
@@ -76,6 +78,10 @@ func NewRouter(
 			}
 			return s[:maxLen-3] + "..."
 		},
+		"formatTime": func(unixTime int64) string {
+			t := time.Unix(unixTime, 0)
+			return t.Format("Jan 02, 2006")
+		},
 	}
 	gv := ginview.New(config)
 	gv.SetFileHandler(embeddedFH)
@@ -93,7 +99,7 @@ func NewRouter(
 	// Product pages
 	bookGroup := handler.Group("/books")
 	bookGroup.Use(authMiddleware(a))
-	newBooksRoutes(bookGroup, shelf, stats, p, l)
+	newBooksRoutes(bookGroup, shelf, stats, p, highlightList, l)
 
 	// Stats pages
 	statsGroup := handler.Group("/stats")
