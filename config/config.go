@@ -33,7 +33,8 @@ type (
 
 	// HTTP -.
 	HTTP struct {
-		Port string
+		Port      string
+		UrlPrefix string
 	}
 
 	// Log -.
@@ -117,9 +118,11 @@ func readHTTPConfig() (HTTP, error) {
 	if port == "" {
 		port = "8080"
 	}
+	url_prefix := readPrefixedEnv("URL_PREFIX")
 
 	return HTTP{
-		Port: port,
+		Port:      port,
+		UrlPrefix: strings.TrimSuffix(url_prefix, "/"),
 	}, nil
 }
 

@@ -60,12 +60,13 @@ func Run(cfg *config.Config) {
 	rs := stats.NewKOReaderPGStats(pg)
 
 	// HTTP Server
-	handler := gin.New()
-	web.NewRouter(handler, l, authService, progress, shelf, rs, cfg.Version)
+	router := gin.New()
+	handler := router.Group(cfg.UrlPrefix)
+	web.NewRouter(handler, router, l, authService, progress, shelf, rs, cfg.Version)
 	v1.NewRouter(handler, l, authService, progress, shelf)
 	opds.NewRouter(handler, l, authService, progress, shelf)
 	webdav.NewRouter(handler, authService, l, rs)
-	httpServer := httpserver.New(handler, httpserver.Port(cfg.HTTP.Port))
+	httpServer := httpserver.New(router, httpserver.Port(cfg.HTTP.Port))
 
 	// Waiting signal
 	interrupt := make(chan os.Signal, 1)

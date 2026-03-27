@@ -3,6 +3,7 @@ package opds
 import (
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -13,17 +14,19 @@ import (
 )
 
 type OPDSRouter struct {
-	books  library.Shelf
-	logger logger.Interface
+	urlPrefix string
+	books     library.Shelf
+	logger    logger.Interface
 }
 
 func NewRouter(
-	handler *gin.Engine,
+	handler *gin.RouterGroup,
 	l logger.Interface,
 	a auth.AuthInterface,
 	p sync.Progress,
 	shelf library.Shelf) {
-	sh := &OPDSRouter{shelf, l}
+	urlPrefix := strings.TrimSuffix(handler.BasePath(), "/")
+	sh := &OPDSRouter{urlPrefix, shelf, l}
 
 	h := handler.Group("/opds")
 	h.Use(basicAuth(a))
@@ -43,14 +46,14 @@ func (r *OPDSRouter) listShelves(c *gin.Context) {
 			Title:   "By Newest",
 			Link: []Link{
 				{
-					Href: "/opds/newest/",
+					Href: r.urlPrefix + "/opds/newest/",
 					Type: "application/atom+xml;type=feed;profile=opds-catalog",
 				},
 			},
 		},
 	}
 	links := []Link{}
-	feed := BuildFeed("urn:kompanion:main", "KOmpanion library", "/opds", shelves, links)
+	feed := BuildFeed("urn:kompanion:main", "KOmpanion library", r.urlPrefix+"/opds", shelves, links, r.urlPrefix)
 	c.XML(http.StatusOK, feed)
 }
 
@@ -66,10 +69,10 @@ func (r *OPDSRouter) listNewest(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"message": "Internal server error", "code": 1001})
 		return
 	}
-	baseUrl := "/opds/newest/"
-	entries := translateBooksToEntries(books.Books)
+	baseUrl := r.urlPrefix + "/opds/newest/"
+	entries := translateBooksToEntries(books.Books, r.urlPrefix)
 	navLinks := formNavLinks(baseUrl, books)
-	feed := BuildFeed("urn:kompanion:newest", "KOmpanion library", baseUrl, entries, navLinks)
+	feed := BuildFeed("urn:kompanion:newest", "KOmpanion library", baseUrl, entries, navLinks, r.urlPrefix)
 	c.XML(http.StatusOK, feed)
 }
 

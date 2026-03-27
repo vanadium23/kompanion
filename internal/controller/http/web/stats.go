@@ -124,7 +124,7 @@ func generateDailyStatsChart(stats []stats.DailyStats) ([]byte, error) {
 	return buffer.Bytes(), nil
 }
 
-func newStatsRoutes(handler *gin.RouterGroup, stats stats.ReadingStats, l logger.Interface) {
+func newStatsRoutes(handler *gin.RouterGroup, urlPrefix string, stats stats.ReadingStats, l logger.Interface) {
 	handler.GET("/", func(c *gin.Context) {
 		// Get date range from query params, default: a month ago to current day
 		now := time.Now()
@@ -154,9 +154,10 @@ func newStatsRoutes(handler *gin.RouterGroup, stats stats.ReadingStats, l logger
 		}
 
 		c.HTML(200, "stats", passStandartContext(c, gin.H{
-			"from":  from.Format("2006-01-02"),
-			"to":    to.Format("2006-01-02"),
-			"stats": generalStats,
+			"urlPrefix": urlPrefix,
+			"from":      from.Format("2006-01-02"),
+			"to":        to.Format("2006-01-02"),
+			"stats":     generalStats,
 		}))
 	})
 
