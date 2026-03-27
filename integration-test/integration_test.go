@@ -20,7 +20,7 @@ import (
 
 const (
 	// Attempts connection
-	host       = "app:8080"
+	host       = 127.0.0.1:8080"
 	healthPath = "http://" + host + "/healthcheck"
 	attempts   = 20
 
