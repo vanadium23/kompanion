@@ -87,7 +87,7 @@ func TestHTTPHighlightSync(t *testing.T) {
 
 	Test(t,
 		Description("Sync Highlights via API"),
-		Put(basePath+"/api/v1/sync/highlight"),
+		Post(basePath+"/syncs/highlights"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Headers("x-auth-user").Add(deviceName),
 		Send().Headers("x-auth-key").Add(hashSyncPassword("password")),
@@ -124,7 +124,7 @@ func TestHTTPHighlightSync(t *testing.T) {
 	// Step 5: Verify duplicate sync doesn't create duplicates
 	Test(t,
 		Description("Sync Same Highlights Again (Dedup)"),
-		Put(basePath+"/api/v1/sync/highlight"),
+		Post(basePath+"/syncs/highlights"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Headers("x-auth-user").Add(deviceName),
 		Send().Headers("x-auth-key").Add(hashSyncPassword("password")),
@@ -197,7 +197,7 @@ func TestHTTPHighlightSyncWithNotes(t *testing.T) {
 
 	Test(t,
 		Description("Sync Highlight With Note"),
-		Put(basePath+"/api/v1/sync/highlight"),
+		Post(basePath+"/syncs/highlights"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Headers("x-auth-user").Add(deviceName),
 		Send().Headers("x-auth-key").Add(hashSyncPassword("password")),
@@ -225,7 +225,7 @@ func TestHTTPHighlightSyncWithNotes(t *testing.T) {
 
 	Test(t,
 		Description("Sync Highlight Without Note"),
-		Put(basePath+"/api/v1/sync/highlight"),
+		Post(basePath+"/syncs/highlights"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Headers("x-auth-user").Add(deviceName),
 		Send().Headers("x-auth-key").Add(hashSyncPassword("password")),
@@ -248,7 +248,7 @@ func TestHTTPHighlightSyncUnauthorized(t *testing.T) {
 	// No auth headers
 	Test(t,
 		Description("Sync Without Auth"),
-		Put(basePath+"/api/v1/sync/highlight"),
+		Post(basePath+"/syncs/highlights"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Body().JSON(highlightRequest),
 		Expect().Status().Equal(http.StatusUnauthorized),
@@ -257,7 +257,7 @@ func TestHTTPHighlightSyncUnauthorized(t *testing.T) {
 	// Wrong password
 	Test(t,
 		Description("Sync With Wrong Password"),
-		Put(basePath+"/api/v1/sync/highlight"),
+		Post(basePath+"/syncs/highlights"),
 		Send().Headers("Content-Type").Add("application/json"),
 		Send().Headers("x-auth-user").Add("nonexistent-device"),
 		Send().Headers("x-auth-key").Add("wronghash"),
