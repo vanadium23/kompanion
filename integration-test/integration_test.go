@@ -21,7 +21,7 @@ import (
 const attempts = 20
 
 func TestMain(m *testing.M) {
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	err := healthCheck(attempts)
 	if err != nil {
@@ -36,7 +36,7 @@ func TestMain(m *testing.M) {
 
 func healthCheck(attempts int) error {
 	var err error
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	for attempts > 0 {
 		err = Do(Get(healthPath), Expect().Status().Equal(http.StatusOK))
@@ -55,7 +55,7 @@ func healthCheck(attempts int) error {
 }
 
 func TestWebFooterVersion(t *testing.T) {
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	Test(t,
 		Description("Footer Version"),
@@ -69,7 +69,7 @@ func TestWebFooterVersion(t *testing.T) {
 // New tests based on controller/web
 // login/page
 func TestWebAuthUser(t *testing.T) {
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 	username, password := grabTestUser()
 
 	Test(t,
@@ -114,7 +114,7 @@ func TestWebAuthUser(t *testing.T) {
 // devices
 func TestWebDevice(t *testing.T) {
 	client, loginSteps := webAuthSteps()
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	Test(t,
 		Description("Login for Device"),
@@ -177,7 +177,7 @@ func TestHTTPKoreaderSyncProgress(t *testing.T) {
 	deviceName := generateDeviceName()
 	deviceSteps := setupDeviceSteps(client, deviceName)
 	Test(t, Description("Device Register"), deviceSteps)
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	// check auth
 	Test(t,
@@ -218,7 +218,7 @@ func TestHTTPKoreaderSyncProgress(t *testing.T) {
 // HTTP GET /users/auth
 func TestHTTPAuth(t *testing.T) {
 	username, password := grabTestUser()
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 	Test(t,
 		Description("Auth With Incorrect Password"),
 		Get(basePath+"/users/auth"),
@@ -276,7 +276,7 @@ func TestHTTPKompanionShelf(t *testing.T) {
 
 	client, loginSteps := webAuthSteps()
 	Test(t, Description("Login for Device"), loginSteps)
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	// put book
 	var redirectedPath string
@@ -355,7 +355,7 @@ func TestWebStats(t *testing.T) {
 	Test(t, Description("Device Register"), deviceSteps)
 
 	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(deviceName+":"+password))
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	statsContent, err := os.ReadFile("../test/test_data/koreader/koreader_statistics_example.sqlite3")
 	if err != nil {
@@ -423,7 +423,7 @@ func TestHTTPKompanionOPDS(t *testing.T) {
 
 	client, loginSteps := webAuthSteps()
 	Test(t, Description("Login for Device"), loginSteps)
-	host, healthPath, basePath := grabHealthCheck()
+	host, healthPath, basePath := grabTestHost()
 
 	// put book
 	var redirectedPath string
@@ -479,8 +479,15 @@ func grabTestHost() (host string, healthPath string, basePath string) {
 }
 
 func grabTestUser() (string, string) {
-	// TODO: read from env
-	return "user", "password"
+	user := readPrefixedEnv("TEST_USER")
+	password := readPrefixedEnv("TEST_PASSWORD")
+
+	if user == "" || password == "" {
+		user = "user"
+		password = "password"
+	}
+
+	return user, password
 }
 
 func generateDeviceName() string {
