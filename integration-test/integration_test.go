@@ -219,6 +219,7 @@ func TestHTTPKoreaderSyncProgress(t *testing.T) {
 func TestHTTPAuth(t *testing.T) {
 	username, password := grabTestUser()
 	_, _, basePath := grabTestHost()
+
 	Test(t,
 		Description("Auth With Incorrect Password"),
 		Get(basePath+"/users/auth"),
@@ -346,7 +347,6 @@ func TestHTTPKompanionShelf(t *testing.T) {
 
 // stats
 func TestWebStats(t *testing.T) {
-	_, password := grabTestUser()
 	// arrange
 	client, loginSteps := webAuthSteps()
 	Test(t, Description("Login for Device"), loginSteps)
@@ -354,6 +354,7 @@ func TestWebStats(t *testing.T) {
 	deviceSteps := setupDeviceSteps(client, deviceName)
 	Test(t, Description("Device Register"), deviceSteps)
 
+	_, password := grabTestUser()
 	basicAuth := "Basic " + base64.StdEncoding.EncodeToString([]byte(deviceName+":"+password))
 	_, _, basePath := grabTestHost()
 
@@ -466,30 +467,28 @@ func TestHTTPKompanionOPDS(t *testing.T) {
 }
 
 func readPrefixedEnv(key string) string {
-	envKey := fmt.Sprintf("KOMPANION_%s", strings.ToUpper(key))
+	envKey := fmt.Sprintf("KOMPANION_TEST_%s", strings.ToUpper(key))
 	return os.Getenv(envKey)
 }
 
 func grabTestHost() (host string, healthPath string, basePath string) {
-	host = readPrefixedEnv("TEST_HOST")
+	host = readPrefixedEnv("HOST")
 
 	if host == "" {
 		host = "app:8080"
 	}
 
-	healthPath = "http://" + host + "/healthcheck"
-	basePath = "http://" + host
-
-	return host, healthPath, basePath
+	return host, "http://" + host + "/healthcheck", "http://" + host
 }
 
 func grabTestUser() (user string, password string) {
-	user = readPrefixedEnv("TEST_USER")
-	password = readPrefixedEnv("TEST_PASSWORD")
+	user = readPrefixedEnv("USER")
+	password = readPrefixedEnv("PASSWORD")
 
 	if user == "" {
 		user = "user"
-	} else if password == "" {
+	}
+	if password == "" {
 		password = "password"
 	}
 
