@@ -487,8 +487,9 @@ func grabTestUser() (user string, password string) {
 	user = readPrefixedEnv("TEST_USER")
 	password = readPrefixedEnv("TEST_PASSWORD")
 
-	if user == "" || password == "" {
+	if user == "" {
 		user = "user"
+	} else if password == "" {
 		password = "password"
 	}
 
